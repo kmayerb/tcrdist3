@@ -7,3 +7,4 @@ scipy>=1.4.1
 pwseqdist==0.2
 numba
 python-Levenshtein==0.12.0
+multiprocessing
