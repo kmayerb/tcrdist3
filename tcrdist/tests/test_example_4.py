@@ -10,7 +10,7 @@ def test_example_4():
     Needleman-Wunsch algorithm to align sequences and then 
     calculate the number of mismatching positions (pw.metrics.nw_hamming_metric)
 
-    This method doesn't rely on Numba so it can be sped up using multiple cpus.
+    This method doesn't rely on Numba so it can run faster using multiple cpus.
     """
     import pwseqdist as pw
     import pandas as pd
@@ -18,12 +18,13 @@ def test_example_4():
     import multiprocessing
 
     df = pd.read_csv("dash.csv")
+    df = df.head(100) # for faster testing
     tr = TCRrep(cell_df = df, 
                 organism = 'mouse', 
                 chains = ['alpha','beta'], 
                 use_defaults=False,
                 compute_distances = False,
-                cpus = (multiprocessing.cpu_count() - 1),
+                cpus = 1,
                 db_file = 'alphabeta_gammadelta_db.tsv')
 
     metrics_a = {

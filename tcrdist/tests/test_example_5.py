@@ -16,12 +16,13 @@ def test_example_5():
     import multiprocessing
 
     df = pd.read_csv("dash.csv")
+    df = df.head(100) # for faster testing
     tr = TCRrep(cell_df = df, 
                 organism = 'mouse', 
                 chains = ['alpha','beta'], 
                 use_defaults=False,
                 compute_distances = False,
-                cpus = (multiprocessing.cpu_count() - 1),
+                cpus = 1,
                 db_file = 'alphabeta_gammadelta_db.tsv')
 
     metrics_a = {

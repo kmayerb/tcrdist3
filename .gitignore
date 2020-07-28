@@ -1,4 +1,12 @@
 # Byte-compiled / optimized / DLL files
+.DS_Store
+.vscode/
+depreciated_code/*
+hold_temp/*
+tcrdist/.DS_Store
+tcrdist/db/.DS_Store
+tcrdist/test_files/*
+
 __pycache__/
 *.py[cod]
 *$py.class

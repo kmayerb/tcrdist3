@@ -121,11 +121,11 @@ def test_dash_nw_metric_fixed_gappos_False():
 
     df = pd.read_csv("dash2.csv")
     import multiprocessing
-    _cpu = multiprocessing.cpu_count() - 2 
-    r = _pws(df = df, metrics = metrics, weights= weights, kargs=kargs, cpu = _cpu, store = False)
-    assert r['tcrdist'].shape[0] == 1924
-    assert r['tcrdist'].shape[1] == 1924
-    print(r)
+    df = df.head(100)
+    r = _pws(df = df, metrics = metrics, weights= weights, kargs=kargs, cpu = 1, store = False)
+    assert r['tcrdist'].shape[0] == 100
+    assert r['tcrdist'].shape[1] == 100
+
 
 
 def test_pw():
