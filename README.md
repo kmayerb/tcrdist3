@@ -15,7 +15,7 @@ pip install tcrdist3
 
 ## Documentation
 
-More documentation can be found at [tcrdist3.readthedocs](https://tcrdist3.readthedocs.io/en/stable/).
+More documentation can be found at [tcrdist3.readthedocs](https://tcrdist3.readthedocs.io/).
 
 ## Basic Usage
 
