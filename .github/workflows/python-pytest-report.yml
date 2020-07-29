@@ -28,6 +28,8 @@ jobs:
         pip install pytest-cov
         pip install coveralls
     - name: Test with pytest and coverage
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: |
         coverage run --source=tcrdist/ -m pytest -v --disable-warnings
         coverage report
