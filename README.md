@@ -1,11 +1,10 @@
 # tcrdist3
 
-![Python application](https://github.com/kmayerb/tcrdist3/workflows/Python%20application/badge.svg?event=push)
-
-[![Coverage Status](https://coveralls.io/repos/github/kmayerb/tcrdist3/badge.svg?branch=master)](https://coveralls.io/github/kmayerb/tcrdist3?branch=master)
-
+![Python application](https://github.com/kmayerb/tcrdist3/workflows/Python%20application/badge.svg?event=push) [![Coverage Status](https://coveralls.io/repos/github/kmayerb/tcrdist3/badge.svg?branch=master)](https://coveralls.io/github/kmayerb/tcrdist3?branch=master)[![Documentation Status](https://readthedocs.org/projects/tcrdist3/badge/?version=latest)](https://tcrdist3.readthedocs.io/en/latest/?badge=latest)
 
 Flexible distance measures for comparing T cell receptors 
+
+tcrdist3 is a python API-enabled toolkit for analyzing T-cell receptor repertoires. Some of the functionality and code is adapted from the original tcr-dist package which was released with the publication of Dash et al. Nature (2017) doi:10.1038/nature22383. This package contains a new API for computing tcrdistance measures as well as new features.
 
 
 ## Installation
@@ -13,6 +12,10 @@ Flexible distance measures for comparing T cell receptors
 ```
 pip install tcrdist3
 ```
+
+## Documentation
+
+More documentation can be found at [tcrdist3.readthedocs](https://tcrdist3.readthedocs.io/en/stable/).
 
 ## Basic Usage
 

@@ -14,8 +14,8 @@ The following short examples use data `dash.csv <https://raw.githubusercontent.c
 Examples
 ++++++++
 
-I am happy to use defaults
---------------------------
+I am happy to use the defaults
+------------------------------
 .. literalinclude:: ../tcrdist/tests/test_example_1.py
     :linenos:
     :lines: 6-28
@@ -78,8 +78,8 @@ I want complete control
 
 
 
-I just want a count mismatches
-------------------------------
+I just want to count mismatches
+-------------------------------
 .. literalinclude:: ../tcrdist/tests/test_example_4.py
     :linenos:
     :lines: 6-100
@@ -87,7 +87,7 @@ I just want a count mismatches
     :language: python
 
 I want to use my own distance metric
------------------------------------
+------------------------------------
 
 
 .. literalinclude:: ../tcrdist/tests/test_example_5.py
@@ -104,8 +104,8 @@ I want tcrdistances, but I hate OOP
     :dedent: 4
     :language: python
 
-I hate OOP and I only want distances for the CDR3 
--------------------------------------------------
+I hate OOP, and I only want distances for the CDR3 
+--------------------------------------------------
 .. literalinclude:: ../tcrdist/tests/test_example_6.py
     :linenos:
     :lines: 6-100

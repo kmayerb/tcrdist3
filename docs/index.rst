@@ -10,7 +10,8 @@ July 2020
    pip install tcrdist3
 
 `tcrdist3 <https://github.com/kmayerb/tcrdist3>`_ is a python API-enabled toolkit for analyzing T-cell receptor repertoires. Some of the functionality and code is adapted from the original tcr-dist package which was released with the publication of Dash et al. Nature (2017). The manuscript
-(`doi:10.1038/nature22383 <https://www.nature.com/articles/nature22383>`_). This package contains a new API for accessing the features of tcr-dist, as well as many new features that expand the T cell receptor analysis pipeline.
+(`doi:10.1038/nature22383 <https://www.nature.com/articles/nature22383>`_). tcrdist3 is a python API-enabled toolkit for analyzing T-cell receptor repertoires. Some of the functionality and code is adapted from the original tcr-dist package which was released with the publication of Dash et al. Nature (2017) doi:10.1038/nature22383. 
+This package contains a new API for computing distance measures as well as new features.
 
 .. toctree::
    :caption: Getting started
