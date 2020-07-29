@@ -29,7 +29,6 @@ jobs:
       run: |
         coverage run --source=tcrdist/ -m pytest -v --disable-warnings
         coverage report
-        pytest --cov=.
         coveralls
       
 
