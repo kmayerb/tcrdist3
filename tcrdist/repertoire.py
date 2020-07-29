@@ -6,6 +6,97 @@ from . import repertoire_db
 from tcrdist.rep_funcs import _pws
 
 class TCRrep:
+    """
+    Flexible distance measures for comparing T cell receptors
+
+    The TCRrep Class hold T cell repertoire data, infers CDRs from v-gene name, and 
+    computes multi-CDR 'tcrdistance'.  
+
+    Attributes
+    ----------
+    cell_df : pd.DataFrame or None
+        Pandas DataFrame containing cell level information 
+    clone_df : pd.DataFrame or None
+        Pandas DataFrame containing clone level information. 
+        This can be provided directly from a program like MIXCR or
+        can be inferred by deduplicating a cell_df. 
+    organism = str, 
+        specifies relevant organism for analysis: 'human' or 'mouse'
+    chains : list
+        specifies relevant chains for single or paried TCR analysis
+        ['alpha','beta'], ['alpha'], ['beta'], ['gamma','delta'],  ['gamma'] or ['delta']  
+    db_file : str
+        specifies refereence file. The default is 'alphabeta_gammadelta_db.tsv' which
+        is preinstalled  with the install python3.7/site-packages/tcrdist/db/
+    imgt_aligned : bool
+        If True, by default, cdr1, cdr2,and pmhc are inferred aligned to fixed length with gaps.
+        If False, cdr1, cdr2,and pmhc are returned as ungapped raw sequences.   
+    infer_all_genes : bool
+        If True, load all_gene reference from 'db_file`.
+    infer_cdrs : bool
+        If True, infer cdr1, cdr2,and pmhc from the v gene name
+    infer_index_cols : bool
+        If True, infer index_cols used to deduplicate cell_df.
+        If False, index_cols can be specified directly after initialization.
+    index_cols : list
+        list of index colums used to deduplicate cell_df to clone_df
+    deduplicate : bool
+        If True, then clone_df will be assigned cell_df grouped_by
+        index_cols.
+        If False, and clone_df is None, then clone_df will be be 
+        assigned a copy of cell_df.
+    use_defaults : True
+        If True, use default metrics, weights, and kargs
+    store_all_cdr : True,
+        If True, save all distance matrices for each CDR (e.g., pw_cdr3_b_aa).
+        If False, only save pw_alpha and pw_beta
+    compute_distances : True
+        If True, automatically compute distances
+    cpus : int, 
+        Number of cpus to use. In general 1 cpu is sufficient from default Numba metric 
+        with less than 10^7  pairwise compairsons. However, more cpus will 
+        result in a speedup for metrics like pw.metrics.nw_hamming_metric for more than 10^6 
+        pairwise compairsons.
+    
+    Example
+    -------
+    .. code-block:: python
+
+        import pandas as pd
+        from tcrdist.repertoire import TCRrep
+
+        df = pd.read_csv("dash.csv")
+        tr = TCRrep(
+                cell_df = df, 
+                organism = 'mouse', 
+                chains = ['alpha','beta'], 
+                db_file = 'alphabeta_gammadelta_db.tsv',
+                clone_df          = None,
+                imgt_aligned      = True,
+                infer_all_genes   = True,
+                infer_cdrs        = True,
+                infer_index_cols  = True,
+                deduplicate       = True,
+                use_defaults      = True,
+                store_all_cdr     = True,
+                compute_distances = True,
+                index_cols        = None,
+                cpus              = 1, 
+                db_file           = 'alphabeta_gammadelta_db.tsv')
+
+    Notes
+    -----
+    The default initialization compute pairwise distance matrices. 
+
+    See examples at https://tcrdist3.readthedocs.io/ for more information
+    about flexibility of TCRrep.
+
+    Computed pairwised distance matrics that can be accessed:
+        TCRrep.pw_alpha, 
+        TCRrep.pw_beta,  
+        TCRrep.pw_cdr3_a_aa, 
+        TCRrep.pw_cdr3_b_aa  
+    """
     def __init__(self,
                  organism          = "mouse",
                  chains            = ['alpha', 'beta'],
@@ -19,6 +110,7 @@ class TCRrep:
                  use_defaults      = True,
                  store_all_cdr     = True,
                  compute_distances = True,
+                 index_cols        = None,
                  cpus              = 1, 
                  db_file           = 'alphabeta_gammadelta_db.tsv'):
         
@@ -28,12 +120,13 @@ class TCRrep:
         self.chains = chains
         self._validate_chains()
         
-        self.index_cols = None
+        self.index_cols = index_cols
         self.clone_df = clone_df 
 
         if cell_df is None:
             cell_df = pd.DataFrame()
         self.cell_df = cell_df
+        self.clone_df = clone_df
         self._validate_cell_df()
         
         self.db_file = db_file
@@ -60,7 +153,8 @@ class TCRrep:
             self.infer_index_cols()
             self.deduplicate()
         else: 
-            self.clone_df = self.cell_df.copy()
+            if self.clone_df is None:
+                self.clone_df = self.cell_df.copy()
 
         if use_defaults:
             self._initialize_chain_specific_attributes()
@@ -127,29 +221,24 @@ class TCRrep:
             if True cdr1, cdr2, cdr2.5 will be returned with gaps
             and by definition will be the same length. MSH.......ET
 
-
         Returns
     	-------
         self.cell_df : pandas.core.frame.DataFrame
-    	   Assigns [cdr3|cdr2|cdr1|pmhc]_[a|b|d|g]_aa columns in self.cell_df
+    	   Assigns [cdr3|cdr2|cdr1|pmhc]_[a|b|d|g]_aa columns in TCRrep.cell_df
 
         Examples
     	--------
         >>> testrep = TCRrep(cell_df = example_df, organism = "human", chains= ["alpha","beta"])
         >>> testrep.infer_cdrs_from_v_gene(chain = "alpha")
         >>> testrep.infer_cdrs_from_v_gene(chain = "beta")
-        >>> testrep.index_cols = testrep.index_cols + ['cdr1_a_aa','cdr2_a_aa', 'pmhc_a_aa', 'cdr1_b_aa', 'cdr2_b_aa', 'pmhc_b_aa']
 
         Notes
     	-----
-        This function takes the V-gene names and infers the amino amino_acid
+        This function takes the v-gene names and infers the amino acid
         sequence of the cdr1, cdr2, and pmhc region (pmhc refers to the
         pMHC-facing loop between CDR2 and CDR3 (IMGT alignment columns 81 - 86.
+      
         These sequences are based up on lookup from the dictionary here:
-
-        originally: from tcrdist.cdr3s_human import pb_cdrs
-
-        now:
 
         self.generate_ref_genes_from_db(db_file)
 
@@ -213,12 +302,14 @@ class TCRrep:
             self.cell_df['pmhc_d_aa'] = list(map(f2, self.cell_df.v_d_gene))
     
     def infer_index_cols(self):
+        """
+        Infers index columns from TCRrep.cell_df
+        """
         self.index_cols = [item for item in self.cell_df.columns.to_list() if item not in ['count', 'cell_id', 'clone_id']]
         
     def deduplicate(self):
         """
-        With attribute self.index_col calls _deduplicate() and assigns
-        result to attribute self.clone_df
+        With attribute self.index_col calls _deduplicate() and assigns result to attribute self.clone_df
         """
         clone_df = _deduplicate(self.cell_df, self.index_cols)
         
@@ -394,21 +485,25 @@ class TCRrep:
 
     def _validate_db_file(self):
         """
-        Warning if invalid organism is passed to TCRrep __init__
+        Issues warning if invalid organism is passed to TCRrep __init__
         """
         if self.db_file not in ['alphabeta_gammadelta_db.tsv','alphabeta_db.tsv','gammadelta_db.tsv']:
             warnings.warn("db_file must be 'alphabeta_gammadelta_db.tsv' or 'alphabeta_db.tsv' or 'gammadelta_db.tsv' unless you have built tcrdist3 from scratch")
     
     def _validate_organism(self):
         """
-        Raise ValueError if invalid organism is passed to TCRrep __init__
+        Raises 
+        ------
+        ValueError if invalid organism is passed to TCRrep __init__
         """
         if self.organism not in ["human", "mouse"]:
             raise ValueError("organism must be 'mouse' or 'human'")
     
     def _validate_chains(self):
         """
-        Raise ValueError if invalid chains are passed to TCRrep __init__
+        Raises
+        ------ 
+        ValueError if invalid chains are passed to TCRrep __init__
         """
         check_chains_arg = ['alpha', 'beta', "gamma", "delta"]
         if len([c for c in self.chains if c not in check_chains_arg]) > 0:
@@ -416,7 +511,7 @@ class TCRrep:
                                 'following {} case-sensitive'.format(check_chains_arg))
     def _validate_cell_df(self):
         """
-        raise ValueError if  is not properly formatted.
+        Issues warning if TCRrep.cell_df not properly formatted.
         """
         if not isinstance(self.cell_df, pd.DataFrame):
             warnings.warn('TCRrep cell_df argument must be pandas.DataFrame unless you are providing a clone_df directly\n')
@@ -449,6 +544,11 @@ class TCRrep:
                     warnings.warn("cell_df needs a column called 'v_d_gene' for default functions\n")
 
     def _validate_imgt_aligned(self):
+        """
+        Raises
+        ------
+        ValueError if TCRrep.imgt_aligned is not a boolean
+        """
         if not isinstance(self.imgt_aligned, bool):
             raise ValueError('TCRrep imgt_aligned argument must be a boolean')
 
