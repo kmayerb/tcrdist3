@@ -12,7 +12,6 @@ def test_example_1():
             tr.pw_cdr3_a_aa - cdr3 alpha chain distance matrix
             tr.pw_cdr3_b_aa - cdr3 beta chain distance matrix
     """
-    import pwseqdist as pw
     import pandas as pd
     from tcrdist.repertoire import TCRrep
 
@@ -24,6 +23,7 @@ def test_example_1():
     
     tr.pw_alpha
     tr.pw_beta
+    tr.pw_cdr3_a_aa
     tr.pw_cdr3_b_aa
 
 
