@@ -19,7 +19,7 @@ opts = dict(name='tcrdist3',
             author_email='kmayerbl@fredhutch.org',
             version='0.1.0',
             packages=PACKAGES,
-            package_data={"": ["*.csv"]},
+            package_data={"": ["*.csv","*.tsv"]},
            )
 
 install_reqs = [
