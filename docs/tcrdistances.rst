@@ -48,12 +48,12 @@ I want complete control
             * `pw.metrics.nw_hamming_metric` - a pairwise Needleman-Wunsch alignment followed by hamming distance (with multiprocessing enabled for faster run-time)
             * `pw.metrics.nw_metric` -  a reciprocal Needleman-Wunsch alignment score based dissimilarity using BLOSUM62
         * The field - commonly uses editdistance to compare CDRs. For instance, the Cython enabled packages like python-Levenshtein metrics can be used seamlessly with tcrdist3
-        * Dictionary keys must match appropriate columns of clone_df DataFrame.
+        * Dictionary keys must match appropriate columns of the clone_df DataFrame.
 
 .. tip::
 
     * weights - typically the CDR3 is given a higher weight because it is in direct contact with antigen peptide.
-        * Dictionary keys must match appropriate columns of clone_df DataFrame.
+        * Dictionary keys must match appropriate columns of the clone_df DataFrame.
 
 .. tip::
 
@@ -63,11 +63,9 @@ I want complete control
             * `ctrim` - number of amino acids to trim of c-terminal end of a CDR. (i.e. ctrim = 3 CASSQDFEQ-YF consider only positions after CAS-SQDFEQ-YF)
             * `ntrim` - number of amino acids to trim of n-terminal end of a CDR. (i.e. ntrim = 2 CASSQDFEQ-YF consider only positions before "YF", SQDFEQ-YF)
             * `gap_penalty` - the penalty accrued for gaps in the pairwise alignment.
-            * 'fixed_gappos' - When sequences are of different length, there will be a gap position. If 'fixed_gappos' is False, 
-            then the metric inserts a single gap at an optimal position based on a BLOSUM62 scoring matrix. 
-            This is recommended for the CDR3, but it is not necessary when the CDR1, 2, and 2.5 are already imgt_aligned and of a fixed length.
+            * 'fixed_gappos' - When sequences are of different length, there will be a gap position. If 'fixed_gappos' is False, then the metric inserts a single gap at an optimal position based on a BLOSUM62 scoring matrix. This is recommended for the CDR3, but it is not necessary when the CDR1, 2, and 2.5 are already imgt_aligned and of a fixed length.
          * The default parameters match those used in Dash et al. (2018) *Quantifiable predictive features define epitope-specific T cell receptor repertoires
-         * Dictionary keys must match appropriate columns of clone_df DataFrame.
+         * Dictionary keys must match appropriate columns of the clone_df DataFrame.
 
 
 .. tip::

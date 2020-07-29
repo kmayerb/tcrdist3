@@ -6,7 +6,7 @@ Inputs
 Data
 ++++
 
-The tcrdist2 standard input is a pandas.DataFrame
+The tcrdist3 standard input is a Pandas DataFrame.
 
 The header and first line of a typical input for beta-chain analysis would look like this:
 
@@ -50,7 +50,7 @@ The following are usually inferred from germline reference v-gene but can be sup
 
 .. tip::
 
-  CDR2.5, the pMHC-facing loop between CDR2 and CDR3, are referred to in tcrdist2 as pmhc_a and phmc_b, respectively.
+  CDR2.5, the pMHC-facing loop between CDR2 and CDR3, are referred to in tcrdist3 as pmhc_a and phmc_b, respectively.
 
 
 
@@ -60,7 +60,7 @@ Arguments
 chain(s)
 -------
 
-Most classes and functions in tcrdist2 require specification of the appropriate t cell receptor 
+Most classes and functions in tcrdist3 require specification of the appropriate t cell receptor 
 chains:
     - ['alpha'], ['beta'], ['gamma'], or ['delta'] for single-chain analysis, 
     - ['alpha', 'beta'] or ['gamma', 'delta'] for paired-chain analyis 
@@ -68,19 +68,15 @@ chains:
 organism
 --------
 
-Most classes and functions in tcrdist2 require specification of an appropriate host organism. 
+Most classes and functions in tcrdist3 require specification of an appropriate host organism. 
 Currently only 'human' or 'mouse' are supported. This is required because reference TCR genes
 are organism specific. 
 
 db_file
 -------
 
-The `db_file` is used by tcrdist2 to supply updated information about reference TCR germline sequences. 
+The `db_file` is used by tcrdist3 to supply updated information about reference TCR germline sequences. 
 
-These files come with tcrdist2:
-
-`tcrdist2/tcrdist/db/alphabeta_db.tsv`
-`tcrdist2/tcrdist/db/gammadelta_db.tsv`
 
 .. tip:: 
 
