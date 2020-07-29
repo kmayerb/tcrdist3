@@ -2,6 +2,9 @@
 
 ![Python application](https://github.com/kmayerb/tcrdist3/workflows/Python%20application/badge.svg?event=push)
 
+[![Coverage Status](https://coveralls.io/repos/github/kmayerb/tcrdist3/badge.svg?branch=master)](https://coveralls.io/github/kmayerb/tcrdist3?branch=master)
+
+
 Flexible distance measures for comparing T cell receptors 
 
 

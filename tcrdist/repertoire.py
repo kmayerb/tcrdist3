@@ -195,19 +195,19 @@ class TCRrep:
                                                              cdr = 2,
                                                              organism = self.organism,
                                                              attr ='cdrs')
-        if chain is "alpha":
+        if chain == "alpha":
             self.cell_df['cdr1_a_aa'] = list(map(f0, self.cell_df.v_a_gene))
             self.cell_df['cdr2_a_aa'] = list(map(f1, self.cell_df.v_a_gene))
             self.cell_df['pmhc_a_aa'] = list(map(f2, self.cell_df.v_a_gene))
-        if chain is "beta":
+        if chain == "beta":
             self.cell_df['cdr1_b_aa'] = list(map(f0, self.cell_df.v_b_gene))
             self.cell_df['cdr2_b_aa'] = list(map(f1, self.cell_df.v_b_gene))
             self.cell_df['pmhc_b_aa'] = list(map(f2, self.cell_df.v_b_gene))
-        if chain is "gamma":
+        if chain == "gamma":
             self.cell_df['cdr1_g_aa'] = list(map(f0, self.cell_df.v_g_gene))
             self.cell_df['cdr2_g_aa'] = list(map(f1, self.cell_df.v_g_gene))
             self.cell_df['pmhc_g_aa'] = list(map(f2, self.cell_df.v_g_gene))
-        if chain is "delta":
+        if chain == "delta":
             self.cell_df['cdr1_d_aa'] = list(map(f0, self.cell_df.v_d_gene))
             self.cell_df['cdr2_d_aa'] = list(map(f1, self.cell_df.v_d_gene))
             self.cell_df['pmhc_d_aa'] = list(map(f2, self.cell_df.v_d_gene))
