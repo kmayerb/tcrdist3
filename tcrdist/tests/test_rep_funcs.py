@@ -3,6 +3,53 @@ import pwseqdist as pw
 import numpy as np
 from tcrdist.rep_funcs import _pws, _pw
 
+def test_pw_rectangular():
+    df = pd.read_csv("dash.csv")
+    rmat = _pw(
+        metric = pw.metrics.nb_vector_tcrdist,
+        seqs1 = df.cdr3_b_aa[0:10],
+        seqs2 = df.cdr3_b_aa, 
+        ncpus=1, 
+        uniqify= True, 
+        use_numba = True)
+    assert rmat.shape == (10,1924)
+
+
+def test_pws_rectangular_computation():
+    metrics = { "cdr3_a_aa" : pw.metrics.nb_vector_tcrdist,
+                "pmhc_a_aa" : pw.metrics.nb_vector_tcrdist,
+                "cdr2_a_aa" : pw.metrics.nb_vector_tcrdist,
+                "cdr1_a_aa" : pw.metrics.nb_vector_tcrdist,
+                "cdr3_b_aa" : pw.metrics.nb_vector_tcrdist,
+                "pmhc_b_aa" : pw.metrics.nb_vector_tcrdist,
+                "cdr2_b_aa" : pw.metrics.nb_vector_tcrdist,
+                "cdr1_b_aa" : pw.metrics.nb_vector_tcrdist}
+
+    weights = { 
+                "cdr3_a_aa" : 3,
+                "pmhc_a_aa" : 1,
+                "cdr2_a_aa" : 1,
+                "cdr1_a_aa" : 1,
+                "cdr3_b_aa" : 3,
+                "pmhc_b_aa" : 1,
+                "cdr2_b_aa" : 1,
+                "cdr1_b_aa" : 1}
+
+    kargs = {   "cdr3_a_aa" : {'use_numba': True, 'distance_matrix': pw.matrices.tcr_nb_distance_matrix, 'dist_weight': 1, 'gap_penalty':4, 'ntrim':3, 'ctrim':2, 'fixed_gappos':False},
+                "pmhc_a_aa" : {'use_numba': True, 'distance_matrix': pw.matrices.tcr_nb_distance_matrix, 'dist_weight': 1, 'gap_penalty':4, 'ntrim':0, 'ctrim':0, 'fixed_gappos':True},
+                "cdr2_a_aa" : {'use_numba': True, 'distance_matrix': pw.matrices.tcr_nb_distance_matrix, 'dist_weight': 1, 'gap_penalty':4, 'ntrim':0, 'ctrim':0, 'fixed_gappos':True},
+                "cdr1_a_aa" : {'use_numba': True, 'distance_matrix': pw.matrices.tcr_nb_distance_matrix, 'dist_weight': 1, 'gap_penalty':4, 'ntrim':0, 'ctrim':0, 'fixed_gappos':True},
+                "cdr3_b_aa" : {'use_numba': True, 'distance_matrix': pw.matrices.tcr_nb_distance_matrix, 'dist_weight': 1, 'gap_penalty':4, 'ntrim':3, 'ctrim':2, 'fixed_gappos':False},
+                "pmhc_b_aa" : {'use_numba': True, 'distance_matrix': pw.matrices.tcr_nb_distance_matrix, 'dist_weight': 1, 'gap_penalty':4, 'ntrim':0, 'ctrim':0, 'fixed_gappos':True},
+                "cdr2_b_aa" : {'use_numba': True, 'distance_matrix': pw.matrices.tcr_nb_distance_matrix, 'dist_weight': 1, 'gap_penalty':4, 'ntrim':0, 'ctrim':0, 'fixed_gappos':True},
+                "cdr1_b_aa" : {'use_numba': True, 'distance_matrix': pw.matrices.tcr_nb_distance_matrix, 'dist_weight': 1, 'gap_penalty':4, 'ntrim':0, 'ctrim':0, 'fixed_gappos':True}}
+
+    df = pd.read_csv("dash2.csv")
+    df = df.head(10).copy()
+    df2 = pd.read_csv("dash2.csv")
+    r = _pws(df = df, df2 = df2, metrics = metrics, weights= weights, kargs=kargs, cpu = 1, store = False)
+    assert r['tcrdist'].shape == (10,1924)
+
 def test_dash_tcrdist_fixed_gappos_False():
     import pandas as pd
     import pwseqdist as pw
@@ -143,7 +190,8 @@ def test_pw():
             ntrim=3, 
             ctrim=2, 
             fixed_gappos=True)
-    print(r)
+            
+    assert isinstance(r, np.ndarray)
 
 def test_indirect_nw_hamming_metric():
     seqs = ['CASSLDRGEVFF', # Seq1

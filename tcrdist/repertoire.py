@@ -111,7 +111,8 @@ class TCRrep:
                  store_all_cdr     = True,
                  compute_distances = True,
                  index_cols        = None,
-                 cpus              = 1, 
+                 cpus              = 1,
+                 df2               = None, 
                  db_file           = 'alphabeta_gammadelta_db.tsv'):
         
         self.organism = organism
@@ -126,8 +127,10 @@ class TCRrep:
         if cell_df is None:
             cell_df = pd.DataFrame()
         self.cell_df = cell_df
-        self.clone_df = clone_df
         self._validate_cell_df()
+        self.clone_df = clone_df
+        self.df2 = df2
+        
         
         self.db_file = db_file
         self._validate_db_file()
@@ -162,10 +165,12 @@ class TCRrep:
         if compute_distances:
             self.compute_distances()
      
-    def compute_distances(self):
+    def compute_distances(self, df = None):
+        if df is None:
+            df = self.clone_df
         if 'alpha' in self.chains:
             pw_alpha  = _pws(
-                df = self.clone_df, 
+                df = df,
                 metrics = self.metrics_a, 
                 weights = self.weights_a, 
                 kargs   = self.kargs_a, 
@@ -174,7 +179,7 @@ class TCRrep:
             self._assign_distance_attributes(d = pw_alpha, chain = 'alpha')
         if 'beta' in self.chains:
             pw_beta = _pws(
-                df = self.clone_df, 
+                df = df, 
                 metrics = self.metrics_b, 
                 weights = self.weights_b, 
                 kargs   = self.kargs_b, 
@@ -183,7 +188,7 @@ class TCRrep:
             self._assign_distance_attributes(d = pw_beta, chain = 'beta')
         if 'gamma' in self.chains:
             pw_gamma = _pws(
-                df = self.clone_df, 
+                df = df,
                 metrics = self.metrics_g, 
                 weights = self.weights_g, 
                 kargs   = self.kargs_g, 
@@ -192,20 +197,68 @@ class TCRrep:
             self._assign_distance_attributes(d = pw_gamma, chain = 'gamma')
         if 'delta' in self.chains:
             pw_delta = _pws(
-                df = self.clone_df, 
+                df = df, 
                 metrics = self.metrics_d,
                 weights = self.weights_d, 
                 kargs   = self.kargs_d, 
                 cpu     = self.cpus, 
                 store   = self.store_all_cdr)
             self._assign_distance_attributes(d = pw_delta, chain = 'delta')
+    
+    def compute_rect_distances(self, df = None, df2 = None, store = None):
+        if df is None:
+            df = self.clone_df
+        if df2 is None:
+            df2 = self.df2
+        if store is None:
+            store = self.store_all_cdr
+        if 'alpha' in self.chains:
+            pw_alpha  = _pws(
+                df = df,
+                df2 = df2,
+                metrics = self.metrics_a, 
+                weights = self.weights_a, 
+                kargs   = self.kargs_a, 
+                cpu     = self.cpus, 
+                store   = store)
+            self._assign_distance_attributes(d = pw_alpha, chain = 'alpha',prefix = "rw")
+        if 'beta' in self.chains:
+            pw_beta = _pws(
+                df = df,
+                df2 = df2, 
+                metrics = self.metrics_b, 
+                weights = self.weights_b, 
+                kargs   = self.kargs_b, 
+                cpu     = self.cpus, 
+                store   = store)
+            self._assign_distance_attributes(d = pw_beta, chain = 'beta',prefix = "rw")
+        if 'gamma' in self.chains:
+            pw_gamma = _pws(
+                df = df,
+                df2 = df2, 
+                metrics = self.metrics_g, 
+                weights = self.weights_g, 
+                kargs   = self.kargs_g, 
+                cpu     = self.cpus, 
+                store   = store)
+            self._assign_distance_attributes(d = pw_gamma, chain = 'gamma', prefix = "rw")
+        if 'delta' in self.chains:
+            pw_delta = _pws(
+                df = df,
+                df2 = df2,
+                metrics = self.metrics_d,
+                weights = self.weights_d, 
+                kargs   = self.kargs_d, 
+                cpu     = self.cpus, 
+                store   = store)
+            self._assign_distance_attributes(d = pw_delta, chain = 'delta', prefix = "rw")
 
-    def _assign_distance_attributes(self, d:dict, chain:str):
+    def _assign_distance_attributes(self, d:dict, chain:str, prefix = 'pw'):
         for k in d.keys():
             if k == 'tcrdist':
-                pw_k = f"pw_{chain}"
+                pw_k = f"{prefix}_{chain}"
             else:
-                pw_k = f"pw_{k}"
+                pw_k = f"{prefix}_{k}"
             setattr(self, pw_k, d[k])
 
     def infer_cdrs_from_v_gene(self, chain, imgt_aligned = True):

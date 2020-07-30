@@ -8,7 +8,7 @@ import numpy as np
 __all__ = ['_pw', '_pws']
 
 
-def _pws(df, metrics, weights, kargs, cpu = 1, uniquify = True, store = False):
+def _pws(df, metrics, weights, kargs, df2 = None, cpu = 1, uniquify = True, store = False):
     """    
     _pws performs pairwise distance calculation across a multiple 
     columns of a Pandas DataFrame. This naturally permits calculation of
@@ -19,6 +19,8 @@ def _pws(df, metrics, weights, kargs, cpu = 1, uniquify = True, store = False):
     ----------
     df : pd.DataFrame
         Clones DataFrame containing, at a minimum, columns with CDR sequences
+    df2 : pd.DataFrame or None
+        Second clones DataFrame containing, at a minimum, columns with CDR sequences
     metrics : dict
         Dictionary of functions, specifying the distance metrics to apply to each CDR
     weights : dict
@@ -87,7 +89,11 @@ def _pws(df, metrics, weights, kargs, cpu = 1, uniquify = True, store = False):
     tcrdist = None
     s = dict()
     for k in metric_keys:
-        pw_mat = _pw(seqs1 = df[k].values, metric = metrics[k], ncpus = cpu, uniqify= uniquify, **kargs[k])
+        if df2 is None:
+            pw_mat = _pw(seqs1 = df[k].values, metric = metrics[k], ncpus = cpu, uniqify= uniquify, **kargs[k])
+        else:
+            pw_mat = _pw(seqs1 = df[k].values, seqs2 = df2[k].values ,metric = metrics[k], ncpus = cpu, uniqify= uniquify, **kargs[k])
+            
         if store:
            s[k] = pw_mat 
         if tcrdist is None:
