@@ -6,7 +6,8 @@ __all__ = ['download_and_extract_zip_file']
 
 """
 python -c "from tcrdist.setup_tests import *; download_and_extract_zip_file('bulk.csv.zip')"
-python -c "from tcrdist.setup_tests import *; download_and_extract_zip_file('bulk.csv.zip')"
+python -c "from tcrdist.setup_tests import *; download_and_extract_zip_file('dash.zip')"
+python -c "from tcrdist.setup_tests import *; download_and_extract_zip_file('sant.csv.zip')"
 """
 
 # public facing data files, L looksup url based for dropbox and aws

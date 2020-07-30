@@ -27,13 +27,13 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         pip install pytest-cov
         pip install coveralls
-        python -c "from tcrdist.setup_tests import *; download_and_extract_zip_file('bulk.csv.zip')"
-        python -c "from tcrdist.setup_tests import *; download_and_extract_zip_file('dash.csv.zip')"
-        python -c "from tcrdist.setup_tests import *; download_and_extract_zip_file('sant.csv.zip')"
     - name: Test with pytest and coverage
       env:
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: |
+        python -c "from tcrdist.setup_tests import *; download_and_extract_zip_file('bulk.csv.zip')"
+        python -c "from tcrdist.setup_tests import *; download_and_extract_zip_file('dash.zip')"
+        python -c "from tcrdist.setup_tests import *; download_and_extract_zip_file('sant.csv.zip')"
         coverage run --source=tcrdist/ -m pytest -v --disable-warnings
         coverage report
         pytest --cov=tcrdist/
