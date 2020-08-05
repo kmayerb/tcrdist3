@@ -4,6 +4,8 @@ import numpy as np
 import warnings
 from . import repertoire_db
 from tcrdist.rep_funcs import _pws
+from zipdist.zip2 import Zipdist2
+import sys
 
 class TCRrep:
     """
@@ -28,6 +30,10 @@ class TCRrep:
     db_file : str
         specifies refereence file. The default is 'alphabeta_gammadelta_db.tsv' which
         is preinstalled  with the install python3.7/site-packages/tcrdist/db/
+    archive_name : str
+        Name for archive file. (only used if archive result is True)
+    archive_result: bool
+        If True save result to .tar.gz archive
     imgt_aligned : bool
         If True, by default, cdr1, cdr2,and pmhc are inferred aligned to fixed length with gaps.
         If False, cdr1, cdr2,and pmhc are returned as ungapped raw sequences.   
@@ -100,6 +106,9 @@ class TCRrep:
     def __init__(self,
                  organism          = "mouse",
                  chains            = ['alpha', 'beta'],
+                 db_file           = 'alphabeta_gammadelta_db.tsv',
+                 archive_name      = 'tcrdist3.archive',
+                 blank             = False,
                  cell_df           = None,
                  clone_df          = None,
                  imgt_aligned      = True,
@@ -113,58 +122,173 @@ class TCRrep:
                  index_cols        = None,
                  cpus              = 1,
                  df2               = None, 
-                 db_file           = 'alphabeta_gammadelta_db.tsv'):
+                 archive_result    = False):
         
+
         self.organism = organism
         self._validate_organism()   
 
         self.chains = chains
         self._validate_chains()
         
-        self.index_cols = index_cols
-        self.clone_df = clone_df 
+        self.archive_name = archive_name
+        self.blank = blank 
+        # blank is only used if reloading from .tar.gz
+        if self.blank:
+            self.cell_df           = None
+            self.clone_df          = None
+            self.imgt_aligned      = False
+            self.infer_all_genes   = False
+            self.store_all_cdr     = False
+            self.index_cols        = None
+            self.cpus              = 1,
+            self.df2               = None 
+            self.archive_result    = False
+        else:
+            self.index_cols = index_cols
+            self.clone_df = clone_df 
 
-        if cell_df is None:
-            cell_df = pd.DataFrame()
-        self.cell_df = cell_df
-        self._validate_cell_df()
-        self.clone_df = clone_df
-        self.df2 = df2
-        
-        
-        self.db_file = db_file
-        self._validate_db_file()
+            if cell_df is None:
+                cell_df = pd.DataFrame()
+            self.cell_df = cell_df
+            self._validate_cell_df()
+            self.clone_df = clone_df
+            self.df2 = df2
+            
+            
+            self.db_file = db_file
+            self._validate_db_file()
 
-        self.imgt_aligned = imgt_aligned
-        self._validate_imgt_aligned()
+            self.imgt_aligned = imgt_aligned
+            self._validate_imgt_aligned()
 
-        self.store_all_cdr = store_all_cdr
-        self.cpus = cpus
+            self.store_all_cdr = store_all_cdr
+            self.cpus = cpus
 
-        if infer_all_genes:     
-            self.all_genes = repertoire_db.RefGeneSet(db_file).all_genes
-        
-        if infer_cdrs:
-            for chain in self.chains:
-                self.infer_cdrs_from_v_gene(chain = chain, imgt_aligned = self.imgt_aligned)
-                    # Assume all provided columns are index columns, except 'count' 'cell_id', 'clone_id'
-        
-        if infer_index_cols:
-            self.infer_index_cols()
-        
-        if deduplicate:
-            self.infer_index_cols()
-            self.deduplicate()
-        else: 
-            if self.clone_df is None:
-                self.clone_df = self.cell_df.copy()
+            self.archive_result = archive_result
+            self.infer_all_genes = infer_all_genes
+            self.use_defaults = use_defaults
 
-        if use_defaults:
-            self._initialize_chain_specific_attributes()
-    
-        if compute_distances:
-            self.compute_distances()
+            if infer_all_genes:     
+                self.all_genes = repertoire_db.RefGeneSet(db_file).all_genes
+            
+            if infer_cdrs:
+                for chain in self.chains:
+                    self.infer_cdrs_from_v_gene(chain = chain, imgt_aligned = self.imgt_aligned)
+                        # Assume all provided columns are index columns, except 'count' 'cell_id', 'clone_id'
+            
+            if infer_index_cols:
+                self.infer_index_cols()
+            
+            if deduplicate:
+                self.infer_index_cols()
+                self.deduplicate()
+            else: 
+                if self.clone_df is None:
+                    self.clone_df = self.cell_df.copy()
+
+            if use_defaults:
+                self._initialize_chain_specific_attributes()
+        
+            if compute_distances:
+                self.compute_distances()
+
+            if self.archive_result:
+                self.archive()
      
+    def archive(self, 
+                dest = None, 
+                dest_tar_name = None, 
+                verbose = True, 
+                use_csv = False):
+        """ 
+        Use Zipdist2 to Make an Archive.tar.gz 
+
+        Parameters
+        ----------
+        dest : str
+            e.g., 'default_archive'
+        dest_tar_name : str
+            e.g., 'default_archive.tar.gz'
+        verbose : bool
+            if True, report steps in archive process
+        use_csv : bool
+            if True, archive will include .csv file. Useful for porting files to other applications, but creates large files.
+
+        Example
+        -------
+        .. code-block:: python
+            tr = TCRrep(cell_df = pd.DataFrame(), organism = "mouse")
+            tr.archive(dest = "default_archive", dest_tar_name = "default_archive.tar.gz")
+
+        Notes
+        -----
+        See :py:meth:`tcrdist.repertoire.rebuild`: for reubilding a TCRrep instance from 
+        an TCRrep archive .tar.gz file.
+        
+        """
+        if dest is None:
+            dest = self.archive_name
+        if dest_tar_name is None:
+            dest_tar_name = f"{dest}.tar.gz"
+
+        self.cell_df_index = self.cell_df.index.copy()
+        self.cell_df = self.cell_df.reset_index()
+
+        z = Zipdist2(name = dest_tar_name , target = self)
+        z._save(dest = dest, dest_tar = dest_tar_name, verbose = verbose, use_csv = use_csv )
+        sys.stdout.write(f"\tArchiving your TCRrep using Zipdist2 in [{dest_tar_name}]\n")
+    
+    def rebuild(self,
+                dest = None,
+                dest_tar_name = None, 
+                verbose = True ):
+        """ 
+        Use Zipdist2 to reubild a TCRrep instance from an Archive.tar.gz
+
+        Parameters
+        ----------
+        dest_tar_name : str
+            e.g., 'default_archive.tar.gz'
+        verbose : bool
+            If True, report rebuilding process steps.
+
+        Example
+        -------
+        Shows :py:meth:`tcrdist.repertoire.archive` and :py:meth:`tcrdist.repertoire.rebuild` 
+        used together.
+
+        .. code-block:: python
+        
+            tr = TCRrep(cell_df = pd.DataFrame(), organism = "mouse")
+            tr.archive(dest = "default_archive", dest_tar_name = "default_archive.tar.gz")
+            tr_new = TCRrep(cell_df = pd.DataFrame(), organism = "mouse")
+            tr_new.rebuild(dest_tar_name = "default_archive.tar.gz")
+        
+        Notes
+        -----
+        See :py:meth:`tcrdist.repertoire.archive` for creating TCRrep archive file.
+        """
+        #tr = TCRrep(cell_df=df.iloc[0:0,:], chains=chains, organism='mouse')
+        if dest is None:
+            dest = self.archive_name
+        if dest_tar_name is None:
+            dest_tar_name = f"{dest}.tar.gz"
+
+        z = Zipdist2(name = dest, target = self)
+        z._build(dest_tar = dest_tar_name , target = self, verbose = verbose)
+        
+        # VALIDATION OF INPUTS
+        # check that chains are valid.
+        self._validate_organism()
+        self._validate_chains()
+        # check that  is a pd.DataFrame
+        self._validate_cell_df()
+
+        # RE INIT the REFERENCE DB see repertoire_db.py
+        self.all_genes = repertoire_db.RefGeneSet(self.db_file).all_genes
+       
+
     def compute_distances(self, df = None):
         if df is None:
             df = self.clone_df

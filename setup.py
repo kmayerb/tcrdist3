@@ -17,7 +17,7 @@ opts = dict(name='tcrdist3',
             license='MIT',
             author='Koshlan Mayer-Blackwell',
             author_email='kmayerbl@fredhutch.org',
-            version='0.1.1',
+            version='0.1.2',
             packages=PACKAGES,
             package_data={"": ["*.csv","*.tsv"]},
            )
@@ -28,7 +28,8 @@ install_reqs = [
       'parasail>=1.1.17',
       'scipy>=1.4.1',
       'pwseqdist>=0.2.1',
-      'numba']
+      'numba',
+      'zipdist>=0.1.5']
 
 if __name__ == "__main__":
       setup(**opts, install_requires=install_reqs)
