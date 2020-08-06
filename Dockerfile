@@ -1,6 +1,6 @@
 FROM continuumio/miniconda3:4.8.2
 
-RUN apt-get update && apt-get install -y procps && apt-get install nano && apt-get install gcc
+RUN apt-get update && apt-get install -y procps && apt-get install -y nano && apt-get -y install gcc
 
 RUN pip install git+https://github.com/kmayerb/tcrdist3.git@0.1.3
 
