@@ -29,7 +29,8 @@ install_reqs = [
       'scipy>=1.4.1',
       'pwseqdist>=0.2.1',
       'numba',
-      'zipdist>=0.1.5']
+      'zipdist>=0.1.5',
+      'fishersapi']
 
 if __name__ == "__main__":
       setup(**opts, install_requires=install_reqs)

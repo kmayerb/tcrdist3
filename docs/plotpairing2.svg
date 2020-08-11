@@ -1,0 +1,258 @@
+<svg height="700" version="1.1" width="600" xmlns="http://www.w3.org/2000/svg">
+<text fill="black" font-family="sans-serif" font-size="40.0" font-weight="normal" x="59.000" xml:space="preserve" y="88.000">Vα</text>
+
+<text fill="black" font-family="sans-serif" font-size="40.0" font-weight="normal" x="493.000" xml:space="preserve" y="88.000">Jα</text>
+
+<path d="M 50.0 142.28187919463087 L 100 142.28187919463087 M 100 142.28187919463087 C 200 142.28187919463087, 400.0 142.28187919463087, 500.0 142.28187919463087" fill="none" stroke="red" stroke-width="84.56375838926175"/>
+<path d="M 500.0 142.28187919463087 L 550.0 142.28187919463087" fill="none" stroke="red" stroke-width="84.56375838926175"/>
+<path d="M 50.0 204.6979865771812 L 100 204.6979865771812" fill="none" stroke="red" stroke-width="40.26845637583893"/>
+<defs>
+                    <linearGradient id="TCRGRADlingrad1" spreadMethod="pad" x1="0.0%" x2="100.0%" y1="0.0%" y2="0.0%">
+                                    <stop offset="0.0%" stop-color="red" stop-opacity="1"/><stop offset="25.0%" stop-color="red" stop-opacity="1"/><stop offset="75.0%" stop-color="green" stop-opacity="1"/><stop offset="100.0%" stop-color="green" stop-opacity="1"/>
+                    </linearGradient>
+            </defs>
+<path d="M 100 204.6979865771812 C 200 204.6979865771812, 400.0 353.69127516778525, 500.0 353.69127516778525" fill="none" stroke="url(#TCRGRADlingrad1)" stroke-width="40.26845637583893"/>
+<path d="M 500.0 353.69127516778525 L 550.0 353.69127516778525" fill="none" stroke="green" stroke-width="40.26845637583893"/>
+<path d="M 50.0 226.84563758389262 L 100 226.84563758389262" fill="none" stroke="red" stroke-width="4.026845637583893"/>
+<defs>
+                    <linearGradient id="TCRGRADlingrad2" spreadMethod="pad" x1="0.0%" x2="100.0%" y1="0.0%" y2="0.0%">
+                                    <stop offset="0.0%" stop-color="red" stop-opacity="1"/><stop offset="25.0%" stop-color="red" stop-opacity="1"/><stop offset="75.0%" stop-color="blue" stop-opacity="1"/><stop offset="100.0%" stop-color="blue" stop-opacity="1"/>
+                    </linearGradient>
+            </defs>
+<path d="M 100 226.84563758389262 C 200 226.84563758389262, 400.0 436.241610738255, 500.0 436.241610738255" fill="none" stroke="url(#TCRGRADlingrad2)" stroke-width="4.026845637583893"/>
+<path d="M 500.0 436.241610738255 L 550.0 436.241610738255" fill="none" stroke="blue" stroke-width="4.026845637583893"/>
+<path d="M 50.0 234.8993288590604 L 100 234.8993288590604" fill="none" stroke="red" stroke-width="12.080536912751679"/>
+<defs>
+                    <linearGradient id="TCRGRADlingrad3" spreadMethod="pad" x1="0.0%" x2="100.0%" y1="0.0%" y2="0.0%">
+                                    <stop offset="0.0%" stop-color="red" stop-opacity="1"/><stop offset="25.0%" stop-color="red" stop-opacity="1"/><stop offset="75.0%" stop-color="cyan" stop-opacity="1"/><stop offset="100.0%" stop-color="cyan" stop-opacity="1"/>
+                    </linearGradient>
+            </defs>
+<path d="M 100 234.8993288590604 C 200 234.8993288590604, 400.0 536.9127516778524, 500.0 536.9127516778524" fill="none" stroke="url(#TCRGRADlingrad3)" stroke-width="12.080536912751679"/>
+<path d="M 500.0 536.9127516778524 L 550.0 536.9127516778524" fill="none" stroke="cyan" stroke-width="12.080536912751679"/>
+<path d="M 50.0 246.9798657718121 L 100 246.9798657718121" fill="none" stroke="red" stroke-width="12.080536912751679"/>
+<defs>
+                    <linearGradient id="TCRGRADlingrad4" spreadMethod="pad" x1="0.0%" x2="100.0%" y1="0.0%" y2="0.0%">
+                                    <stop offset="0.0%" stop-color="red" stop-opacity="1"/><stop offset="25.0%" stop-color="red" stop-opacity="1"/><stop offset="75.0%" stop-color="magenta" stop-opacity="1"/><stop offset="100.0%" stop-color="magenta" stop-opacity="1"/>
+                    </linearGradient>
+            </defs>
+<path d="M 100 246.9798657718121 C 200 246.9798657718121, 400.0 613.4228187919464, 500.0 613.4228187919464" fill="none" stroke="url(#TCRGRADlingrad4)" stroke-width="12.080536912751679"/>
+<path d="M 500.0 613.4228187919464 L 550.0 613.4228187919464" fill="none" stroke="magenta" stroke-width="12.080536912751679"/>
+<path d="M 50.0 255.0335570469799 L 100 255.0335570469799" fill="none" stroke="red" stroke-width="4.026845637583893"/>
+<defs>
+                    <linearGradient id="TCRGRADlingrad5" spreadMethod="pad" x1="0.0%" x2="100.0%" y1="0.0%" y2="0.0%">
+                                    <stop offset="0.0%" stop-color="red" stop-opacity="1"/><stop offset="25.0%" stop-color="red" stop-opacity="1"/><stop offset="75.0%" stop-color="black" stop-opacity="1"/><stop offset="100.0%" stop-color="black" stop-opacity="1"/>
+                    </linearGradient>
+            </defs>
+<path d="M 100 255.0335570469799 C 200 255.0335570469799, 400.0 677.8523489932886, 500.0 677.8523489932886" fill="none" stroke="url(#TCRGRADlingrad5)" stroke-width="4.026845637583893"/>
+<path d="M 500.0 677.8523489932886 L 550.0 677.8523489932886" fill="none" stroke="black" stroke-width="4.026845637583893"/>
+<path d="M 50.0 277.1812080536913 L 100 277.1812080536913" fill="none" stroke="green" stroke-width="40.26845637583893"/>
+<defs>
+                    <linearGradient id="TCRGRADlingrad6" spreadMethod="pad" x1="0.0%" x2="100.0%" y1="0.0%" y2="0.0%">
+                                    <stop offset="0.0%" stop-color="green" stop-opacity="1"/><stop offset="25.0%" stop-color="green" stop-opacity="1"/><stop offset="75.0%" stop-color="red" stop-opacity="1"/><stop offset="100.0%" stop-color="red" stop-opacity="1"/>
+                    </linearGradient>
+            </defs>
+<path d="M 100 277.1812080536913 C 200 277.1812080536913, 400.0 204.6979865771812, 500.0 204.6979865771812" fill="none" stroke="url(#TCRGRADlingrad6)" stroke-width="40.26845637583893"/>
+<path d="M 500.0 204.6979865771812 L 550.0 204.6979865771812" fill="none" stroke="red" stroke-width="40.26845637583893"/>
+<path d="M 50.0 319.46308724832215 L 100 319.46308724832215 M 100 319.46308724832215 C 200 319.46308724832215, 400.0 395.97315436241615, 500.0 395.97315436241615" fill="none" stroke="green" stroke-width="44.29530201342283"/>
+<path d="M 500.0 395.97315436241615 L 550.0 395.97315436241615" fill="none" stroke="green" stroke-width="44.29530201342283"/>
+<path d="M 50.0 361.74496644295306 L 100 361.74496644295306" fill="none" stroke="green" stroke-width="40.26845637583893"/>
+<defs>
+                    <linearGradient id="TCRGRADlingrad7" spreadMethod="pad" x1="0.0%" x2="100.0%" y1="0.0%" y2="0.0%">
+                                    <stop offset="0.0%" stop-color="green" stop-opacity="1"/><stop offset="25.0%" stop-color="green" stop-opacity="1"/><stop offset="75.0%" stop-color="blue" stop-opacity="1"/><stop offset="100.0%" stop-color="blue" stop-opacity="1"/>
+                    </linearGradient>
+            </defs>
+<path d="M 100 361.74496644295306 C 200 361.74496644295306, 400.0 458.38926174496646, 500.0 458.38926174496646" fill="none" stroke="url(#TCRGRADlingrad7)" stroke-width="40.26845637583893"/>
+<path d="M 500.0 458.38926174496646 L 550.0 458.38926174496646" fill="none" stroke="blue" stroke-width="40.26845637583893"/>
+<path d="M 50.0 383.89261744966444 L 100 383.89261744966444" fill="none" stroke="green" stroke-width="4.026845637583893"/>
+<defs>
+                    <linearGradient id="TCRGRADlingrad8" spreadMethod="pad" x1="0.0%" x2="100.0%" y1="0.0%" y2="0.0%">
+                                    <stop offset="0.0%" stop-color="green" stop-opacity="1"/><stop offset="25.0%" stop-color="green" stop-opacity="1"/><stop offset="75.0%" stop-color="cyan" stop-opacity="1"/><stop offset="100.0%" stop-color="cyan" stop-opacity="1"/>
+                    </linearGradient>
+            </defs>
+<path d="M 100 383.89261744966444 C 200 383.89261744966444, 400.0 544.9664429530201, 500.0 544.9664429530201" fill="none" stroke="url(#TCRGRADlingrad8)" stroke-width="4.026845637583893"/>
+<path d="M 500.0 544.9664429530201 L 550.0 544.9664429530201" fill="none" stroke="cyan" stroke-width="4.026845637583893"/>
+<path d="M 50.0 389.9328859060403 L 100 389.9328859060403" fill="none" stroke="green" stroke-width="8.053691275167786"/>
+<defs>
+                    <linearGradient id="TCRGRADlingrad9" spreadMethod="pad" x1="0.0%" x2="100.0%" y1="0.0%" y2="0.0%">
+                                    <stop offset="0.0%" stop-color="green" stop-opacity="1"/><stop offset="25.0%" stop-color="green" stop-opacity="1"/><stop offset="75.0%" stop-color="magenta" stop-opacity="1"/><stop offset="100.0%" stop-color="magenta" stop-opacity="1"/>
+                    </linearGradient>
+            </defs>
+<path d="M 100 389.9328859060403 C 200 389.9328859060403, 400.0 623.489932885906, 500.0 623.489932885906" fill="none" stroke="url(#TCRGRADlingrad9)" stroke-width="8.053691275167786"/>
+<path d="M 500.0 623.489932885906 L 550.0 623.489932885906" fill="none" stroke="magenta" stroke-width="8.053691275167786"/>
+<path d="M 50.0 395.97315436241615 L 100 395.97315436241615" fill="none" stroke="green" stroke-width="4.026845637583893"/>
+<defs>
+                    <linearGradient id="TCRGRADlingrad10" spreadMethod="pad" x1="0.0%" x2="100.0%" y1="0.0%" y2="0.0%">
+                                    <stop offset="0.0%" stop-color="green" stop-opacity="1"/><stop offset="25.0%" stop-color="green" stop-opacity="1"/><stop offset="75.0%" stop-color="black" stop-opacity="1"/><stop offset="100.0%" stop-color="black" stop-opacity="1"/>
+                    </linearGradient>
+            </defs>
+<path d="M 100 395.97315436241615 C 200 395.97315436241615, 400.0 681.8791946308725, 500.0 681.8791946308725" fill="none" stroke="url(#TCRGRADlingrad10)" stroke-width="4.026845637583893"/>
+<path d="M 500.0 681.8791946308725 L 550.0 681.8791946308725" fill="none" stroke="black" stroke-width="4.026845637583893"/>
+<path d="M 50.0 420.1342281879196 L 100 420.1342281879196" fill="none" stroke="blue" stroke-width="44.29530201342283"/>
+<defs>
+                    <linearGradient id="TCRGRADlingrad11" spreadMethod="pad" x1="0.0%" x2="100.0%" y1="0.0%" y2="0.0%">
+                                    <stop offset="0.0%" stop-color="blue" stop-opacity="1"/><stop offset="25.0%" stop-color="blue" stop-opacity="1"/><stop offset="75.0%" stop-color="red" stop-opacity="1"/><stop offset="100.0%" stop-color="red" stop-opacity="1"/>
+                    </linearGradient>
+            </defs>
+<path d="M 100 420.1342281879196 C 200 420.1342281879196, 400.0 246.9798657718121, 500.0 246.9798657718121" fill="none" stroke="url(#TCRGRADlingrad11)" stroke-width="44.29530201342283"/>
+<path d="M 500.0 246.9798657718121 L 550.0 246.9798657718121" fill="none" stroke="red" stroke-width="44.29530201342283"/>
+<path d="M 50.0 444.2953020134229 L 100 444.2953020134229" fill="none" stroke="blue" stroke-width="4.026845637583893"/>
+<defs>
+                    <linearGradient id="TCRGRADlingrad12" spreadMethod="pad" x1="0.0%" x2="100.0%" y1="0.0%" y2="0.0%">
+                                    <stop offset="0.0%" stop-color="blue" stop-opacity="1"/><stop offset="25.0%" stop-color="blue" stop-opacity="1"/><stop offset="75.0%" stop-color="green" stop-opacity="1"/><stop offset="100.0%" stop-color="green" stop-opacity="1"/>
+                    </linearGradient>
+            </defs>
+<path d="M 100 444.2953020134229 C 200 444.2953020134229, 400.0 420.13422818791946, 500.0 420.13422818791946" fill="none" stroke="url(#TCRGRADlingrad12)" stroke-width="4.026845637583893"/>
+<path d="M 500.0 420.13422818791946 L 550.0 420.13422818791946" fill="none" stroke="green" stroke-width="4.026845637583893"/>
+<path d="M 50.0 468.4563758389263 L 100 468.4563758389263 M 100 468.4563758389263 C 200 468.4563758389263, 400.0 500.6711409395973, 500.0 500.6711409395973" fill="none" stroke="blue" stroke-width="44.29530201342283"/>
+<path d="M 500.0 500.6711409395973 L 550.0 500.6711409395973" fill="none" stroke="blue" stroke-width="44.29530201342283"/>
+<path d="M 50.0 492.6174496644296 L 100 492.6174496644296" fill="none" stroke="blue" stroke-width="4.026845637583893"/>
+<defs>
+                    <linearGradient id="TCRGRADlingrad13" spreadMethod="pad" x1="0.0%" x2="100.0%" y1="0.0%" y2="0.0%">
+                                    <stop offset="0.0%" stop-color="blue" stop-opacity="1"/><stop offset="25.0%" stop-color="blue" stop-opacity="1"/><stop offset="75.0%" stop-color="black" stop-opacity="1"/><stop offset="100.0%" stop-color="black" stop-opacity="1"/>
+                    </linearGradient>
+            </defs>
+<path d="M 100 492.6174496644296 C 200 492.6174496644296, 400.0 685.9060402684564, 500.0 685.9060402684564" fill="none" stroke="url(#TCRGRADlingrad13)" stroke-width="4.026845637583893"/>
+<path d="M 500.0 685.9060402684564 L 550.0 685.9060402684564" fill="none" stroke="black" stroke-width="4.026845637583893"/>
+<path d="M 50.0 516.778523489933 L 100 516.778523489933" fill="none" stroke="cyan" stroke-width="44.29530201342283"/>
+<defs>
+                    <linearGradient id="TCRGRADlingrad14" spreadMethod="pad" x1="0.0%" x2="100.0%" y1="0.0%" y2="0.0%">
+                                    <stop offset="0.0%" stop-color="cyan" stop-opacity="1"/><stop offset="25.0%" stop-color="cyan" stop-opacity="1"/><stop offset="75.0%" stop-color="red" stop-opacity="1"/><stop offset="100.0%" stop-color="red" stop-opacity="1"/>
+                    </linearGradient>
+            </defs>
+<path d="M 100 516.778523489933 C 200 516.778523489933, 400.0 291.2751677852349, 500.0 291.2751677852349" fill="none" stroke="url(#TCRGRADlingrad14)" stroke-width="44.29530201342283"/>
+<path d="M 500.0 291.2751677852349 L 550.0 291.2751677852349" fill="none" stroke="red" stroke-width="44.29530201342283"/>
+<path d="M 50.0 540.9395973154363 L 100 540.9395973154363" fill="none" stroke="cyan" stroke-width="4.026845637583893"/>
+<defs>
+                    <linearGradient id="TCRGRADlingrad15" spreadMethod="pad" x1="0.0%" x2="100.0%" y1="0.0%" y2="0.0%">
+                                    <stop offset="0.0%" stop-color="cyan" stop-opacity="1"/><stop offset="25.0%" stop-color="cyan" stop-opacity="1"/><stop offset="75.0%" stop-color="green" stop-opacity="1"/><stop offset="100.0%" stop-color="green" stop-opacity="1"/>
+                    </linearGradient>
+            </defs>
+<path d="M 100 540.9395973154363 C 200 540.9395973154363, 400.0 424.16107382550337, 500.0 424.16107382550337" fill="none" stroke="url(#TCRGRADlingrad15)" stroke-width="4.026845637583893"/>
+<path d="M 500.0 424.16107382550337 L 550.0 424.16107382550337" fill="none" stroke="green" stroke-width="4.026845637583893"/>
+<path d="M 50.0 546.9798657718121 L 100 546.9798657718121 M 100 546.9798657718121 C 200 546.9798657718121, 400.0 551.006711409396, 500.0 551.006711409396" fill="none" stroke="cyan" stroke-width="8.053691275167786"/>
+<path d="M 500.0 551.006711409396 L 550.0 551.006711409396" fill="none" stroke="cyan" stroke-width="8.053691275167786"/>
+<path d="M 50.0 557.046979865772 L 100 557.046979865772" fill="none" stroke="cyan" stroke-width="12.080536912751679"/>
+<defs>
+                    <linearGradient id="TCRGRADlingrad16" spreadMethod="pad" x1="0.0%" x2="100.0%" y1="0.0%" y2="0.0%">
+                                    <stop offset="0.0%" stop-color="cyan" stop-opacity="1"/><stop offset="25.0%" stop-color="cyan" stop-opacity="1"/><stop offset="75.0%" stop-color="black" stop-opacity="1"/><stop offset="100.0%" stop-color="black" stop-opacity="1"/>
+                    </linearGradient>
+            </defs>
+<path d="M 100 557.046979865772 C 200 557.046979865772, 400.0 693.9597315436242, 500.0 693.9597315436242" fill="none" stroke="url(#TCRGRADlingrad16)" stroke-width="12.080536912751679"/>
+<path d="M 500.0 693.9597315436242 L 550.0 693.9597315436242" fill="none" stroke="black" stroke-width="12.080536912751679"/>
+<path d="M 50.0 567.1140939597316 L 100 567.1140939597316" fill="none" stroke="magenta" stroke-width="8.053691275167786"/>
+<defs>
+                    <linearGradient id="TCRGRADlingrad17" spreadMethod="pad" x1="0.0%" x2="100.0%" y1="0.0%" y2="0.0%">
+                                    <stop offset="0.0%" stop-color="magenta" stop-opacity="1"/><stop offset="25.0%" stop-color="magenta" stop-opacity="1"/><stop offset="75.0%" stop-color="red" stop-opacity="1"/><stop offset="100.0%" stop-color="red" stop-opacity="1"/>
+                    </linearGradient>
+            </defs>
+<path d="M 100 567.1140939597316 C 200 567.1140939597316, 400.0 317.44966442953023, 500.0 317.44966442953023" fill="none" stroke="url(#TCRGRADlingrad17)" stroke-width="8.053691275167786"/>
+<path d="M 500.0 317.44966442953023 L 550.0 317.44966442953023" fill="none" stroke="red" stroke-width="8.053691275167786"/>
+<path d="M 50.0 573.1543624161075 L 100 573.1543624161075" fill="none" stroke="magenta" stroke-width="4.026845637583893"/>
+<defs>
+                    <linearGradient id="TCRGRADlingrad18" spreadMethod="pad" x1="0.0%" x2="100.0%" y1="0.0%" y2="0.0%">
+                                    <stop offset="0.0%" stop-color="magenta" stop-opacity="1"/><stop offset="25.0%" stop-color="magenta" stop-opacity="1"/><stop offset="75.0%" stop-color="green" stop-opacity="1"/><stop offset="100.0%" stop-color="green" stop-opacity="1"/>
+                    </linearGradient>
+            </defs>
+<path d="M 100 573.1543624161075 C 200 573.1543624161075, 400.0 428.18791946308727, 500.0 428.18791946308727" fill="none" stroke="url(#TCRGRADlingrad18)" stroke-width="4.026845637583893"/>
+<path d="M 500.0 428.18791946308727 L 550.0 428.18791946308727" fill="none" stroke="green" stroke-width="4.026845637583893"/>
+<path d="M 50.0 577.1812080536913 L 100 577.1812080536913" fill="none" stroke="magenta" stroke-width="4.026845637583893"/>
+<defs>
+                    <linearGradient id="TCRGRADlingrad19" spreadMethod="pad" x1="0.0%" x2="100.0%" y1="0.0%" y2="0.0%">
+                                    <stop offset="0.0%" stop-color="magenta" stop-opacity="1"/><stop offset="25.0%" stop-color="magenta" stop-opacity="1"/><stop offset="75.0%" stop-color="blue" stop-opacity="1"/><stop offset="100.0%" stop-color="blue" stop-opacity="1"/>
+                    </linearGradient>
+            </defs>
+<path d="M 100 577.1812080536913 C 200 577.1812080536913, 400.0 524.8322147651006, 500.0 524.8322147651006" fill="none" stroke="url(#TCRGRADlingrad19)" stroke-width="4.026845637583893"/>
+<path d="M 500.0 524.8322147651006 L 550.0 524.8322147651006" fill="none" stroke="blue" stroke-width="4.026845637583893"/>
+<path d="M 50.0 599.3288590604027 L 100 599.3288590604027" fill="none" stroke="magenta" stroke-width="40.26845637583893"/>
+<defs>
+                    <linearGradient id="TCRGRADlingrad20" spreadMethod="pad" x1="0.0%" x2="100.0%" y1="0.0%" y2="0.0%">
+                                    <stop offset="0.0%" stop-color="magenta" stop-opacity="1"/><stop offset="25.0%" stop-color="magenta" stop-opacity="1"/><stop offset="75.0%" stop-color="cyan" stop-opacity="1"/><stop offset="100.0%" stop-color="cyan" stop-opacity="1"/>
+                    </linearGradient>
+            </defs>
+<path d="M 100 599.3288590604027 C 200 599.3288590604027, 400.0 575.1677852348993, 500.0 575.1677852348993" fill="none" stroke="url(#TCRGRADlingrad20)" stroke-width="40.26845637583893"/>
+<path d="M 500.0 575.1677852348993 L 550.0 575.1677852348993" fill="none" stroke="cyan" stroke-width="40.26845637583893"/>
+<path d="M 50.0 621.4765100671141 L 100 621.4765100671141 M 100 621.4765100671141 C 200 621.4765100671141, 400.0 629.5302013422819, 500.0 629.5302013422819" fill="none" stroke="magenta" stroke-width="4.026845637583893"/>
+<path d="M 500.0 629.5302013422819 L 550.0 629.5302013422819" fill="none" stroke="magenta" stroke-width="4.026845637583893"/>
+<path d="M 50.0 627.5167785234898 L 100 627.5167785234898" fill="none" stroke="black" stroke-width="8.053691275167786"/>
+<defs>
+                    <linearGradient id="TCRGRADlingrad21" spreadMethod="pad" x1="0.0%" x2="100.0%" y1="0.0%" y2="0.0%">
+                                    <stop offset="0.0%" stop-color="black" stop-opacity="1"/><stop offset="25.0%" stop-color="black" stop-opacity="1"/><stop offset="75.0%" stop-color="red" stop-opacity="1"/><stop offset="100.0%" stop-color="red" stop-opacity="1"/>
+                    </linearGradient>
+            </defs>
+<path d="M 100 627.5167785234898 C 200 627.5167785234898, 400.0 325.503355704698, 500.0 325.503355704698" fill="none" stroke="url(#TCRGRADlingrad21)" stroke-width="8.053691275167786"/>
+<path d="M 500.0 325.503355704698 L 550.0 325.503355704698" fill="none" stroke="red" stroke-width="8.053691275167786"/>
+<path d="M 50.0 633.5570469798657 L 100 633.5570469798657" fill="none" stroke="black" stroke-width="4.026845637583893"/>
+<defs>
+                    <linearGradient id="TCRGRADlingrad22" spreadMethod="pad" x1="0.0%" x2="100.0%" y1="0.0%" y2="0.0%">
+                                    <stop offset="0.0%" stop-color="black" stop-opacity="1"/><stop offset="25.0%" stop-color="black" stop-opacity="1"/><stop offset="75.0%" stop-color="cyan" stop-opacity="1"/><stop offset="100.0%" stop-color="cyan" stop-opacity="1"/>
+                    </linearGradient>
+            </defs>
+<path d="M 100 633.5570469798657 C 200 633.5570469798657, 400.0 597.3154362416108, 500.0 597.3154362416108" fill="none" stroke="url(#TCRGRADlingrad22)" stroke-width="4.026845637583893"/>
+<path d="M 500.0 597.3154362416108 L 550.0 597.3154362416108" fill="none" stroke="cyan" stroke-width="4.026845637583893"/>
+<path d="M 50.0 657.718120805369 L 100 657.718120805369" fill="none" stroke="black" stroke-width="44.29530201342283"/>
+<defs>
+                    <linearGradient id="TCRGRADlingrad23" spreadMethod="pad" x1="0.0%" x2="100.0%" y1="0.0%" y2="0.0%">
+                                    <stop offset="0.0%" stop-color="black" stop-opacity="1"/><stop offset="25.0%" stop-color="black" stop-opacity="1"/><stop offset="75.0%" stop-color="magenta" stop-opacity="1"/><stop offset="100.0%" stop-color="magenta" stop-opacity="1"/>
+                    </linearGradient>
+            </defs>
+<path d="M 100 657.718120805369 C 200 657.718120805369, 400.0 653.6912751677852, 500.0 653.6912751677852" fill="none" stroke="url(#TCRGRADlingrad23)" stroke-width="44.29530201342283"/>
+<path d="M 500.0 653.6912751677852 L 550.0 653.6912751677852" fill="none" stroke="magenta" stroke-width="44.29530201342283"/>
+<path d="M 50.0 681.8791946308725 L 100 681.8791946308725" fill="none" stroke="lime" stroke-width="4.026845637583893"/>
+<defs>
+                    <linearGradient id="TCRGRADlingrad24" spreadMethod="pad" x1="0.0%" x2="100.0%" y1="0.0%" y2="0.0%">
+                                    <stop offset="0.0%" stop-color="lime" stop-opacity="1"/><stop offset="25.0%" stop-color="lime" stop-opacity="1"/><stop offset="75.0%" stop-color="red" stop-opacity="1"/><stop offset="100.0%" stop-color="red" stop-opacity="1"/>
+                    </linearGradient>
+            </defs>
+<path d="M 100 681.8791946308725 C 200 681.8791946308725, 400.0 331.5436241610738, 500.0 331.5436241610738" fill="none" stroke="url(#TCRGRADlingrad24)" stroke-width="4.026845637583893"/>
+<path d="M 500.0 331.5436241610738 L 550.0 331.5436241610738" fill="none" stroke="red" stroke-width="4.026845637583893"/>
+<path d="M 50.0 685.9060402684563 L 100 685.9060402684563" fill="none" stroke="lime" stroke-width="4.026845637583893"/>
+<defs>
+                    <linearGradient id="TCRGRADlingrad25" spreadMethod="pad" x1="0.0%" x2="100.0%" y1="0.0%" y2="0.0%">
+                                    <stop offset="0.0%" stop-color="lime" stop-opacity="1"/><stop offset="25.0%" stop-color="lime" stop-opacity="1"/><stop offset="75.0%" stop-color="green" stop-opacity="1"/><stop offset="100.0%" stop-color="green" stop-opacity="1"/>
+                    </linearGradient>
+            </defs>
+<path d="M 100 685.9060402684563 C 200 685.9060402684563, 400.0 432.2147651006711, 500.0 432.2147651006711" fill="none" stroke="url(#TCRGRADlingrad25)" stroke-width="4.026845637583893"/>
+<path d="M 500.0 432.2147651006711 L 550.0 432.2147651006711" fill="none" stroke="green" stroke-width="4.026845637583893"/>
+<path d="M 50.0 689.9328859060402 L 100 689.9328859060402" fill="none" stroke="lime" stroke-width="4.026845637583893"/>
+<defs>
+                    <linearGradient id="TCRGRADlingrad26" spreadMethod="pad" x1="0.0%" x2="100.0%" y1="0.0%" y2="0.0%">
+                                    <stop offset="0.0%" stop-color="lime" stop-opacity="1"/><stop offset="25.0%" stop-color="lime" stop-opacity="1"/><stop offset="75.0%" stop-color="blue" stop-opacity="1"/><stop offset="100.0%" stop-color="blue" stop-opacity="1"/>
+                    </linearGradient>
+            </defs>
+<path d="M 100 689.9328859060402 C 200 689.9328859060402, 400.0 528.8590604026846, 500.0 528.8590604026846" fill="none" stroke="url(#TCRGRADlingrad26)" stroke-width="4.026845637583893"/>
+<path d="M 500.0 528.8590604026846 L 550.0 528.8590604026846" fill="none" stroke="blue" stroke-width="4.026845637583893"/>
+<path d="M 50.0 695.9731543624159 L 100 695.9731543624159" fill="none" stroke="lime" stroke-width="8.053691275167786"/>
+<defs>
+                    <linearGradient id="TCRGRADlingrad27" spreadMethod="pad" x1="0.0%" x2="100.0%" y1="0.0%" y2="0.0%">
+                                    <stop offset="0.0%" stop-color="lime" stop-opacity="1"/><stop offset="25.0%" stop-color="lime" stop-opacity="1"/><stop offset="75.0%" stop-color="cyan" stop-opacity="1"/><stop offset="100.0%" stop-color="cyan" stop-opacity="1"/>
+                    </linearGradient>
+            </defs>
+<path d="M 100 695.9731543624159 C 200 695.9731543624159, 400.0 603.3557046979865, 500.0 603.3557046979865" fill="none" stroke="url(#TCRGRADlingrad27)" stroke-width="8.053691275167786"/>
+<path d="M 500.0 603.3557046979865 L 550.0 603.3557046979865" fill="none" stroke="cyan" stroke-width="8.053691275167786"/>
+<text fill="black" font-family="sans-serif" font-size="20" font-weight="normal" x="52.000" xml:space="preserve" y="186.023">TRAV89</text>
+
+<text fill="black" font-family="sans-serif" font-size="20" font-weight="normal" x="52.000" xml:space="preserve" y="335.017">TRAV14</text>
+
+<text fill="black" font-family="sans-serif" font-size="20" font-weight="normal" x="52.000" xml:space="preserve" y="453.809">TRAV12</text>
+
+<text fill="black" font-family="sans-serif" font-size="20" font-weight="normal" x="52.000" xml:space="preserve" y="536.359">TRAV23</text>
+
+<text fill="black" font-family="sans-serif" font-size="20" font-weight="normal" x="52.000" xml:space="preserve" y="600.789">TRAV11</text>
+
+<text fill="white" font-family="sans-serif" font-size="20" font-weight="normal" x="52.000" xml:space="preserve" y="659.178">TRAV3</text>
+
+<text fill="black" font-family="sans-serif" font-size="20" font-weight="normal" x="52.000" xml:space="preserve" y="697.433">TRAV6</text>
+
+<text fill="black" font-family="sans-serif" font-size="20" font-weight="normal" x="484.000" xml:space="preserve" y="224.279">TRAJ2</text>
+
+<text fill="black" font-family="sans-serif" font-size="20" font-weight="normal" x="484.000" xml:space="preserve" y="391.393">TRAJ5</text>
+
+<text fill="black" font-family="sans-serif" font-size="20" font-weight="normal" x="470.800" xml:space="preserve" y="490.050">TRAJ13</text>
+
+<text fill="black" font-family="sans-serif" font-size="20" font-weight="normal" x="484.000" xml:space="preserve" y="576.628">TRAJ3</text>
+
+<text fill="black" font-family="sans-serif" font-size="20" font-weight="normal" x="470.800" xml:space="preserve" y="649.111">TRAJ21</text>
+
+<text fill="white" font-family="sans-serif" font-size="20" font-weight="normal" x="484.000" xml:space="preserve" y="695.419">TRAJ4</text>
+
+</svg>

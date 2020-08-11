@@ -1,18 +1,9 @@
 .. _tcrdistances:
 
-.. toctree::
-   :maxdepth: 3
-   :caption: Contents:
-
 TCR Distances
 =============
 
-**tcrdist3 provides flexible distance measures for comparing T cell receptors across complementarity determining regions (CDRs)**
-
 The following short examples use data `dash.csv <https://raw.githubusercontent.com/kmayerb/tcrdist2/API2/tcrdist/test_files_compact/dash.csv>`_ (375KB). 
-
-Examples
-++++++++
 
 I am happy to use the defaults
 ------------------------------

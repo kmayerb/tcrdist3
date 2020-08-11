@@ -8,7 +8,7 @@ Data
 
 The tcrdist3 standard input is a Pandas DataFrame.
 
-The header and first line of a typical input for beta-chain analysis would look like this:
+The header and first line of a typical input for a beta-chain analysis would look like this:
 
 +------------+------------+------------+------------+------------+----------------------+-----------------------------------------------------------+
 | subject    | epitope    | count      | v_b_gene   | j_b_gene   | cdr3_b_aa            | cdr3_b_nucseq                                             |
