@@ -17,7 +17,7 @@ opts = dict(name='tcrdist3',
             license='MIT',
             author='Koshlan Mayer-Blackwell',
             author_email='kmayerbl@fredhutch.org',
-            version='0.1.0',
+            version='0.1.3',
             packages=PACKAGES,
             package_data={"": ["*.csv","*.tsv"]},
            )
@@ -27,8 +27,9 @@ install_reqs = [
       'numpy>=1.16.4',
       'parasail>=1.1.17',
       'scipy>=1.4.1',
-      'pwseqdist>=0.2',
+      'pwseqdist>=0.2.1',
       'numba',
+      'zipdist>=0.1.5',
       'fishersapi']
 
 if __name__ == "__main__":
