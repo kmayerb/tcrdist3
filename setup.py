@@ -28,7 +28,8 @@ install_reqs = [
       'parasail>=1.1.17',
       'scipy>=1.4.1',
       'pwseqdist>=0.2',
-      'numba']
+      'numba',
+      'fishersapi']
 
 if __name__ == "__main__":
       setup(**opts, install_requires=install_reqs)

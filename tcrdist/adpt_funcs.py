@@ -1,4 +1,5 @@
 import logging
+from collections import Counter
 import os
 import pandas as pd
 import numpy as np
@@ -12,12 +13,127 @@ from scipy.spatial.distance import squareform
 from tcrdist.repertoire import TCRrep
 from tcrdist.swap_gene_name import adaptive_to_imgt
 
-
-__all__ = [ 'ispublic',
+__all__ = [ 'import_adaptive',
+            'ispublic',
             'simple_cluster_index',
             'cluster_index_to_df',
             'get_centroid_seq',
             'default_tcrdist_and_image']
+
+
+def import_adaptive_file(   adaptive_filename, 
+                            organism = "human", 
+                            chain = "beta",
+                            return_valid_cdr3_only = True, 
+                            count = 'productive_frequency',
+                            version_year= 2020,
+                            sep = "\t",
+                            subject = None,
+                            epitope = None,
+                            log = True, 
+                            swap_imgt_dictionary = None,
+                            additional_cols = None):
+    """
+    Prepare tcrdist3 input from 2020 Adaptive File containing 'bio_identity', 'productive_frequency', 'templates', and 'rearrangement'.
+
+    Parameters 
+    ----------
+    adaptive_filename : str
+        path to the Adaptive filename 
+    version : int
+        version_year
+    epitope : str or None
+        name of epitope if known
+    subject : str or None
+        If none the filename will be used as the subject
+    use_as_count : str
+        name of column to be used as count (could be 'productive_frequency' or 'templates')
+    sep : str
+        seperatore in Adaptive file
+    organism : str
+        'human' or 'mouse'
+    chain : str
+        'beta' or 'alpha'
+    log : bool
+        If True, write a log.
+    swap_imgt_dictionary : dict or None
+        If None, the default dictionary adaptive_to_imgt is used
+    additional_cols : None or List
+        list of any additional columns you want to keep
+    
+    Returns 
+    -------
+    bulk_df : pd.DataFrame
+    """
+    try:
+        bulk_df = pd.read_csv(adaptive_filename, sep= sep, usecols = ['bio_identity', 'productive_frequency', 'templates', 'rearrangement'])
+    except ValueError as e:
+        raise Exception('Bulk Adpative TCR file was missing required columns') from e
+
+
+    if swap_imgt_dictionary is None:
+        swap_imgt_dictionary = adaptive_to_imgt
+
+    if log: logging.basicConfig(filename='prepbulk.log',level=logging.DEBUG, format='tcrdist3:%(asctime)s\n\t %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+
+    item_names = {'alpha': ["cdr3_b_aa","v_a_gene", "j_a_gene","cdr3_b_nucseq"], 
+                  'beta' : ["cdr3_b_aa","v_b_gene","j_b_gene","cdr3_b_nucseq"]}[chain]
+
+    # Coerce strings to numeric
+    bulk_df['productive_frequency'] = pd.to_numeric(bulk_df['productive_frequency'],errors='coerce')
+
+    # Parse bio-identity
+    ns= {0:"cdr3_aa", 1:"v_gene", 2:"j_gene"}
+    cdr_v_j = bulk_df['bio_identity'].str.split("+", expand = True).\
+        rename(columns = lambda x: ns[x])
+    bulk_df[[item_names[0], 'v_gene', 'j_gene']] = cdr_v_j
+
+    # Convert Names from Adapative to IMGT
+    bulk_df[item_names[1]] = bulk_df['v_gene'].apply(lambda x : swap_imgt_dictionary[organism].get(x))
+    bulk_df[item_names[2]] = bulk_df['j_gene'].apply(lambda x : swap_imgt_dictionary[organism].get(x))
+    # Record Invalid Names
+    invalid_v_names =  Counter(bulk_df['v_gene'][  bulk_df[item_names[1]].isna() ].to_list())
+    invalid_j_names =  Counter(bulk_df['j_gene'][  bulk_df[item_names[2]].isna() ].to_list())
+
+     # Validate CDR sequences
+    bulk_df['valid_cdr3'] = bulk_df[item_names[0]].apply(lambda cdr3: _valid_cdr3(cdr3)) 
+    # Count number of valid seqs
+    valid = np.sum(bulk_df['valid_cdr3'])
+    
+    # Assign subject baesd on the < subject > argument 
+    if subject is None:
+        bulk_df['subject'] = adaptive_filename
+    else: 
+        bulk_df['subject'] = subject
+
+    # Assign a user supplied or blank epitope baesd on the < epitope > argument 
+    if epitope is None:
+        bulk_df['epitope'] = 'X' 
+    else: 
+        bulk_df['epitope'] = epitope
+
+    if additional_cols is None:
+        bulk_df = bulk_df[['subject','productive_frequency', 'templates','epitope',item_names[0],item_names[1],item_names[2],'valid_cdr3','rearrangement']].copy()
+        bulk_df = bulk_df.rename(columns = {'rearrangement':item_names[3]})
+    else:
+        selections = ['subject','productive_frequency', 'templates','epitope',item_names[0],item_names[1],item_names[2],'valid_cdr3','rearrangement'] + additional_cols
+        bulk_df = bulk_df[selections].copy()
+        bulk_df = bulk_df.rename(columns = {'rearrangement':item_names[3]})
+
+    # Logging
+    if return_valid_cdr3_only:
+        bulk_df = bulk_df[bulk_df['valid_cdr3']]
+        if log: logging.info(f"VALID CDR3 ({valid }) / ({bulk_df.shape[0]}) CLONES")
+        if log: logging.info(f"OMITTING INVALID CDR3s FROM FINAL RESULTS")
+        if log: logging.info(bulk_df[bulk_df.valid_cdr3 == False][['subject', "cdr3_b_aa"]])
+        if log: logging.info(f"Final Reults has Column Names {bulk_df.columns}")
+        if log: logging.info(f"Invalid ADAPTIVE V-gene names {invalid_v_names} not included\n")
+        if log: logging.info(f"Invalid ADAPTIVE J-gene names {invalid_j_names} not included\n")
+    
+    # Assign count the productive_frequency based on the < use_as_count > argument
+    bulk_df['count'] = bulk_df[count].copy()
+
+    return bulk_df
 
 
 def _valid_cdr3(cdr3):
@@ -154,7 +270,6 @@ def get_centroid_seq(df):
     if len(seqs) < 3:
         return df.head(1)['cdr3_b_aa'], None, None, None
 
-
     metrics = {
             "cdr3_b_aa" : pw.metrics.nb_vector_tcrdist,
             "pmhc_b_aa" : pw.metrics.nb_vector_tcrdist,
@@ -279,8 +394,10 @@ def bulk_adaptive_dataset_to_tcrdist3_clone_df( bulk_filename = None,
     
     return tr.clone_df.copy()
 
-def default_dist_clust_centroids(infile):
+def default_dist_clust_centroids(infile, cpus = 1, cdr3_b_aa_weight = 5, max_dist = 200):
+    
     from tcrdist.repertoire import TCRrep
+    
     print(infile)
     
     df = pd.read_csv(infile)
@@ -292,35 +409,38 @@ def default_dist_clust_centroids(infile):
                 compute_distances = False,
                 infer_index_cols = True,
                 deduplicate=False,
-                cpus = 1,
+                cpus = cpus,
+                store_all_cdr=False,
                 db_file = 'alphabeta_gammadelta_db.tsv')
-    tr.weights_b['cdr3_b_aa'] = 5
-
-    icols = [
-        'cell_type',
-        'subject',
-        'v_b_gene',
-        'j_b_gene',
-        'cdr3_b_aa',
-        'cdr3_b_nucseq',
-        'cdr1_b_aa',
-        'cdr2_b_aa',
-        'pmhc_b_aa']
-
-    tr.index_cols = icols
-    tr.deduplicate()
-    tr.compute_distances()
-    ci = simple_cluster_index(tr.pw_beta, t = 200)
-    ci_df = cluster_index_to_df(cluster_index = ci)
     
+    # Overweight CDR3B
+    tr.weights_b['cdr3_b_aa'] = cdr3_b_aa_weight 
 
+    icols = ['cell_type','subject','v_b_gene','j_b_gene','cdr3_b_aa','cdr3_b_nucseq','cdr1_b_aa','cdr2_b_aa','pmhc_b_aa']
+    # Manually assign index cols    
+    tr.index_cols = icols
+    # Deduplicate
+    tr.deduplicate()
+    # Compute Distances
+    tr.compute_distances()
+    
+    
+    # Cluster based on the max_dist
+    ci = simple_cluster_index(tr.pw_beta, t = max_dist)
+
+    # Get a DataFrame for clusters (It is returned largest to smallest)
+    ci_df = cluster_index_to_df(cluster_index = ci)  
+
+    # Determine degree of public sharing in each cluster
     publicities = list()
     for i,r in ci_df.iterrows():
         clone_cluster_df = tr.clone_df.iloc[r['neighbors'],]
         publicity,n_subjects = ispublic(clone_cluster_df)
         publicities.append((publicity,n_subjects))
+    # Store public status in a DataFrame
     public_df = pd.DataFrame(publicities).rename(columns = {0:'public',1:'n_subjects'})
 
+    # Iterate through the ci_df DataFrame
     counter = 0
     centroids = list()
     cluster_df_list = list()
@@ -330,7 +450,6 @@ def default_dist_clust_centroids(infile):
         clone_cluster_df = tr.clone_df.iloc[r['neighbors'],]
         cluster_df_list.append(clone_cluster_df )
         publicity = ispublic(clone_cluster_df)
-        #centroid, dmatrix, iloc_ind, loc_ind = get_centroid_seq(df = tr.clone_df.iloc[r['neighbors'],]) ##get_centroid_seq(seqs = clone_cluster_df['cdr3_b_aa'].values)
         try:
             centroid, dmatrix, iloc_ind, loc_ind, = get_centroid_seq(df = tr.clone_df.iloc[r['neighbors'],])
             #print(centroid)
@@ -351,63 +470,69 @@ def default_dist_clust_centroids(infile):
             centroids.append( clone_cluster_df.iloc[iloc_ind,].reset_index(drop=True).copy())
         except:
             centroids.append( clone_cluster_df.iloc[0,].reset_index(drop=True).copy())
-        #if counter > 10: break
 
+    # Save the Information in a centroids_df
 
-        # renames --- {0: 'cell_type', 1: 'subject', 2: 'v_b_gene', 3: 'j_b_gene', 4: 'cdr3_b_aa', 5: 'cdr3_b_nucs, 6: 'cdr1_b_aa', 7: 'cdr2_b_aa', 8: 'pmhc_b_aa', 9: 'count', 10: 'clone_id'}
+    # renames --- {0: 'cell_type', 1: 'subject', 2: 'v_b_gene', 3: 'j_b_gene', 4: 'cdr3_b_aa', 5: 'cdr3_b_nucs, 6: 'cdr1_b_aa', 7: 'cdr2_b_aa', 8: 'pmhc_b_aa', 9: 'count', 10: 'clone_id'}
     renames = {i:v for i,v in enumerate(tr.clone_df.columns.to_list())}
     centroids_df = pd.DataFrame(centroids).rename(columns = renames)
     centroids_df['neighbors']     = ci_df['neighbors'].to_list()
     centroids_df['K_neighbors']   = ci_df['K_neighbors'].to_list()
-    centroids_df['cluster_id'] = ci_df['cluster_id'].to_list()
-    centroids_df['public'] = public_df['public'].to_list()
-    centroids_df['n_subjects'] = public_df['n_subjects'].to_list()
-    centroids_df['size_order'] = list(range(0,centroids_df.shape[0]))
+    centroids_df['cluster_id']    = ci_df['cluster_id'].to_list()
+    centroids_df['public']        = public_df['public'].to_list()
+    centroids_df['n_subjects']    = public_df['n_subjects'].to_list()
+    centroids_df['size_order']    = list(range(0,centroids_df.shape[0]))
     
     tr.centroids_df = centroids_df.copy()
-    #return centroids_df, cluster_df_list, tr.clone_df.copy()
     return tr
+
+
+def get_basic_centroids(tr, max_dist = 200):
+
+    # Cluster based on the max_dist
+    ci = simple_cluster_index(tr.pw_beta, t = max_dist)
+
+    # Get a DataFrame for clusters (It is returned largest to smallest)
+    ci_df = cluster_index_to_df(cluster_index = ci)  
+
+    # Determine degree of public sharing in each cluster
+    publicities = list()
+    for i,r in ci_df.iterrows():
+        clone_cluster_df = tr.clone_df.iloc[r['neighbors'],]
+        publicity,n_subjects = ispublic(clone_cluster_df)
+        publicities.append((publicity,n_subjects))
+    # Store public status in a DataFrame
+    public_df = pd.DataFrame(publicities).rename(columns = {0:'public',1:'n_subjects'})
+
+    # Iterate through the ci_df DataFrame
+    counter = 0
+    centroids = list()
+    cluster_df_list = list()
+    for i,r in ci_df.iterrows():
+        counter = counter + 1
+        print(r['neighbors'])
+        clone_cluster_df = tr.clone_df.iloc[r['neighbors'],]
+        cluster_df_list.append(clone_cluster_df )
+        publicity = ispublic(clone_cluster_df)
+        try:
+            centroid, dmatrix, iloc_ind, loc_ind, = get_centroid_seq(df = tr.clone_df.iloc[r['neighbors'],])
+            assert clone_cluster_df.iloc[iloc_ind,]['cdr3_b_aa'] == centroid
+            assert tr.clone_df.iloc[loc_ind,]['cdr3_b_aa'] == centroid
+            centroids.append( clone_cluster_df.iloc[iloc_ind,].reset_index(drop=True).copy())
+        except:
+            centroids.append( clone_cluster_df.iloc[0,].reset_index(drop=True).copy())
+
+    # Save the Information in a centroids_df
+
+    # renames --- {0: 'cell_type', 1: 'subject', 2: 'v_b_gene', 3: 'j_b_gene', 4: 'cdr3_b_aa', 5: 'cdr3_b_nucs, 6: 'cdr1_b_aa', 7: 'cdr2_b_aa', 8: 'pmhc_b_aa', 9: 'count', 10: 'clone_id'}
+    renames = {i:v for i,v in enumerate(tr.clone_df.columns.to_list())}
+    centroids_df = pd.DataFrame(centroids).rename(columns = renames)
+    centroids_df['neighbors']     = ci_df['neighbors'].to_list()
+    centroids_df['K_neighbors']   = ci_df['K_neighbors'].to_list()
+    centroids_df['cluster_id']    = ci_df['cluster_id'].to_list()
+    centroids_df['public']        = public_df['public'].to_list()
+    centroids_df['n_subjects']    = public_df['n_subjects'].to_list()
+    centroids_df['size_order']    = list(range(0,centroids_df.shape[0]))
     
-
-# def default_tcrdist_and_image(infile):
-#     from tcrdist.repertoire import TCRrep
-#     print(infile)
-    
-#     df = pd.read_csv(infile)
-#     df['count'] = 1
-
-#     tr = TCRrep(cell_df = df, 
-#                 organism = 'human', 
-#                 chains = ['beta'], 
-#                 compute_distances = False,
-#                 infer_index_cols = True,
-#                 deduplicate=False,
-#                 cpus = 1,
-#                 db_file = 'alphabeta_gammadelta_db.tsv')
-
-#     icols = [
-#         'cell_type',
-#         'subject',
-#         'v_b_gene',
-#         'j_b_gene',
-#         'cdr3_b_aa',
-#         'cdr3_b_nucseq',
-#         'cdr1_b_aa',
-#         'cdr2_b_aa',
-#         'pmhc_b_aa']
-
-#     tr.index_cols = icols
-#     #tr.show_incomplete()
-#     #tr.show_incomplete().v_b_gene.value_counts()
-#     tr.deduplicate()
-#     tr.compute_distances()
-
-#     pd.DataFrame(tr.pw_beta).to_csv("tmp.csv", index = False)
-#     fn = os.path.basename(infile)
-#     png_fn = fn.replace("csv","png")
-#     cmd = f"Rscript R_matrix_to_image.R tmp.csv pw_beta_{png_fn}"
-#     print(cmd)
-#     os.system(cmd)
-
-
-#### END IMAGE MAKING ####
+    tr.centroids_df = centroids_df.copy()
+    return tr
