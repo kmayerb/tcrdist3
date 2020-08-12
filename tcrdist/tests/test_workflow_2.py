@@ -30,3 +30,27 @@ def test_workflow_2():
     tr = get_basic_centroids(tr, max_dist = 200)
     
     tr.centroids_df
+    
+    tr.clone_df['covid'] = ['healthy' if x.find("Healthy") != -1 else "covid" for x in tr.clone_df.cohort]
+    
+    from tcrdist.rep_diff import neighborhood_diff, hcluster_diff, member_summ
+    import hierdiff
+    #tr.clone_df['covid'] = ['healthy' if x.find("Healthy") != -1 else "covid" for x in tr.clone_df.cohort]
+    #nd = neighborhood_diff(tr.clone_df, tr.pw_beta, x_cols = ['covid'], count_col = 'count')
+
+    tr.clone_df['covid'] = ['healthy' if x.find("Healthy") != -1 else "covid" for x in tr.clone_df.cohort]
+    res, Z= hcluster_diff(tr.clone_df, tr.pw_beta, x_cols = ['covid'], count_col = 'count')
+    
+    res_summary = member_summ(res_df = res, clone_df = tr.clone_df, addl_cols=['cohort','subject'])
+    
+    res_detailed = pd.concat([res, res_summary], axis = 1)
+    
+    html = hierdiff.plot_hclust_props(Z,
+                title='PA Epitope Example',
+                res=res_detailed,
+                tooltip_cols=['cdr3_b_aa','v_b_gene', 'j_b_gene','cohort','subject'],
+                alpha=0.05, 
+                alpha_col='pvalue')
+    
+    with open('hierdiff_example.html', 'w') as fh:
+        fh.write(html)
