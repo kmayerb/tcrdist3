@@ -30,7 +30,8 @@ install_reqs = [
       'pwseqdist>=0.2.1',
       'numba',
       'zipdist>=0.1.5',
-      'fishersapi']
+      'fishersapi',
+      'hierdiff>=0.4']
 
 if __name__ == "__main__":
       setup(**opts, install_requires=install_reqs)
