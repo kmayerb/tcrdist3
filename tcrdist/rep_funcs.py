@@ -92,7 +92,7 @@ def _pws(df, metrics, weights, kargs, df2 = None, cpu = 1, uniquify = True, stor
         if df2 is None:
             pw_mat = _pw(seqs1 = df[k].values, metric = metrics[k], ncpus = cpu, uniqify= uniquify, **kargs[k])
         else:
-            pw_mat = _pw(seqs1 = df[k].values, seqs2 = df2[k].values ,metric = metrics[k], ncpus = cpu, uniqify= uniquify, **kargs[k])
+            pw_mat = _pw(seqs1 = df[k].values, seqs2 = df2[k].values, metric = metrics[k], ncpus = cpu, uniqify= uniquify, **kargs[k])
             
         if store:
            s[k] = pw_mat 
