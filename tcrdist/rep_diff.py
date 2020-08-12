@@ -7,7 +7,7 @@ __all__ = ['neighborhood_diff',
            'hcluster_diff',
            'member_summ']
 
-def neighborhood_diff(clone_df, pwmat, x_cols, count_col='count', knn_neighbors=50, knn_radius=None, subset_ind=None, cluster_ind=None, test_method='fishers'):
+def neighborhood_diff(clone_df, pwmat, x_cols, count_col='count', knn_neighbors=None, knn_radius=None, subset_ind=None, cluster_ind=None, test_method='fishers'):
     """Tests for association of categorical variables in x_cols with the neighborhood
     around each TCR in clone_df. The neighborhood is defined by the K closest neighbors
     using pairwise distances in pwmat, or defined by a distance radius, knn_radius.
@@ -22,7 +22,7 @@ def neighborhood_diff(clone_df, pwmat, x_cols, count_col='count', knn_neighbors=
     Use test_method = None to return a table of counts for all neighborhoods that can be saved as
     a CSV and used to run other, more sophisticated tests (e.g. edgeR or other regressions).
 
-    Use Fisher's exact test (test='fishers') to detect enrichment/association of the neighborhood
+    Use Fisher's exact test (test_method='fishers') to detect enrichment/association of the neighborhood
     with one binary variable. For example, test the 2 x 2 table for each clone:
 
     +----+----+-------+--------+
@@ -51,7 +51,8 @@ def neighborhood_diff(clone_df, pwmat, x_cols, count_col='count', knn_neighbors=
     pwmat : np.ndarray [nclones x nclones]
         Square distance matrix for defining neighborhoods
     x_cols : list
-        List of columns to be tested for association with the neighborhood
+        List of columns to be tested for association with the neighborhood. 
+        (If test_method ='fishers' than x_cols must be length 1 and contain a binary variable)
     count_col : str
         Column in clone_df that specifies counts.
         Default none assumes count of 1 cell for each row.
@@ -60,10 +61,6 @@ def neighborhood_diff(clone_df, pwmat, x_cols, count_col='count', knn_neighbors=
     knn_radius : float
         Radius for inclusion of neighbors within the neighborhood.
         Specify K or R but not both.
-    subset_ind : None or np.ndarray with partial index of df, optional
-        Provides option to tally counts only within a subset of df, but to maintain the clustering
-        of all individuals. Allows for one clustering of pooled TCRs,
-        but tallying/testing within a subset (e.g. participants or conditions)
     cluster_ind : None or np.ndarray
         Indices into df specifying the neighborhoods for testing.
     test_method : str or None
@@ -80,7 +77,6 @@ def neighborhood_diff(clone_df, pwmat, x_cols, count_col='count', knn_neighbors=
                                   count_col=count_col,
                                   knn_neighbors=knn_neighbors,
                                   knn_radius=knn_radius,
-                                  subset_ind=subset_ind,
                                   cluster_ind=cluster_ind)
     if not test_method is None:
         res = hd.cluster_association_test(res, y_col='cmember', method=test_method)
@@ -168,7 +164,7 @@ def hcluster_diff(clone_df, pwmat, x_cols, Z=None, count_col='count', subset_ind
     return res, Z
 
 
-def member_summ(res_df, clone_df, count_col='count', addl_cols=[], addl_n=1):
+def member_summ(res_df, clone_df, key_col = 'neighbors_i', count_col='count', addl_cols=[], addl_n=1):
     """Return additional summary info about each result (row)) based on the members of the cluster.
 
     This is helpful for preparing strings to add to the tooltip in hierdiff.plot_hclust_props.
@@ -179,6 +175,8 @@ def member_summ(res_df, clone_df, count_col='count', addl_cols=[], addl_n=1):
         Returned from neighborhood_diff or hcluster_diff
     clone_df : pd.DataFrame [nclones x metadata]
         Contains metadata for each clone.
+    key_col : str
+        Column in res_df that specifies the iloc of members in the clone_df
     count_col : str
         Column in clone_df that specifies counts.
         Default none assumes count of 1 cell for each row.
@@ -207,7 +205,7 @@ def member_summ(res_df, clone_df, count_col='count', addl_cols=[], addl_n=1):
     
     split = []
     for resi, res_row in res_df.iterrows():
-        m = clone_df.iloc[res_row['members']]
+        m = clone_df.iloc[res_row[key_col]]
 
         mode_i = m[count_col].idxmax()
         summ = {}
