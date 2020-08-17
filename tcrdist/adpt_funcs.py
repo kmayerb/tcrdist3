@@ -267,6 +267,7 @@ def get_centroid_seq(df):
     """
     #import pwseqdist as pw
     #from scipy.spatial.distance import squareform
+    seqs = df['cdr3_b_aa']
     if len(seqs) < 3:
         return df.head(1)['cdr3_b_aa'], None, None, None
 
@@ -446,7 +447,7 @@ def default_dist_clust_centroids(infile, cpus = 1, cdr3_b_aa_weight = 5, max_dis
     cluster_df_list = list()
     for i,r in ci_df.iterrows():
         counter = counter + 1
-        print(r['neighbors'])
+        #print(r['neighbors'])
         clone_cluster_df = tr.clone_df.iloc[r['neighbors'],]
         cluster_df_list.append(clone_cluster_df )
         publicity = ispublic(clone_cluster_df)
@@ -468,7 +469,9 @@ def default_dist_clust_centroids(infile, cpus = 1, cdr3_b_aa_weight = 5, max_dis
             assert tr.clone_df.iloc[loc_ind,]['cdr3_b_aa'] == centroid
             # store the centroid
             centroids.append( clone_cluster_df.iloc[iloc_ind,].reset_index(drop=True).copy())
-        except:
+        except Exception as e:
+            print(e)
+            print("fail")
             centroids.append( clone_cluster_df.iloc[0,].reset_index(drop=True).copy())
 
     # Save the Information in a centroids_df
@@ -487,7 +490,7 @@ def default_dist_clust_centroids(infile, cpus = 1, cdr3_b_aa_weight = 5, max_dis
     return tr
 
 
-def get_basic_centroids(tr, max_dist = 200):
+def get_basic_centroids(tr, max_dist = 200, look = False):
 
     # Cluster based on the max_dist
     ci = simple_cluster_index(tr.pw_beta, t = max_dist)
@@ -510,7 +513,7 @@ def get_basic_centroids(tr, max_dist = 200):
     cluster_df_list = list()
     for i,r in ci_df.iterrows():
         counter = counter + 1
-        print(r['neighbors'])
+        
         clone_cluster_df = tr.clone_df.iloc[r['neighbors'],]
         cluster_df_list.append(clone_cluster_df )
         publicity = ispublic(clone_cluster_df)
@@ -519,8 +522,16 @@ def get_basic_centroids(tr, max_dist = 200):
             assert clone_cluster_df.iloc[iloc_ind,]['cdr3_b_aa'] == centroid
             assert tr.clone_df.iloc[loc_ind,]['cdr3_b_aa'] == centroid
             centroids.append( clone_cluster_df.iloc[iloc_ind,].reset_index(drop=True).copy())
-        except:
+            if look: 
+                #print(dmatrix)
+                print(r['neighbors'])
+                print(f"MAX DISTANCE IN CLUSTER: {np.max(dmatrix)}" )
+                print("----")
+        except Exception as e:
+            print("Using first sequence when not enough available to find centroid.\n")
+            #print('FAIL')
             centroids.append( clone_cluster_df.iloc[0,].reset_index(drop=True).copy())
+
 
     # Save the Information in a centroids_df
 

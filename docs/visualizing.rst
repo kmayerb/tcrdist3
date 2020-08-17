@@ -1,3 +1,5 @@
+.. _visualizing:
+
 Visualizing
 ===========
 
@@ -94,8 +96,12 @@ evident.
 
 1. Load the data from Dash et al. paper.
 2. Use a mapper to convert vdjDB data to tcrdist2 input pd.DataFrame.
-3. Subset the data to consider only mouse sequences specific to the ‘PA’
-  epitope.
+3. Subset the data to consider only mouse sequences specific to the ‘PA’ epitope.
+
+To quickly get data associated with these and other snippets, see the section on :ref:`downloads`. 
+The datafile referenced here is (`vdjDB_PMID28636592 <https://www.dropbox.com/s/mmjyi8i3p1ps3qq/vdjDB_PMID28636592.zip?dl=1>`_).
+
+
 
 .. code:: python
 

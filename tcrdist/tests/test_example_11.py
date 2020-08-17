@@ -12,6 +12,8 @@ def test_example_11():
     4. Load data of interest into a TCRrep instance.
     5. Compare the first 100 clones in primary dataset (100 Clones) against the the entire bulk dataset (77,538 Clones)
     """
+    from tcrdist.setup_tests import download_and_extract_zip_file
+    download_and_extract_zip_file('bulk.zip', source = "dropbox", dest = ".")
     df_bulk = pd.read_csv('bulk.csv', sep = ",")        #(1)
     tr_bulk = TCRrep(cell_df = df_bulk,                 #(2)
                 organism = 'mouse', 
@@ -30,3 +32,6 @@ def test_example_11():
     assert df_search.shape  == (77538, 8)
     tr.compute_rect_distances(df = tr.clone_df, df2 = df_search) #(5)
     assert tr.rw_cdr3_b_aa.shape == (100, 77538)
+
+    import numpy as np
+    np.sum(tr.rw_beta < 50, axis = 1)

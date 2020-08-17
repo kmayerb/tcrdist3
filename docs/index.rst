@@ -70,6 +70,7 @@ PA and NP gene usage diagrams. Click to enlarge.
 .. |pic2| image:: NP_gene_usage_plot.svg
    :width: 49%
 
+See the example gallery (:ref:`visualizing`) for more examples of how to produce these diagrams.
 
 .. literalinclude:: ../tcrdist/tests/test_introduction_3.py
     :linenos:
@@ -232,6 +233,8 @@ Huang, H., Wang, C., Rubelt, F., Scriba, T. J. & Davis, M. M. Analyzing the Myco
 
    tcrdistances
    visualizing
+   motif_gallery
+   
   
    
 
@@ -239,8 +242,11 @@ Huang, H., Wang, C., Rubelt, F., Scriba, T. J. & Davis, M. M. Analyzing the Myco
    :caption: More Details
    :maxdepth: 1
 
-   inputs
    adaptive
+   downloads
+   inputs
+   pGen
+   
    
 
    
