@@ -16,7 +16,7 @@ Installation
 ------------
 .. code-block:: none
 
-   pip install git+https://github.com/kmayerb/tcrdist3.git@0.1.3
+   pip install git+https://github.com/kmayerb/tcrdist3.git@0.1.4
 
 
 Brief background
