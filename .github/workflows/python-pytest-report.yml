@@ -34,8 +34,6 @@ jobs:
         python -c "from tcrdist.setup_tests import *; download_and_extract_zip_file('bulk.csv.zip')"
         python -c "from tcrdist.setup_tests import *; download_and_extract_zip_file('dash.zip')"
         python -c "from tcrdist.setup_tests import *; download_and_extract_zip_file('sant.csv.zip')"
-        coverage run --source=tcrdist/ -m pytest -v --disable-warnings
-        coverage report
         pytest --cov=tcrdist/
         coveralls
       

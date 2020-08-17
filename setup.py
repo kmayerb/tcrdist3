@@ -31,7 +31,10 @@ install_reqs = [
       'numba',
       'zipdist>=0.1.5',
       'fishersapi',
-      'hierdiff>=0.4']
+      'hierdiff>=0.4',
+      'palmotif>=0.2',
+      'tcrsampler>=0.1.7',
+      'parmap>=1.5.2']
 
 if __name__ == "__main__":
       setup(**opts, install_requires=install_reqs)

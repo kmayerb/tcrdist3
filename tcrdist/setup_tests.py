@@ -17,6 +17,30 @@ L = {"dash.zip":
         'aws': { 
             'url' : None}
     },
+    "bulk.zip":
+        {'dropbox': {
+            'url' : "https://www.dropbox.com/s/4yy9110al33ckh7/bulk.zip?dl=1"},
+        'aws': { 
+            'url' : None}
+    },
+    "cdr3_beta_500K.zip":
+        {'dropbox': {
+            'url' : "https://www.dropbox.com/s/yevk0rus1dqnzcg/cdr3_beta_500K.zip?dl=1"},
+        'aws': { 
+            'url' : None}
+    },
+    "human_T_alpha_beta_sim200K.zip":
+        {'dropbox': {
+            'url' : "https://www.dropbox.com/s/jjnon2x8qt0qk4y/human_T_alpha_beta_sim200K.zip?dl=1"},
+        'aws': { 
+            'url' : None}
+    },
+    "vdjDB_PMID28636592.zip":
+        {'dropbox': {
+            'url' : "https://www.dropbox.com/s/mmjyi8i3p1ps3qq/vdjDB_PMID28636592.zip?dl=1"},
+        'aws': { 
+            'url' : None}
+    },
     "sant.csv.zip":
         {'dropbox': {
             'url' : "https://www.dropbox.com/s/8p3djrdd270ad0n/sant.csv.zip?dl=1"},
@@ -73,12 +97,46 @@ L = {"dash.zip":
         }
     }
 
+def list_available_zip_files():
+    """
+    List all available zip files downloadable from tcrdist3. 
+    
+    Returns 
+    -------
+    List of zipfile names that can be passed to zipfile argument in download_and_extract_zip_file()
+    """
+
+    return [k for k in L.keys()]
+
 def get_url(zipfile, source = 'dropbox'):
+    """
+    Lookup the url associatd with a zipfile
+
+    Returns
+    -------
+    url : str
+    """
     url = L[zipfile][source]['url']
     return url
 
 def download_and_extract_zip_file(zipfile, source = 'dropbox', dest = paths.path_to_base):
-    """ Downloads and extract a zip file to destinateion folder """
+    """ 
+    Downloads and extracts a zip file to destination folder.
+    Uses functions from **requests** and **Zipfile**, part of the Python Standard Library, to avoid the 
+    platform independent use of wget, curl, gunzip, etc.
+
+    
+    Parameters 
+    ----------
+    zipfile : str
+        Name of zip file see (list_available_zip_files() for current list)
+    source : str
+        The host source name where the file will be downloaded from. Currently 'dropbox' 
+        is the only aviable option but 'aws' will be available on release >= 1.0.0
+    dest : str
+        path where the files to be saved and unzipped
+    
+    """
     url = get_url(zipfile, source = source)
     r = requests.get(url) 
     with open(zipfile,'wb') as f:
