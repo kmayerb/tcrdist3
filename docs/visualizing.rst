@@ -1,4 +1,4 @@
-.. _visualizing:
+.. _visualizingpgen:
 
 Visualizing
 ===========
@@ -17,15 +17,13 @@ feature of tcrdist2, we have built them as stand-alone features.
    :maxdepth: 2
    :caption: Contents:
 
-plot_pairings
--------------
 
 .. automodule:: tcrdist.gene_pairing_plot
 
 .. autofunction:: plot_pairings
 
 
-Examples Plotting Gene Usage
+I want to plot gene pairings
 ----------------------------
 
 A popular feature of tcrdist is the ability to visualize the gene usage

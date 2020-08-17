@@ -14,9 +14,20 @@ In addition to the docstrings found throughout the code, we provide an example i
 
 Installation
 ------------
+
 .. code-block:: none
 
    pip install git+https://github.com/kmayerb/tcrdist3.git@0.1.4
+
+
+Docker Container
+----------------
+
+.. code-block:: none
+
+   docker pull quay.io/kmayerb/tcrdist3:0.1.4
+
+If you need more details, checkout out the page on the tcrdist3 :ref:`docker` container.
 
 
 Brief background
@@ -243,6 +254,7 @@ Huang, H., Wang, C., Rubelt, F., Scriba, T. J. & Davis, M. M. Analyzing the Myco
    :maxdepth: 1
 
    adaptive
+   docker
    downloads
    inputs
    pGen
