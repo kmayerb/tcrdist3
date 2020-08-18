@@ -234,7 +234,8 @@ Huang, H., Wang, C., Rubelt, F., Scriba, T. J. & Davis, M. M. Analyzing the Myco
 .. toctree::
    :caption: Workflow
    :maxdepth: 1
-
+   
+   index
    workflow
    
 
