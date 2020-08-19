@@ -15,17 +15,20 @@ Getting the Docker Image
 
 Pull the image:
 
-.. code-block:: 
 
+.. code-block:: none
+    
     docker pull quay.io/kmayerb/tcrdist3:0.1.4
+
 
 Running a Container
 -------------------
 
 Run a container iteractively (flag `-it`):
 
-.. code-block::
-   
+
+.. code-block:: none
+    
     docker run -it quay.io/kmayerb/tcrdist3:0.1.4
 
 
