@@ -1,6 +1,7 @@
 # tcrdist3
 
 ![Python application](https://github.com/kmayerb/tcrdist3/workflows/Python%20application/badge.svg?event=push) [![Coverage Status](https://coveralls.io/repos/github/kmayerb/tcrdist3/badge.svg?branch=master)](https://coveralls.io/github/kmayerb/tcrdist3?branch=master)[![Documentation Status](https://readthedocs.org/projects/tcrdist3/badge/?version=latest)](https://tcrdist3.readthedocs.io/en/latest/?badge=latest)
+[![Docker Repository on Quay](https://quay.io/repository/kmayerb/tcrdist3/status "Docker Repository on Quay")](https://quay.io/repository/kmayerb/tcrdist3)
 
 Flexible distance measures for comparing T cell receptors 
 
