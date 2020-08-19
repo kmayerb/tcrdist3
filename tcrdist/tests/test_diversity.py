@@ -32,7 +32,7 @@ def test_diversity_example_1():
     pb1_div = generalized_simpsons_entropy(df.loc[df['epitope'] == 'PB1', 'count'])
 
     """The most common SDI is order=2. But see Grabchak et al.
-    who generalize the index/entropy for all integer orders and show it is helpful
+    who generalized the index/entropy for all integer orders and show it is helpful
     to look at a range of orders:
 
     Grabchak M, Marcon E, Lang G, Zhang Z (2017) The generalized Simpson’s entropy
@@ -51,10 +51,7 @@ def test_diversity_example_1():
                                     df.loc[df['epitope'] == 'PA', 'count'],
                                     orders=np.arange(2, 20))
 
-    """Compute a "fuzzy" Simpson's diversity index using the pairwise distance matrix.
-    While SDI order=2 is defined as (one minus) the probability of sampling two identical
-    TCRs from a repertoire, the fuzzy index is (one minus) the probability of sampling two TCRs that are
-    within a specified distance of each other."""
+    """Compute a "fuzzy" Simpson's diversity index using the pairwise distance matrix."""
     tr = TCRrep(cell_df = df.loc[df['epitope'] == 'PB1'], 
                 organism = 'mouse', 
                 chains = ['alpha','beta'], 
@@ -63,8 +60,4 @@ def test_diversity_example_1():
     fdiv = fuzzy_diversity(tr.clone_df['count'],
                            tr.pw_alpha + tr.pw_beta,
                            order=2,
-                           threshold=50)
-    
-    
-
-
+                           threshold=75)
