@@ -20,6 +20,7 @@ def test_fuzzy_div():
 
 
 def test_diversity_example_1():
+    import numpy as np
     import pandas as pd
     from tcrdist.repertoire import TCRrep
     from tcrdist.diversity import generalized_simpsons_entropy, simpsons_difference, fuzzy_diversity
