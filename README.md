@@ -14,6 +14,13 @@ tcrdist3 is a python API-enabled toolkit for analyzing T-cell receptor repertoir
 pip install git+https://github.com/kmayerb/tcrdist3.git@0.1.4
 ```
 
+## Docker
+[![Docker Repository on Quay](https://quay.io/repository/kmayerb/tcrdist3/status "Docker Repository on Quay")](https://quay.io/repository/kmayerb/tcrdist3)
+
+```
+docker pull quay.io/kmayerb/tcrdist3:0.1.4
+```
+
 ## Documentation
 
 More documentation can be found at [tcrdist3.readthedocs](https://tcrdist3.readthedocs.io/).
