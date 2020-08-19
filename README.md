@@ -22,6 +22,7 @@ docker pull quay.io/kmayerb/tcrdist3:0.1.4
 ```
 
 ## Documentation
+(https://readthedocs.org/projects/tcrdist3/badge/?version=latest)](https://tcrdist3.readthedocs.io/en/latest/?badge=latest)
 
 More documentation can be found at [tcrdist3.readthedocs](https://tcrdist3.readthedocs.io/).
 
