@@ -119,6 +119,13 @@ I want to use TCRrep but I want to keep my variable names
     :dedent: 4
     :language: python
 
+I want to search a bulk dataset
+-------------------------------
+.. literalinclude:: ../tcrdist/tests/test_example_11.py
+    :linenos:
+    :lines: 6-100
+    :dedent: 4
+    :language: python
 
 I want something else
 ---------------------

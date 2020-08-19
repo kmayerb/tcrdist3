@@ -60,16 +60,9 @@ Gene Level Analyses
 -------------------
 
 Loading a TCR dataset will immediately enable gene-level analyses of repertoires, 
-for example Sankey plots of V/D/J gene frequency. It can also be helpful to look
-at the preferential pairings of specific V(D)J genes, as it may indicate some kind
-of interesting structure or specificity enrichment in the repertoire. For example,
-the Sankey plot of NP-specific TCRs below shows a clear pairing preference of
-TRBV2*01 with TRBJ1-6*01 with an estimated odds-ratio of 59 and p-value < 1e-6,
-indicating that given the overall frequency of these genes in the repertoire its
-highly unexpected that the two would pair together in so many TCRs by chance alone.
-Such an insight may provide quick clues about genes underlying a specificity,
-though it is also important to look at gene-pairings in a reference/unenriched
-repertoire for comparison.
+for example Sankey plots of V/D/J gene frequency or statistical tests for differential 
+gene enrichment in two or more conditions:
+
 
 .. literalinclude:: ../tcrdist/tests/test_introduction_3.py
     :linenos:
@@ -89,35 +82,28 @@ PA and NP gene usage diagrams. Click to enlarge.
    :width: 49%
 
 See the example gallery (:ref:`visualizing`) for more examples of how to produce these diagrams.
-Testing the NP tetramer sorted repertoire for gene-gene pairing preferences:
 
 .. literalinclude:: ../tcrdist/tests/test_introduction_3.py
     :linenos:
-    :lines: 6-35
+    :lines: 30-50
     :dedent: 4
     :language: python
 
 
 
-.. table:: 
-
-    +--------+-----------+--------+-----------+----+----+----+----+-------+-------+------+--------+------+-------+--------+--------+
-    |  xcol  |   xval    |  ycol  |   yval    |X+Y+|X+Y-|X-Y+|X-Y-|X_marg |Y_marg | X|Y+ |  X|Y-  | Y|X+ | Y|X-  |   OR   | pvalue |
-    +========+===========+========+===========+====+====+====+====+=======+=======+======+========+======+=======+========+========+
-    |v_a_gene|TRAV8-1*01 |j_a_gene|TRAJ12*01  |   9|   4|   3| 287|0.04290|0.03960|0.7500|0.013746|0.6923|0.01034|  215.25|0.000000|
-    +--------+-----------+--------+-----------+----+----+----+----+-------+-------+------+--------+------+-------+--------+--------+
-    |v_a_gene|TRAV8-1*01 |v_b_gene|TRBV12-1*01|   9|   4|   5| 285|0.04290|0.04620|0.6429|0.013841|0.6923|0.01724|  128.25|0.000000|
-    +--------+-----------+--------+-----------+----+----+----+----+-------+-------+------+--------+------+-------+--------+--------+
-    |v_b_gene|TRBV19*01  |j_b_gene|TRBJ2-3*01 |   4|   0|   4| 295|0.01320|0.02640|0.5000|0.000000|1.0000|0.01338|Infinity|0.000000|
-    +--------+-----------+--------+-----------+----+----+----+----+-------+-------+------+--------+------+-------+--------+--------+
-    |v_a_gene|TRAV9N-2*01|j_a_gene|TRAJ31*01  |   9|   2|   9| 283|0.03630|0.05941|0.5000|0.007018|0.8182|0.03082|  141.50|0.000000|
-    +--------+-----------+--------+-----------+----+----+----+----+-------+-------+------+--------+------+-------+--------+--------+
-    |v_a_gene|TRAV9N-2*01|v_b_gene|TRBV16*01  |   9|   2|  10| 282|0.03630|0.06271|0.4737|0.007042|0.8182|0.03425|  126.90|0.000000|
-    +--------+-----------+--------+-----------+----+----+----+----+-------+-------+------+--------+------+-------+--------+--------+
-    |v_b_gene|TRBV2*01   |j_b_gene|TRBJ1-6*01 |  30|   7|  18| 248|0.12211|0.15842|0.6250|0.027451|0.8108|0.06767|   59.05|0.000000|
-    +--------+-----------+--------+-----------+----+----+----+----+-------+-------+------+--------+------+-------+--------+--------+
-    |j_a_gene|TRAJ53*01  |j_b_gene|TRBJ2-7*01 |  10|   2|  42| 249|0.03960|0.17162|0.1923|0.007968|0.8333|0.14433|   29.64|0.000001|
-    +--------+-----------+--------+-----------+----+----+----+----+-------+-------+------+--------+------+-------+--------+--------+
++-----+---------+------+----------+------------+-------+-------+-------+-------+----------+----------+----------+----------+----------+----------+-----------+----------+
+|     | xcol    | xval | ycol     | yval       | X+Y+  | X+Y-  | X-Y+  | X-Y-  | X_marg   | Y_marg   | X|Y+     | X|Y-     | Y|X+     | Y|X-     | OR        | pvalue   |
++-----+---------+------+----------+------------+-------+-------+-------+-------+----------+----------+----------+----------+----------+----------+-----------+----------+
+| 0   | epitope | NP   | j_b_gene | TRBJ1-6*01 | 48.0  | 255.0 | 2.0   | 963.0 | 0.238959 | 0.039432 | 0.960000 | 0.209360 | 0.158416 | 0.002073 | 90.635294 | 0.000001 |
++-----+---------+------+----------+------------+-------+-------+-------+-------+----------+----------+----------+----------+----------+----------+-----------+----------+
+| 1   | epitope | NP   | j_b_gene | TRBJ2-7*01 | 52.0  | 251.0 | 146.0 | 819.0 | 0.238959 | 0.156151 | 0.262626 | 0.234579 | 0.171617 | 0.151295 | 1.162146  | 0.414406 |
++-----+---------+------+----------+------------+-------+-------+-------+-------+----------+----------+----------+----------+----------+----------+-----------+----------+
+| ..  | ...     | ...  | ...      | ...        | ...   | ...   | ...   | ...   | ...      | ...      | ...      | ...      | ...      | ...      | ...       | ...      |
++-----+---------+------+----------+------------+-------+-------+-------+-------+----------+----------+----------+----------+----------+----------+-----------+----------+
+| 103 | epitope | PB1  | v_b_gene | TRBV3*01   | 10.0  | 631.0 | 3.0   | 624.0 | 0.505521 | 0.010252 | 0.769231 | 0.502789 | 0.015601 | 0.004785 | 3.296355  | 0.090888 |
++-----+---------+------+----------+------------+-------+-------+-------+-------+----------+----------+----------+----------+----------+----------+-----------+----------+
+| 104 | epitope | PB1  | v_b_gene | TRBV30*01  | 5.0   | 636.0 | 0.0   | 627.0 | 0.505521 | 0.003943 | 1.000000 | 0.503563 | 0.007800 | 0.000000 | inf       | 0.062083 |
++-----+---------+------+----------+------------+-------+-------+-------+-------+----------+----------+----------+----------+----------+----------+-----------+----------+
 
 
 TCR Distancing
@@ -224,6 +210,72 @@ CDR3 Motif Analysis
 Enrichment is one of many ways to identify a potentially interesting TCRs. The generation probability, Pgen, defined by Walczyk and colleagues is another way of filtering TCRs and TCR neighborhoods that are more frequent than expected based on their probability of being produced through recombination in 
 development. 
 
+Saving
+------
+
+Save your TCRrep object using `dill <https://pypi.org/project/dill/>`_.
+
+.. code-block:: python
+   
+   import dill
+   import pandas as pd
+   from tcrdist.repertoire import TCRrep
+   
+   df = pd.read_csv("dash.csv")
+   tr = TCRrep(cell_df = df,
+               organism = 'mouse',
+               chains = ['alpha','beta'],
+               db_file = 'alphabeta_gammadelta_db.tsv')    
+   
+   dill.dump(tr, open("yourfile.dill", mode='wb'))
+   tr_reloaded = dill.load(open("yourfile.dill", mode='rb'))
+
+
+.. tip:: 
+   For larger datasets, you may wish to first remove unwanted large attributes 
+   that will contribute to the overall file size before dill pickling. Moreover, 
+   you can achieve additional space saving by converting Numpy ndarray attributes 
+   to type `int16`, prior to saving. In the example below, 
+   these steps reduce the final filesize from 114 MB to 36 MB. 
+
+
+.. code-block:: python
+   
+   import dill
+   import pandas as pd
+   from tcrdist.repertoire import TCRrep
+   
+   df = pd.read_csv("dash.csv")
+   tr = TCRrep(cell_df = df,
+               organism = 'mouse',
+               chains = ['alpha','beta'],
+               db_file = 'alphabeta_gammadelta_db.tsv')    
+   
+   """
+   Optional: remove CDR specific attributes
+   prior to saving
+   """
+   tr.pw_pmhc_a_aa = None
+   tr.pw_cdr3_a_aa = None
+   tr.pw_cdr2_a_aa = None
+   tr.pw_cdr1_a_aa = None
+   tr.pw_pmhc_b_aa = None
+   tr.pw_cdr3_b_aa = None
+   tr.pw_cdr2_b_aa = None
+   tr.pw_cdr1_b_aa = None
+
+   """
+   Optional: change numpy datatype to further reduces file sizes
+   """
+   tr.pw_alpha = tr.pw_alpha.astype('int16')
+   tr.pw_alpha = tr.pw_beta.astype('int16')
+
+   dill.dump(tr, open("yourfile.dill", mode='wb'))
+   tr_reloaded = dill.load(open("yourfile.dill", mode='rb'))
+
+
+
+
 Bulk Repertoires
 ----------------
 
@@ -269,7 +321,6 @@ Huang, H., Wang, C., Rubelt, F., Scriba, T. J. & Davis, M. M. Analyzing the Myco
    :maxdepth: 1
 
    adaptive
-   diversity
    docker
    downloads
    inputs
