@@ -4,6 +4,7 @@ import pytest
 def test_fuzzy_div():
     import numpy as np
     from scipy.spatial.distance import squareform
+    from tcrdist.diversity import fuzzy_diversity
 
     n = 100
     counts = np.random.randint(1, 20, size=n)
