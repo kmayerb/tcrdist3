@@ -15,11 +15,11 @@ def test_introduction_3():
 
     from tcrdist.plotting import plot_pairings, _write_svg
    
-    svg_PA  = plot_pairings(tr.clone_df[tr.clone_df.epitope == "PA"].copy(), 
+    svg_PA  = plot_pairings(tr.clone_df.loc[tr.clone_df.epitope == "PA"], 
                 cols = ['v_b_gene', 'j_b_gene','j_a_gene', 'v_a_gene'], 
                 count_col='count')
       
-    svg_NP = plot_pairings(tr.clone_df[tr.clone_df.epitope == "NP"].copy(), 
+    svg_NP = plot_pairings(tr.clone_df.loc[tr.clone_df.epitope == "NP"], 
             cols = ['v_b_gene', 'j_b_gene', 'j_a_gene', 'v_a_gene'], 
             count_col='count')
     
@@ -28,6 +28,8 @@ def test_introduction_3():
     _write_svg(svg_NP, name = "NP_gene_usage_plot.svg", dest = ".")
 
     import fishersapi
-    fishersapi.fishers_frame(tr.clone_df, 
-                             col_pairs=[('epitope', 'j_b_gene'),
-                                        ('epitope', 'v_b_gene')])    
+    fishersapi.fishers_frame(tr.clone_df.loc[tr.clone_df.epitope == "NP"], 
+                             col_pairs=[('v_b_gene', 'j_b_gene'),
+                                        ('v_a_gene', 'j_a_gene'),
+                                        ('v_a_gene', 'v_b_gene'),
+                                        ('j_a_gene', 'j_b_gene')])
