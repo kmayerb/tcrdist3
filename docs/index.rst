@@ -210,6 +210,72 @@ CDR3 Motif Analysis
 Enrichment is one of many ways to identify a potentially interesting TCRs. The generation probability, Pgen, defined by Walczyk and colleagues is another way of filtering TCRs and TCR neighborhoods that are more frequent than expected based on their probability of being produced through recombination in 
 development. 
 
+Saving
+------
+
+Save your TCRrep object using `dill <https://pypi.org/project/dill/>`_.
+
+.. code-block:: python
+   
+   import dill
+   import pandas as pd
+   from tcrdist.repertoire import TCRrep
+   
+   df = pd.read_csv("dash.csv")
+   tr = TCRrep(cell_df = df,
+               organism = 'mouse',
+               chains = ['alpha','beta'],
+               db_file = 'alphabeta_gammadelta_db.tsv')    
+   
+   dill.dump(tr, open("yourfile.dill", mode='wb'))
+   tr_reloaded = dill.load(open("yourfile.dill", mode='rb'))
+
+
+.. tip:: 
+   For larger datasets, you may wish to first remove unwanted large attributes 
+   that will contribute to the overall file size before dill pickling. Moreover, 
+   you can achieve additional space saving by converting Numpy ndarray attributes 
+   to type `int16`, prior to saving. In the example below, 
+   these steps reduce the final filesize from 114 MB to 36 MB. 
+
+
+.. code-block:: python
+   
+   import dill
+   import pandas as pd
+   from tcrdist.repertoire import TCRrep
+   
+   df = pd.read_csv("dash.csv")
+   tr = TCRrep(cell_df = df,
+               organism = 'mouse',
+               chains = ['alpha','beta'],
+               db_file = 'alphabeta_gammadelta_db.tsv')    
+   
+   """
+   Optional: remove CDR specific attributes
+   prior to saving
+   """
+   tr.pw_pmhc_a_aa = None
+   tr.pw_cdr3_a_aa = None
+   tr.pw_cdr2_a_aa = None
+   tr.pw_cdr1_a_aa = None
+   tr.pw_pmhc_b_aa = None
+   tr.pw_cdr3_b_aa = None
+   tr.pw_cdr2_b_aa = None
+   tr.pw_cdr1_b_aa = None
+
+   """
+   Optional: change numpy datatype to further reduces file sizes
+   """
+   tr.pw_alpha = tr.pw_alpha.astype('int16')
+   tr.pw_alpha = tr.pw_beta.astype('int16')
+
+   dill.dump(tr, open("yourfile.dill", mode='wb'))
+   tr_reloaded = dill.load(open("yourfile.dill", mode='rb'))
+
+
+
+
 Bulk Repertoires
 ----------------
 
