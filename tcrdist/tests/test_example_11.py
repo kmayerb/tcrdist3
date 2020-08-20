@@ -31,12 +31,13 @@ def test_example_11():
                 organism = 'mouse', 
                 chains = ['beta'], 
                 db_file = 'alphabeta_gammadelta_db.tsv')
+    
     assert tr.pw_beta.shape == (100,100)
     assert df_search.shape  == (77538, 8)
     tr.compute_rect_distances(df = tr.clone_df, df2 = df_search, store =True) #(5)
     
     assert tr.rw_beta.shape == (100, 77538)
-    assert tr.cdr3_b_aa.shape == (100, 77538)
+    assert tr.rw_cdr3_b_aa.shape == (100, 77538)
     
     # see how many are tcrdistance less than 50
     import numpy as np

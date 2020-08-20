@@ -23,6 +23,12 @@ L = {"dash.zip":
         'aws': { 
             'url' : None}
     },
+    "olga_T_alpha_beta_1000K_simulated_cdr3.zip":
+        {'dropbox': {
+            'url' : "https://www.dropbox.com/s/6qcxs3ylmczyfk7/olga_T_alpha_beta_1000K_simulated_cdr3.zip?dl=1"},
+        'aws': { 
+            'url' : None}
+    },
     "cdr3_beta_500K.zip":
         {'dropbox': {
             'url' : "https://www.dropbox.com/s/yevk0rus1dqnzcg/cdr3_beta_500K.zip?dl=1"},

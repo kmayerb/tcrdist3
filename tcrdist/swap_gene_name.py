@@ -636,3 +636,12 @@ adaptive_to_imgt = {
                 'TCRGV05-01': 'TRGV5*01',
                 'TCRGV06-01': 'TRGV6*01',
                 'TCRGV07-01': 'TRGV7*01'}}
+
+# This quickly makes a dictionary from  'TRGV7*00' -> 'TRGV7*01'
+vdj00_to_imgt = dict()
+vdj00_to_imgt['human']=\
+	{f"{v.split('*')[0]}":v for k,v in adaptive_to_imgt['human'].items() }
+vdj00_to_imgt['mouse']=\
+	{f"{v.split('*')[0]}":v for k,v in adaptive_to_imgt['mouse'].items() }
+
+

@@ -326,7 +326,12 @@ Huang, H., Wang, C., Rubelt, F., Scriba, T. J. & Davis, M. M. Analyzing the Myco
    inputs
    pGen
    
-   
+.. toctree::
+   :caption: Advanced Usage
+   :maxdepth: 1
+
+   simulate
+
 
    
 
