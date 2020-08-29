@@ -166,7 +166,7 @@ def motif_creation_human_betas():
 
 
 
-def sim_all_cdr3_gen()
+def sim_all_cdr3_gen():
 	import itertools
 	def expand_grid(dct):
 	    rows = itertools.product(*dct.values())
