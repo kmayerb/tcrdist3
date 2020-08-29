@@ -7,7 +7,7 @@ Simulation of 1 Million CDRs for both Human and Mouse (beta only).
 
 .. literalinclude:: ../tcrdist/tests/longtest_simulate_cdr3_w_olga.py
     :linenos:
-    :lines: 6-100
+    :lines: 1-100
     :language: python
 
 These files can be downloaded directly using:
