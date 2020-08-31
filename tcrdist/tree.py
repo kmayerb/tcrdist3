@@ -112,6 +112,7 @@ class TCRtree():
         self.default_hcluster_diff_kwargs = kws1
         self.default_member_summ_kwargs   = kws2
         self.default_plot_hclust_props    = kws3
+        self.prune = 3
         self.combine_olga = True
         self.pwmat_str_b = 'pw_beta'
         self.pwmat_str_a = 'pw_alpha'
@@ -129,6 +130,7 @@ class TCRtree():
                         single                       = self.single,
                         generate_svgs                = self.generate_svgs ,
                         combine_olga                 = self.combine_olga,
+                        prune                        = self.prune,
                         verbose                      = self.verbose,
                         default_hcluster_diff_kwargs = self.default_hcluster_diff_kwargs,
                         default_member_summ_kwargs   = self.default_member_summ_kwargs,
@@ -225,6 +227,7 @@ def _auto_hdiff2(tcrrep,
                 generate_svgs = True,
                 combine_olga = False,
                 verbose = True,
+                prune = 3,
                 default_hcluster_diff_kwargs = _get_default_kwargs(chains = ['beta'])[0],
                 default_member_summ_kwargs   = _get_default_kwargs(chains = ['beta'])[1],
                 default_plot_hclust_props    = _get_default_kwargs(chains = ['beta'])[2]):
@@ -384,7 +387,8 @@ def _auto_hdiff2(tcrrep,
     tcrrep.hcluster_df, tcrrep.Z = hcluster_diff(**default_hcluster_diff_kwargs)
     bar.next(); bar.finish()
 
-
+    tcrrep.hcluster_df['prune'] = tcrrep.hcluster_df['K_neighbors'].apply(lambda x: 1 if (x < prune) else 0)#
+    
     """ Do Basic Summary """
     mean_distance_      = list()
     percentage_node_25_ = list()
@@ -474,6 +478,7 @@ def _auto_hdiff2(tcrrep,
     """ Plot """
     html = plot_hclust_props(tcrrep.Z,
             res=tcrrep.hcluster_df_detailed,
+            prune_col = 'prune',
             **default_plot_hclust_props)
 
     """ Write File """		
@@ -530,6 +535,9 @@ def _tcrsampler_svgs(
     from tcrdist.summarize import _select
     
     if chain == 'alpha' and tcrrep.organism == "mouse":
+        # Here we enforce the rule that alpha-mouse cannot use an olga-sampler
+        # TODO: This should be removed as soon as TCRsampler can be updated with a valid 
+        # mouse-alpha simulated background.
         combine_olga = False
     
     # _default_sampler returns a TCRSampler based on organism and chain
@@ -539,22 +547,33 @@ def _tcrsampler_svgs(
         default_background = default_background, 
         default_background_if_missing = default_background_if_missing)
 
+    build_kargs = { 'max_rows' : 100,
+                    'stratify_by_subject' : True,
+                    'use_frequency' : True,
+                    'make_singleton' : False}
+
+    build_kargs_olga = {   'max_rows' : 1000,
+                        'stratify_by_subject' : False,
+                        'use_frequency' : True,
+                        'make_singleton' : False}
+    
+    if verbose: print(f"BUILDING A DEEPER BACKGROUND {report_kwargs(build_kargs)}")
+
+    t.build_background(**build_kargs)
     # Olga Sampler
+    
     if combine_olga:
+        t_olga = _default_sampler_olga(chain = chain, organism = tcrrep.organism)()
+        if verbose: print(f"BUILDING A DEEPER BACKGROUND {report_kwargs(build_kargs_olga)}")
+        t.build_background(**build_kargs_olga )
+
         olga_model = {
             ('beta','human')  : OlgaModel(recomb_type="VDJ", chain_folder = "human_T_beta"),
             ('alpha','human') : OlgaModel(recomb_type="VJ",  chain_folder = "human_T_alpha"),
             ('beta','mouse')  : OlgaModel(recomb_type="VDJ", chain_folder = "mouse_T_beta")
             }[(chain, tcrrep.organism)]
 
-    build_kargs = { 'max_rows' : 100,
-                    'stratify_by_subject' : True,
-                    'use_frequency' : True,
-                    'make_singleton' : False}
-    
-    if verbose: print(f"BUILDING A DEEPER BACKGROUND {report_kwargs(build_kargs)}")
 
-    t.build_background(**build_kargs)
 
     if 'prune' not in tcrrep.hcluster_df.columns:
         if verbose: print("NO PRUNE COLUMNS USED ALL SET TO 0")
@@ -600,33 +619,38 @@ def _tcrsampler_svgs(
             sampled_rep = t.sample( gene_usage_tuples,
                             flatten = True, depth = adjust_depth * 10)
             
-            # < missing_gene > Count the percentage missing, sampler returns none when no v,j pair is present
-            expected_depth = dfnode.shape[0] * adjust_depth * 10
-            recovered_depth = len([1 for x in sampled_rep if x is not None])
-            percent_missing = round(100* (1- (recovered_depth / expected_depth)), 1)
-                   
-            percent_missing_sampler.append(f"{percent_missing}%")
-            
             # Only keep the non-none sequences
             sampled_rep  = [x for x in sampled_rep if x is not None]
+            # < missing_gene > Count the percentage missing, sampler returns none when no v,j pair is present
+            expected_depth = dfnode.shape[0] * adjust_depth * 10
+            recovered_depth = len(sampled_rep)
+            percent_missing = round(100* (1- (recovered_depth / expected_depth)), 1)
+                   
+            percent_missing_sampler.append(f"{percent_missing}%")           
             reference_unique.append(str(pd.Series(sampled_rep).nunique()))
             reference_size.append(str(pd.Series(sampled_rep).count()))
 
             if combine_olga:
                 # We modified Olga source code slightly, such that we simulated sequences 
                 # with a given V,J gene usage
-                flatten = lambda l: [item for sublist in l for item in sublist]
-                sampled_rep_olga = [olga_model.gen_cdr3s(allele_01(v),allele_01(j),n*adjust_depth*10) for v,j,n in gene_usage_tuples]
-                sampled_rep_olga = [x for x in flatten(sampled_rep_olga) if x is not None]
+                # OLD METHOD WHERE WE ACTUALLY SAMPLED, slower but can go much deeper. I don't think one rare sequence however, really make a big difference.
+                #flatten = lambda l: [item for sublist in l for item in sublist]
+                #sampled_rep_olga = [olga_model.gen_cdr3s(allele_01(v),allele_01(j),n*adjust_depth*10) for v,j,n in gene_usage_tuples]
+                #sampled_rep_olga = [x for x in flatten(sampled_rep_olga) if x is not None]
+                sampled_rep_olga = t_olga.sample( gene_usage_tuples,
+                            flatten = True, depth = adjust_depth * 10)
+
+                sampled_rep_olga = [x for x in sampled_rep_olga if x is not None]
+                
                 expected_depth = dfnode.shape[0] * adjust_depth * 10
-                recovered_depth = len([x for x in sampled_rep_olga if x is not None])
+                recovered_depth = len(sampled_rep_olga)
                 percent_missing_olga = round(100* (1- (recovered_depth / expected_depth)), 1)
                 
                 percent_missing_sampler_olga.append(f"{percent_missing_olga}%")            
                 reference_unique_olga.append(str(pd.Series(sampled_rep_olga).nunique()))
                 reference_size_olga.append(str(pd.Series(sampled_rep_olga).count()))
                 
-                
+                # HERE WE COMBINE INTO A SINGLE BACKGROUND:
                 sampled_rep = sampled_rep + sampled_rep_olga
 
 
@@ -692,6 +716,101 @@ def _default_sampler(organism = 'human', chain = 'beta'):
         }[(organism, chain)]
     
     return default_tcrsampler_generator
+
+def _default_sampler_olga(organism = 'human', chain = 'beta'):
+    assert organism in ['human', 'mouse']
+    assert chain in ['beta','alpha']
+    if organism == "mouse" and chain == "alpha":
+        raise KeyError("No currenlty available mouse-alpha chain background form olga")
+
+    default_tcrsampler_generator = {
+        ('human','beta'): 
+            _default_tcrsampler_olga_human_beta,
+        ('human','alpha'): 
+            _default_tcrsampler_olga_human_alpha,
+        ('mouse','beta'): 
+            _default_tcrsampler_olga_mouse_beta
+        }[(organism, chain)]
+    
+    return default_tcrsampler_generator
+
+
+def _default_tcrsampler_olga_human_beta(default_background = None, default_background_if_missing=None):
+    """
+    Responsible for providing the default human beta sampler 'britanova_human_beta_t_cb.tsv.sampler.tsv'
+
+    Returns
+    -------
+    t : tcrsampler.sampler.TCRsampler 
+    """
+    from tcrsampler.sampler import TCRsampler
+    if default_background is None:
+        default_background =  'olga_human_beta_t.sampler.tsv'
+        
+    if default_background_if_missing is None:
+        default_background_if_missing ='olga_sampler.zip'
+    
+    print(default_background)
+
+    try: 
+        t = TCRsampler(default_background=default_background)
+    except OSError:
+        t = TCRsampler()
+        t.download_background_file(default_background_if_missing)
+        t = TCRsampler(default_background=default_background)
+    return t
+
+def _default_tcrsampler_olga_human_alpha(default_background = None, default_background_if_missing=None):
+    """
+    Responsible for providing the default human beta sampler 'britanova_human_beta_t_cb.tsv.sampler.tsv'
+
+    Returns
+    -------
+    t : tcrsampler.sampler.TCRsampler 
+    """
+    from tcrsampler.sampler import TCRsampler
+    if default_background is None:
+        default_background =  'olga_human_alpha_t.sampler.tsv'
+        
+    if default_background_if_missing is None:
+        default_background_if_missing ='olga_sampler.zip'
+    
+    
+    print(default_background)
+
+    try: 
+        t = TCRsampler(default_background=default_background)
+    except OSError:
+        t = TCRsampler()
+        t.download_background_file(default_background_if_missing)
+        t = TCRsampler(default_background=default_background)
+    return t
+
+def _default_tcrsampler_olga_mouse_beta(default_background = None, default_background_if_missing=None):
+    """
+    Responsible for providing the default human beta sampler 'britanova_human_beta_t_cb.tsv.sampler.tsv'
+
+    Returns
+    -------
+    t : tcrsampler.sampler.TCRsampler 
+    """
+    from tcrsampler.sampler import TCRsampler
+    if default_background is None:
+        default_background =  'olga_mouse_beta_t.sampler.tsv'
+        
+    if default_background_if_missing is None:
+        default_background_if_missing ='olga_sampler.zip'
+    
+    
+    print(default_background)
+
+    try: 
+        t = TCRsampler(default_background=default_background)
+    except OSError:
+        t = TCRsampler()
+        t.download_background_file(default_background_if_missing)
+        t = TCRsampler(default_background=default_background)
+    return t
 
 
 def _default_tcrsampler_human_beta(default_background = None, default_background_if_missing=None):
