@@ -33,7 +33,7 @@ install_reqs = [
       'fishersapi',
       'hierdiff>=0.4',
       'palmotif>=0.2',
-      'tcrsampler>=0.1.7',
+      'tcrsampler>=0.1.8',
       'parmap>=1.5.2',
       'olga>=1.2.1']
 
