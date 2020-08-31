@@ -31,7 +31,7 @@ install_reqs = [
       'numba',
       'zipdist>=0.1.5',
       'fishersapi',
-      'hierdiff>=0.4',
+      'hierdiff>=0.5',
       'palmotif>=0.2',
       'tcrsampler>=0.1.8',
       'parmap>=1.5.2',
