@@ -10,7 +10,7 @@ python-Levenshtein==0.12.0
 requests
 fishersapi
 zipdist>=0.1.5
-hierdiff>=0.4
+hierdiff>=0.5
 palmotif>=0.2
 tcrsampler>=0.1.7
 parmap>=1.5.2
