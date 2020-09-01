@@ -71,7 +71,7 @@ def neighborhood_diff(clone_df, pwmat, x_cols, count_col='count', knn_neighbors=
     -------
     res : pd.DataFrame [nclones x results]
         Results from testing the neighborhood around each clone."""
-    res = hd.neighborhood_tally(df=clone_df,
+    res = hd.neighborhood_tally(df_pop=clone_df,
                                   pwmat=pwmat,
                                   x_cols=x_cols,
                                   count_col=count_col,
