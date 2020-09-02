@@ -97,7 +97,7 @@ def _pws(df, metrics, weights, kargs, df2 = None, cpu = 1, uniquify = True, stor
         if store:
            s[k] = pw_mat 
         if tcrdist is None:
-            tcrdist = np.zeros(pw_mat.shape)
+            tcrdist = np.zeros(pw_mat.shape, dtype=np.int16)
         tcrdist = tcrdist + (weights[k] * pw_mat)
     
     s['tcrdist'] = tcrdist
