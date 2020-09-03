@@ -1,6 +1,6 @@
 .. _simulate_cdr3s:
 
-Simulate CDRs
+Simulate CDR3s
 =============
 
 Simulation of 1 Million CDRs for both Human and Mouse (beta only).
