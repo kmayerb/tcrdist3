@@ -4,11 +4,18 @@ import os.path as op
 import os
 import olga
 import olga.load_model as load_model
+#import tcrdist.olga_load_model as load_model #(USE THIS FOR PSUEDOGENE ASWELL AS FUCNTIONAL CDR3 GENERATION)
+
+import tcrdist.olga_directed as seq_gen
+
 import olga.generation_probability as generation_probability
 import olga.generation_probability as pgen
 from olga.utils import nt2aa, determine_seq_type
 from tcrdist.paths import path_to_default_models
+from olga.utils import gene_to_num_str
+import warnings
 path_to_olga_default_models = path_to_default_models
+import random 
 
 class OlgaModel:
     """
@@ -39,7 +46,8 @@ class OlgaModel:
         self.generative_model = None
         self.genomic_data     = None
         self.pgen_model       = None
-
+        self.seq_gen_model    = None 
+        
 
         self._validate_chain_folder_arg()
         self._validate_recomb_type_arg()
@@ -71,6 +79,7 @@ class OlgaModel:
             self.genomic_data = genomic_data
             self.generative_model = generative_model
             self.pgen_model = pgen_model
+            self.seq_gen_model = seq_gen.SequenceGenerationVDJ(self.generative_model, self.genomic_data)
 
         #VJ recomb case --- used for TCRA and light chain
         elif recomb_type == 'VJ':
@@ -82,11 +91,130 @@ class OlgaModel:
             self.genomic_data = genomic_data
             self.generative_model = generative_model
             self.pgen_model = pgen_model
+            self.seq_gen_model = seq_gen.SequenceGenerationVJ(self.generative_model, self.genomic_data)
 
     def __repr__(self):
         return "tcrdist.pgen.OlgaModel set to recomb_type: '{}' and chain_folder: '{}'".format(self.recomb_type, self.chain_folder)
 
-    
+    def gen_cdr3s(self, V:str=None,J:str=None,n:int=1)->list:
+        """
+        Generate n cdr3s from modifieid Olga code using a directed V and J gene usage 
+
+        V: str
+            gene name, e.g, 'TRAV27*01'
+        J: str
+            gene name,  e.g, 'TRAJ42*01'
+        n: int 
+            number of cdr3s to sample
+
+        Returns
+        -------
+        cdr3s : list
+            list of strings (and possibly Nones)
+
+        Example
+        -------
+        np.random.seed(310)
+        result = olga_model_beta.gen_cdr3s(V = 'TRBV20-1*01', J = 'TRBJ1-2*01', n = 4)
+        expected = ['CSARVREAGRTYTF', 'CSAVPPGLPNYGYTF', 'CSARGPSQGYVRGLYGYTF', 'CSAQGLAGYGYTF']
+        assert result == expected
+        """
+        cdr3s = list()
+        for _ in range(n):
+            r = self.gen_cdr3(V=V,J=J)
+            if r is not None:
+                cdr3s.append(r[1])
+            else:
+                cdr3s.append(None)
+        return cdr3s
+
+    def gen_cdr3(self, V=None,J=None):
+        """
+        Gemerate an Olga type CDR3, directed by specific gene usage 
+        
+        Parameters
+        ----------
+        V : str or Npne
+        
+        J : str or Npne
+        
+        
+        Returns
+        -------
+        tuple
+
+        
+        Notes
+        -----
+         .gen_cdr3() returns the full output tuple
+        
+        Example
+        -------
+        np.random.seed(310)
+        from tcrdist.pgen import OlgaModel
+        olga_model_beta = OlgaModel(recomb_type="VDJ", chain_folder = "human_T_beta")
+        result = olga_model_beta.gen_cdr3(V = 'TRBV20-1*01', J = 'TRBJ1-2*01')
+        # NOTE: seed is set, so we expect standard result
+        #NOTE: .gen_cdr3() returns the full output tuple
+        expected = ('TGCAGTGCTAGAGTAAGGGAAGCGGGAAGGACCTACACCTTC',
+                     'CSARVREAGRTYTF',
+                     29,
+                     1,
+                     {'V': 29,
+                      'D': 2,
+                      'J': 1,
+                      'delV': 5,
+                      'delJ': 15,
+                      'delDl': 10,
+                      'delDr': 7,
+                      'insVD': 7,
+                      'insDJ': 6})
+        assert result == expected
+        """
+        if V is not None:
+            #print(F"V SPECIFIED {V}")
+            #print(f"{V} gene_to_num_str {gene_to_num_str(V, 'V')}")
+            try: 
+               # print(f"pgen_model.V_mask_mapping: {self.pgen_model.V_mask_mapping[gene_to_num_str(V, 'V')]}")
+                vnum = random.choice(self.pgen_model.V_mask_mapping[gene_to_num_str(V, "V")])
+            except KeyError:
+                warnings.warn(f"{V}:{gene_to_num_str(V, 'V')} not supported in Olga pgen_model, returning None")
+                return None
+        else:
+            vnum = None  
+            
+            #print(vnum)
+
+        if J is not None:
+            #print(F"J SPECIFIED {J}")
+            #print(f"{J} gene_to_num_str {gene_to_num_str(J, 'J')}")
+            try:
+                #print(f"pgen_model.J_mask_mapping: {self.pgen_model.J_mask_mapping[gene_to_num_str(J, 'J')]}")
+                jnum = random.choice(self.pgen_model.J_mask_mapping[gene_to_num_str(J, "J")])
+            except KeyError:
+                warnings.warn(f"{J}:{gene_to_num_str(J, 'J')} not supported in Olga pgen_model, returning None")
+                return None
+        else:
+            jnum = None       
+
+        if V is not None:
+            generated = self.seq_gen_model.gen_rnd_prod_CDR3(V = vnum, J= jnum)
+            #if generated is not None:
+            return generated
+            #else:
+            #    return None
+        else:
+            return self.seq_gen_model.gen_rnd_prod_CDR3()
+
+        # if V is not None:
+        #     return 1
+        #     print("DIRECTED")
+        #     print((vnum,jnum))
+        #     self.seq_gen_model.gen_rnd_prod_CDR3(V = vnum, J = jnum)
+        # else:
+        #return self.seq_gen_model.gen_rnd_prod_CDR3()
+
+
     def compute_aa_cdr3_pgen(self, CDR3_seq, V_usage_mask_in = None, J_usage_mask_in = None):
         """Compute Pgen for the amino acid sequence CDR3_seq.
 
@@ -210,7 +338,7 @@ class OlgaModel:
 
 
 
-
+# 
 
 
 

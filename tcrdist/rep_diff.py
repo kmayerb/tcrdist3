@@ -76,8 +76,7 @@ def neighborhood_diff(clone_df, pwmat, x_cols, count_col='count', knn_neighbors=
                                   x_cols=x_cols,
                                   count_col=count_col,
                                   knn_neighbors=knn_neighbors,
-                                  knn_radius=knn_radius,
-                                  cluster_ind=cluster_ind)
+                                  knn_radius=knn_radius)
     if not test_method is None:
         res = hd.cluster_association_test(res, y_col='cmember', method=test_method)
     return res

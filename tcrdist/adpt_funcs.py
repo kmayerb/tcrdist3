@@ -238,7 +238,7 @@ def cluster_index_to_df(cluster_index):
     return cluster_df
 
 
-def get_centroid_seq(df):
+def get_centroid_seq(df, cdr3_name = 'cdr3_b_aa'):
     """
     Given a list of sequences, returns the sequence with the minimum 
     sum of distances to all other seqs in the list.
@@ -267,9 +267,9 @@ def get_centroid_seq(df):
     """
     #import pwseqdist as pw
     #from scipy.spatial.distance import squareform
-    seqs = df['cdr3_b_aa']
+    seqs = df[cdr3_name]
     if len(seqs) < 3:
-        return df.head(1)['cdr3_b_aa'], None, None, None
+        return df.head(1)[cdr3_name], None, None, None
 
     metrics = {
             "cdr3_b_aa" : pw.metrics.nb_vector_tcrdist,
@@ -300,9 +300,76 @@ def get_centroid_seq(df):
 
     dmat = dmat.astype(int)
     iloc_idx= dmat.sum(axis = 0).argmin()
-    centroid_seq  = df['cdr3_b_aa'].to_list()[iloc_idx]
+    centroid_seq  = df[cdr3_name].to_list()[iloc_idx]
     loc_idx = df.index.to_list()[iloc_idx]
     return centroid_seq, dmat, iloc_idx, loc_idx
+
+def get_centroid_seq_alpha(df, cdr3_name = 'cdr3_a_aa'):
+    """
+    Given a list of sequences, returns the sequence with the minimum 
+    sum of distances to all other seqs in the list.
+
+    Parameters
+    ----------
+    seqs : list
+        list of strings (amino acid rep)
+    metric : func
+        defaults to pw.metrics.nw_hamming_metric
+
+    Returns
+    -------
+    centroid_seq : str
+
+    Example 
+    -------
+    >>> seqs = ['CASSEILAALGTQYF', 'CASSWTSRETQYF', 'CASSLAQETQYF', 'CASSLAPGDVSQYF', 'CASSWDQETQYF', 'CASSLWWDSGANVLTF', 'CASSLARTLSSGANVLTF', 'CASIPGTLFTFSGANVLTF', 'CASSFASSGANVLTF', 'CASSYRLLSGANVLTF']	
+    >>> get_centroid_seq(seqs)
+    'CASSFASSGANVLTF'
+
+    Notes 
+    -----
+    In case of multiple occurrences of the minimum values, the indices 
+    corresponding to the first occurrence are returned.
+    """
+    #import pwseqdist as pw
+    #from scipy.spatial.distance import squareform
+    seqs = df[cdr3_name]
+    if len(seqs) < 3:
+        return df.head(1)[cdr3_name], None, None, None
+
+    metrics = {
+            "cdr3_a_aa" : pw.metrics.nb_vector_tcrdist,
+            "pmhc_a_aa" : pw.metrics.nb_vector_tcrdist,
+            "cdr2_a_aa" : pw.metrics.nb_vector_tcrdist,
+            "cdr1_a_aa" : pw.metrics.nb_vector_tcrdist}
+
+    # Define weights
+    weights = { "cdr3_a_aa" : 3,
+                "pmhc_a_aa" : 1,
+                "cdr2_a_aa" : 1,
+                "cdr1_a_aa" : 1}
+
+    kargs = {
+                "cdr3_a_aa" : {'use_numba': True, 'distance_matrix': pw.matrices.tcr_nb_distance_matrix, 'dist_weight': 1, 'gap_penalty':4, 'ntrim':3, 'ctrim':2, 'fixed_gappos':False},
+                "pmhc_a_aa" : {'use_numba': True, 'distance_matrix': pw.matrices.tcr_nb_distance_matrix, 'dist_weight': 1, 'gap_penalty':4, 'ntrim':0, 'ctrim':0, 'fixed_gappos':True},
+                "cdr2_a_aa" : {'use_numba': True, 'distance_matrix': pw.matrices.tcr_nb_distance_matrix, 'dist_weight': 1, 'gap_penalty':4, 'ntrim':0, 'ctrim':0, 'fixed_gappos':True},
+                "cdr1_a_aa" : {'use_numba': True, 'distance_matrix': pw.matrices.tcr_nb_distance_matrix, 'dist_weight': 1, 'gap_penalty':4, 'ntrim':0, 'ctrim':0, 'fixed_gappos':True}}
+    
+    dmat = _pws(df = df,
+        metrics = metrics, 
+        weights = weights, 
+        store = False,
+        uniquify=False,
+        kargs = kargs)
+        
+    dmat = dmat['tcrdist']
+
+    dmat = dmat.astype(int)
+    iloc_idx= dmat.sum(axis = 0).argmin()
+    centroid_seq  = df[cdr3_name].to_list()[iloc_idx]
+    loc_idx = df.index.to_list()[iloc_idx]
+    return centroid_seq, dmat, iloc_idx, loc_idx
+
 
 
 def bulk_adaptive_dataset_to_tcrdist3_clone_df( bulk_filename = None,
@@ -490,7 +557,7 @@ def default_dist_clust_centroids(infile, cpus = 1, cdr3_b_aa_weight = 5, max_dis
     return tr
 
 
-def get_basic_centroids(tr, max_dist = 200, look = False):
+def get_basic_centroids(tr, max_dist = 200, look = False, cdr3_name = 'cdr3_b_aa'):
 
     # Cluster based on the max_dist
     ci = simple_cluster_index(tr.pw_beta, t = max_dist)
@@ -519,8 +586,8 @@ def get_basic_centroids(tr, max_dist = 200, look = False):
         publicity = ispublic(clone_cluster_df)
         try:
             centroid, dmatrix, iloc_ind, loc_ind, = get_centroid_seq(df = tr.clone_df.iloc[r['neighbors'],])
-            assert clone_cluster_df.iloc[iloc_ind,]['cdr3_b_aa'] == centroid
-            assert tr.clone_df.iloc[loc_ind,]['cdr3_b_aa'] == centroid
+            assert clone_cluster_df.iloc[iloc_ind,][ cdr3_name] == centroid
+            assert tr.clone_df.iloc[loc_ind,][ cdr3_name] == centroid
             centroids.append( clone_cluster_df.iloc[iloc_ind,].reset_index(drop=True).copy())
             if look: 
                 #print(dmatrix)
