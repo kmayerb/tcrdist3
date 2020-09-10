@@ -149,8 +149,9 @@ class TCRrep:
             self.clone_df = clone_df 
 
             if cell_df is None:
-                cell_df = pd.DataFrame()
-            self.cell_df = cell_df
+                cell_df = pd.DataFrame()   
+            self.cell_df = cell_df            
+           
             self._validate_cell_df()
             self.clone_df = clone_df
             self.df2 = df2
@@ -698,7 +699,8 @@ class TCRrep:
             
             if "count" not in cell_df_columns:
                 warnings.warn("cell_df needs a counts column to track clonal number of frequency\n")
-            
+                warnings.warn("No 'count' column provided; count column set to 1")
+                self.cell_df['count'] = 1
             if "alpha" in self.chains:
                 if not "cdr3_a_aa" in cell_df_columns:
                     warnings.warn("cell_df needs a column called 'cdr3_a_aa' to track the CDR3 amino acid sequence\n")
