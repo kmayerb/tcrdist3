@@ -10,6 +10,14 @@ tcrdist3 is a python API-enabled toolkit for analyzing T-cell receptor repertoir
 
 ## Installation
 
+[![PyPI version](https://badge.fury.io/py/tcrdist3.svg)](https://badge.fury.io/py/tcrdist3)
+
+```
+pip install tcrdist3
+```
+
+or 
+
 ```
 pip install git+https://github.com/kmayerb/tcrdist3.git@0.1.6
 ```
