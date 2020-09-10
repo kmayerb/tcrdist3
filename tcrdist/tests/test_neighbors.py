@@ -8,6 +8,7 @@ def test_example():
 	The purpose of this example is to show the use of 
 	chosing thresholds based on background discovery rate
 	"""
+	import os
 	import pandas as pd
 	import numpy as np 
 	from tcrdist.repertoire import TCRrep
@@ -17,15 +18,16 @@ def test_example():
 	# Set the acceptable fraction of background that may 
 	# be in the nieghborhood of a TCR
 
-
-	df_background = pd.read_csv("m60_bkgd_test_input.csv")
+	fn = os.path.join('tcrdist', 'data', 'covid19', "m60_bkgd_test_input.csv")
+	df_background = pd.read_csv(fn)
 	
 	tr_background = TCRrep(cell_df = df_background, 
 					organism = "human", 
 					chains= ['beta'], 
 					compute_distances = False)
 
-	df = pd.read_csv("m60_test_input.csv")
+	fn = os.path.join('tcrdist', 'data', 'covid19', "m60_test_input.csv")
+	df = pd.read_csv(fn)
 	
 	tr = TCRrep(cell_df = df, 
 	            organism = 'human', 
@@ -44,7 +46,7 @@ def test_example():
 								tr_background = tr_background,
 								ctrl_bkgd = 2*10**-5, 
 								col = 'cdr3_b_aa',
-								ncpus = 6,
+								ncpus = 2,
 								thresholds = [x for x in range(0,50,2)])
 	
 	centers_df.sort_values(['target_hits'], ascending = False)
