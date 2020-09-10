@@ -6,6 +6,156 @@ import pandas as pd
 import numpy as np
 import re
 
+
+def filter_is(df, col, val):
+    return df[df[col] == val]
+
+def filter_in(df, col, vals):
+    ind = [np.any(x in vals) for x in df[col]]
+    return df[ind]
+
+def filter_gt(df, col, val):
+    return df[df[col] > val]
+
+def filter_lt(df, col, val):
+    return df[df[col] < val]
+
+
+def is_subset(set1, set2):
+    """
+    Return True, if all members of set2 are contained in set1. 
+    i.e, set2 is a subset of set1. See example for clarity:
+    Example
+    -------
+    >>> is_subset(set(["A","B"]), set(["A"]))
+    True
+    >>> is_subset(set(["A","B"]), set(["A","C"]))
+    False
+    """
+    return set(set2)-set(set1) == set()
+
+
+def is_almost_subset(set1, set2, min_set_diff = 2):
+    """
+    Return True, if no more than min_set_diff members of set2 
+    are contained in set1. 
+    i.e, set2 is almost a subset of set1. See example for clarity:
+    
+    Example
+    -------
+    >>>  is_almost_subset(set(["A","B","C","D"]), set(["A", "K"]), 2)
+    True
+    >>> is_almost_subset(set(["A","B","C","D"]), set(["A", "K"]), 1)
+    False
+
+    """
+    return len(set(set2)-set(set1)) < min_set_diff
+
+
+def test_for_subsets(list_of_sets):
+    """
+
+    test_for_subsets (formerly known as turtles_all_the_way_down)
+
+    For a ranked list of sets, return a vector where 1 
+    indicated the set is not a subset of any of sets
+    that come before it in the list. 
+
+    This is useful for eliminating clusters (sets) of TCRs
+    which are smaller than a higher ranked and larger set 
+    that contains all its members. See example for clarity:
+
+    Example 
+    -------
+    >>> test_for_subsets([["A","B","C"], ["A","C","D"], ["A","D"], ["B","E"],["B","C"]])
+    [1, 1, 0, 1, 0] 
+    >>> test_for_subsets([ [1,2,3], [1,3,4], [1,4], [2,5],[2,3]])
+    [1, 1, 0, 1, 0]
+    """
+    tracker = [1]
+    if isinstance(list_of_sets, pd.Series):
+        list_of_sets = list_of_sets.to_list()
+    checked_sets = [list_of_sets[0]]
+    for s in list_of_sets[1:]:
+        if np.any([is_subset(cs, s) for cs in checked_sets]):
+            tracker.append(0)
+        else: 
+            tracker.append(1)
+            checked_sets.append(s)
+    assert len(tracker) == len(list_of_sets)
+    return tracker
+
+
+def test_for_almost_subsets(list_of_sets, thr = 3):
+    """
+
+    test_for_subsets (formerly known as turtles_all_the_way_down)
+
+    For a ranked list of sets, return a vector where 1 
+    indicated the set is not a subset of any of sets
+    that come before it in the list. 
+
+    This is useful for eliminating clusters (sets) of TCRs
+    which are smaller than a higher ranked and larger set 
+    that contains all its members. See example for clarity:
+
+    Example 
+    -------
+    >>> test_for_subsets([["A","B","C"], ["A","C","D"], ["A","D"], ["B","E"],["B","C"]])
+    [1, 1, 0, 1, 0] 
+    >>> test_for_subsets([ [1,2,3], [1,3,4], [1,4], [2,5],[2,3]])
+    [1, 1, 0, 1, 0]
+    """
+    tracker = [1]
+    if isinstance(list_of_sets, pd.Series):
+        list_of_sets = list_of_sets.to_list()
+    checked_sets = [list_of_sets[0]]
+    for s in list_of_sets[1:]:
+        if np.any([is_almost_subset(cs, s, thr) for cs in checked_sets]):
+            tracker.append(0)
+        else: 
+            tracker.append(1)
+            checked_sets.append(s)
+    assert len(tracker) == len(list_of_sets)
+    return tracker
+
+
+
+def _dist_summ(data, precision = 1, scientific = True):
+    """
+    Summarise distribution [as min,q1,median,q3, max]
+    
+    Parameters
+    ----------
+    data : list
+        List of numeric data
+    precision : int
+        How many integers precision in scientific notation = 1, 
+    scientific : bool
+        Default is True, to return result in scientific notation 
+
+    Examples
+    --------
+    >>> _dist_summ([1,2,3,4,5])
+    ['1.e+00', '2.e+00', '3.e+00', '4.e+00', '5.e+00']
+    
+    _dist_summ([1,2,3,4,5], scientific=False)
+    [1, 2.0, 3.0, 4.0, 5]
+
+    """
+    dmin = np.min(data)
+    dQ1 = np.percentile(data, q = 25, interpolation = 'midpoint') 
+    dmedian = np.median(data)
+    dQ3 = np.percentile(data, q = 75, interpolation = 'midpoint') 
+    dmax = np.max(data)
+    r = [dmin, dQ1, dmedian, dQ3, dmax]
+    if scientific:
+        return [np.format_float_scientific(s, precision = precision) for s in r]
+    else:
+        return r 
+
+
+
 def _select(df, iloc_rows, col = 'cdr3_b_aa'):
     return df.iloc[iloc_rows,][col].to_list()
 
@@ -44,7 +194,10 @@ def _summ(df, indices, column = None , f=None, fdf = None, **kwargs):
     summary = list()
     for ind in indices:
         if f is not None:
-            selection = df.iloc[ind, ][column].to_list()
+            if isinstance(df.iloc[ind, ][column], pd.Series):
+                selection = df.iloc[ind, ][column].to_list()
+            else:
+                selection = df.iloc[ind, ][column]
             summary.append(f(selection, **kwargs))
         elif fdf is not None:
             selection = df.iloc[ind, ]
