@@ -17,7 +17,7 @@ opts = dict(name='tcrdist3',
             license='MIT',
             author='Koshlan Mayer-Blackwell',
             author_email='kmayerbl@fredhutch.org',
-            version='0.1.6',
+            version='0.1.7',
             packages=PACKAGES,
             package_data={"": ["*.csv","*.tsv","*.txt"]},
            )
@@ -35,7 +35,8 @@ install_reqs = [
       'palmotif>=0.2',
       'tcrsampler>=0.1.8',
       'parmap>=1.5.2',
-      'olga>=1.2.1']
+      'olga>=1.2.1',
+      'dill>=0.3.2']
 
 if __name__ == "__main__":
       setup(**opts, install_requires=install_reqs)
