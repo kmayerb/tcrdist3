@@ -107,6 +107,9 @@ def bkgd_cntl_nn(  tr,
     ecdfs = parmap.map(_compute_ecdf_rowwise, range(0,tr.rw_beta.shape[0]), data = tr.rw_beta, thresholds = thresholds, pm_pbar = True, pm_processes = ncpus)
     # Based on acceptable ctrl_bkgd, we find max acceptable radi from each TCR
     max_radi = [x[x<=ctrl_bkgd].last_valid_index() for x in ecdfs]
+    # THERE IS A NOTABLE BUG IN THE ABOVE LINE!! IF a radius is None (the next line will fail, thus set Nones to 0.
+    max_radi = [x if (x is not None) else 0 for x in max_radi]
+
     # Confirm that this procedure did infact control background hits
     assert np.all([ np.sum(tr.rw_beta[i,:] <= t) < tr.rw_beta.shape[1]*ctrl_bkgd for t,i in zip(max_radi, range(0,tr.rw_beta.shape[0]))])
     # Tabulate target-set hits. (That is hits within epitope specific set)  
