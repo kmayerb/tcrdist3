@@ -111,7 +111,8 @@ def bkgd_cntl_nn(  tr,
     max_radi = [x if (x is not None) else 0 for x in max_radi]
 
     # Confirm that this procedure did infact control background hits
-    assert np.all([ np.sum(tr.rw_beta[i,:] <= t) < tr.rw_beta.shape[1]*ctrl_bkgd for t,i in zip(max_radi, range(0,tr.rw_beta.shape[0]))])
+    # NOTE WE CAN NO LONGER GAURANTEE THIS IS TRUE IF NUMBER OF PERFECT MATCHES EXCEEDS 0
+    # assert np.all([ np.sum(tr.rw_beta[i,:] <= t) < tr.rw_beta.shape[1]*ctrl_bkgd for t,i in zip(max_radi, range(0,tr.rw_beta.shape[0]))])
     # Tabulate target-set hits. (That is hits within epitope specific set)  
     target_hits = [np.sum(tr.pw_beta[i,:] <= t) for t,i in zip(max_radi, range(0,tr.pw_beta.shape[0]))]
     background_hits = [np.sum(tr.rw_beta[i,:] <= t) for t,i in zip(max_radi, range(0,tr.rw_beta.shape[0]))]
