@@ -12,7 +12,7 @@ def test_example():
 	import pandas as pd
 	import numpy as np 
 	from tcrdist.repertoire import TCRrep
-	from tcrdist.neighbors import compute_ecdf, bkgd_cntl_nn
+	from tcrdist.neighbors import compute_ecdf, bkgd_cntl_nn2
 	from tcrdist.automate import auto_pgen
 	from tcrdist.regex import _index_to_regex_str, _index_to_seqs 
 	from tcrdist.summarize import _summ, _dist_summ, _select, filter_gt, filter_is, test_for_subsets, test_for_almost_subsets
@@ -41,7 +41,7 @@ def test_example():
 
 	assert tr.rw_beta.shape[0] == tr.clone_df.shape[0]
 
-	centers_df = bkgd_cntl_nn(	tr = tr, 
+	centers_df = bkgd_cntl_nn2(	tr = tr, 
 								tr_background = tr_background,
 								ctrl_bkgd = 2*10**-5, 
 								col = 'cdr3_b_aa',
