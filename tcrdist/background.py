@@ -202,5 +202,5 @@ def make_vj_matched_background(
         from tcrsampler.sampler import TCRsampler
         ts = TCRsampler(default_background = 'britanova_human_beta_t_cb.tsv.sampler.tsv')
     df = get_gene_frequencies(ts = ts, df = df, cols = cols)
-    df = df.sample(size).reset_index(drop = True)
+    df = df.reset_index(drop = True)
     return(df)
