@@ -204,3 +204,67 @@ def make_vj_matched_background(
     df = get_gene_frequencies(ts = ts, df = df, cols = cols)
     df = df.reset_index(drop = True)
     return(df)
+
+
+from tcrsampler.sampler import TCRsampler
+
+
+def sample_britanova(size = 100000, random_state =24082020):
+    df = _get_britanova_human_beta_chord_blood_subject_stratified_background(size = size , random_state =random_state)
+    return df
+
+def _get_britanova_human_beta_chord_blood_subject_stratified_background(size = 100000, random_state =24082020):
+    """
+    Produce a background, stratfied by 8 subjects up to 960,000 TCR clones. 
+
+    Unique TCRs are returned without consideration of their clonal frequency.
+
+    Parameters
+    ----------
+    size : int 
+        Size of background
+    random_state : int
+        Seed for random. sample
+    """
+    
+    """Check for background file. If not present, download"""
+    if not 'britanova_human_beta_t_cb.tsv.sampler.tsv' in TCRsampler.currently_available_backgrounds():
+        TCRsampler.download_background_file('britanova_human_beta_t_cb.tsv.sampler.tsv.zip')
+    else:
+        pass 
+        # print("CONGRATS 'britanova_human_beta_t_cb.tsv.sampler.tsv' ALREADY INSTALLED")
+
+    ts = TCRsampler(default_background='britanova_human_beta_t_cb.tsv.sampler.tsv')
+    # In [10]: ts.ref_df.subject.value_counts()
+    # Out[10]:
+    # A5-S18.txt    1073416
+    # A5-S17.txt     825507
+    # A5-S13.txt     692050
+    # A5-S12.txt     573373
+    # A5-S16.txt     559980
+    # A5-S11.txt     519582
+    # A5-S14.txt     302288
+    # A5-S15.txt     120302 (NOTE THIS IS THE SMALLED STAMPLE)
+
+    total = size  #100K
+    nsubject = 8
+    import math
+    per_sample = math.ceil( total / nsubject)
+    if per_sample > 120000:
+        raise ValueError("Size: {size} exceed max size (960000) for valid stratification based on smallest sample")
+
+    samples = []
+    for subject_name, subject_df in ts.ref_df.groupby('subject'):
+        if subject_name == 'A5-S15.txt':
+            samples.append(subject_df.sample(per_sample, 
+                replace = False,
+                random_state = random_state).copy().reset_index(drop = True))
+        else:
+            samples.append(subject_df.sample(per_sample, 
+                replace = False, 
+                random_state = random_state).copy().reset_index(drop = True))
+
+    bitanova_unique_clones_sampled = pd.concat(samples).reset_index(drop = True)
+    bitanova_unique_clones_sampled = bitanova_unique_clones_sampled[['v_reps', 'j_reps', 'cdr3']].rename(columns = {'v_reps':'v_b_name', 'j_reps':'j_b_name','cdr3':'cdr3_b_aa'})
+    return bitanova_unique_clones_sampled 
+
