@@ -3,9 +3,8 @@ import numpy as np
 import os.path as op
 import os
 import olga
-import olga.load_model as load_model
-#import tcrdist.olga_load_model as load_model #(USE THIS FOR PSUEDOGENE ASWELL AS FUCNTIONAL CDR3 GENERATION)
-
+#import olga.load_model as load_model
+import tcrdist.olga_load_model as load_model #(USE THIS FOR PSUEDOGENE ASWELL AS FUNCTIONAL CDR3 GENERATION)
 import tcrdist.olga_directed as seq_gen
 
 import olga.generation_probability as generation_probability

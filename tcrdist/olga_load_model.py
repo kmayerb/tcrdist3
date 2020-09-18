@@ -151,7 +151,7 @@ class GenomicData(object):
         
         for V in self.genV:
             try:
-                if V_anchor_pos[V[0]][0] > 0 and V_anchor_pos[V[0]][1] != 'X': #Check for functionality
+                if V_anchor_pos[V[0]][0] > 0 and V_anchor_pos[V[0]][1] != 'X': #Check for functionality, here we allow P
                     V[1] = V[2][V_anchor_pos[V[0]][0]:]
                 else:
                     V[1] = ''
@@ -160,7 +160,7 @@ class GenomicData(object):
     
         for J in self.genJ:
             try:
-                if J_anchor_pos[J[0]][0] > 0 and J_anchor_pos[J[0]][1] != 'X': #Check for functionality
+                if J_anchor_pos[J[0]][0] > 0 and J_anchor_pos[J[0]][1] != 'X': #Check for functionality, here we allow P
                     J[1] = J[2][:J_anchor_pos[J[0]][0]+3]
                 else:
                     J[1] = ''

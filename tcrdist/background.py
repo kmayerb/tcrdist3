@@ -10,6 +10,7 @@ import numpy as np
 import os
 import pandas as pd
 import sys
+import warnings
 
 from collections import Counter
 from tcrdist.pgen import OlgaModel
@@ -206,10 +207,83 @@ def make_vj_matched_background(
     return(df)
 
 
-from tcrsampler.sampler import TCRsampler
+def get_stratified_gene_usage_frequency(ts = None, replace = True):
+    """
+    MODIFIES A TCRsampler instance with esitmates vj_occur_freq_stratified by subject
+    
+    Parameters
+    ----------
+    ts : tcrsampler.sampler.TCRsampler
+
+    replace : bool 
+        if True, ts.v_occur_freq is set to ts.v_occur_freq_stratified 
+        so other functions will work as befor.
+
+    Returns
+    -------
+    ts : tcrsampler.sampler.TCRsampler
+
+    """
+
+    if ts is None:
+        ts = TCRsampler(default_background = 'britanova_human_beta_t_cb.tsv.sampler.tsv')
+
+    # (1/uniqueTCR_sample_depth) / nsubject
+    nsubjects = len(ts.ref_df.subject.value_counts())
+    inverse_tcrs_per_subject = (1/ts.ref_df.subject.value_counts()) / nsubjects
+    # <weights df> 
+    ws_df = pd.DataFrame({'subject': inverse_tcrs_per_subject.index, 'sweight': inverse_tcrs_per_subject}).reset_index(drop = True)
+    # left join <ws_df> to provide a subject specific weight 
+    df = ts.ref_df.merge(ws_df, how = 'left', on = 'subject').copy()
+    # All sweights should sum to 1.0, up to rounding error
+    assert np.isclose(df.sweight.sum() ,1.0)
+
+    # SUBJECT STRATIFIED V,J FREQUENCIES
+    # For each V,J combo take the weighted sum across all samples
+    df_vj_occur_freq = df[['sweight','v_reps','j_reps']].groupby(['v_reps','j_reps']).sum().reset_index().rename(columns = {'sweight': 'pVJ'})
+    assert np.isclose(df_vj_occur_freq.pVJ.sum() ,1.0)
+    df_vj_occur_freq
+    # Covert to a dictionary keyed on (V,J)
+    ts.vj_occur_freq_stratified = { (x[0],x[1]): x[2] for x in df_vj_occur_freq.to_dict('split')['data']}
+
+    # SUBJECT STRATIFIED VFREQUENCIES
+    df_v_occur_freq = df[['sweight','v_reps']].groupby(['v_reps']).sum().reset_index().rename(columns = {'sweight': 'pV'})
+    assert np.isclose(df_v_occur_freq.pV.sum() ,1.0)
+    df_v_occur_freq
+    # Covert to a dictionary keyed on (V,J)
+    ts.v_occur_freq_stratified = { x[0]:x[1] for x in df_v_occur_freq.to_dict('split')['data']}
+
+    # SUBJECT STRATIFIED JFREQUENCIES
+    df_j_occur_freq = df[['sweight','j_reps']].groupby(['j_reps']).sum().reset_index().rename(columns = {'sweight': 'pJ'})
+    assert np.isclose(df_j_occur_freq.pJ.sum() ,1.0)
+    df_j_occur_freq
+    # Covert to a dictionary keyed on (V,J)
+    ts.j_occur_freq_stratified = { x[0]:x[1] for x in df_j_occur_freq.to_dict('split')['data']}
+    
+    if replace:
+        warnings.warn("REPLACING ts.vj_occur_freq WITH ts.vj_occur_freq_stratified")
+        warnings.warn("REPLACING ts.v_occur_freq  WITH ts.v_occur_freq_stratified")
+        warnings.warn("REPLACING ts.j_occur_freq  WITH ts.j_occur_freq_stratified")
+        ts.vj_occur_freq = ts.vj_occur_freq_stratified 
+        ts.v_occur_freq  = ts.v_occur_freq_stratified 
+        ts.j_occur_freq  = ts.j_occur_freq_stratified 
+
+    return ts 
 
 
 def sample_britanova(size = 100000, random_state =24082020):
+    """
+    Produce a background, stratfied by 8 subjects up to 960,000 TCR clones. 
+
+    Unique TCRs are returned without consideration of their clonal frequency.
+
+    Parameters
+    ----------
+    size : int 
+        Size of background
+    random_state : int
+        Seed for random. sample
+    """
     df = _get_britanova_human_beta_chord_blood_subject_stratified_background(size = size , random_state =random_state)
     return df
 
@@ -265,6 +339,6 @@ def _get_britanova_human_beta_chord_blood_subject_stratified_background(size = 1
                 random_state = random_state).copy().reset_index(drop = True))
 
     bitanova_unique_clones_sampled = pd.concat(samples).reset_index(drop = True)
-    bitanova_unique_clones_sampled = bitanova_unique_clones_sampled[['v_reps', 'j_reps', 'cdr3']].rename(columns = {'v_reps':'v_b_name', 'j_reps':'j_b_name','cdr3':'cdr3_b_aa'})
+    bitanova_unique_clones_sampled = bitanova_unique_clones_sampled[['v_reps', 'j_reps', 'cdr3']].rename(columns = {'v_reps':'v_b_gene', 'j_reps':'j_b_gene','cdr3':'cdr3_b_aa'})
     return bitanova_unique_clones_sampled 
 
