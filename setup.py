@@ -17,7 +17,7 @@ opts = dict(name='tcrdist3',
             license='MIT',
             author='Koshlan Mayer-Blackwell',
             author_email='kmayerbl@fredhutch.org',
-            version='0.1.7',
+            version='0.1.8',
             packages=PACKAGES,
             package_data={"": ["*.csv","*.tsv","*.txt"]},
            )
