@@ -29,10 +29,14 @@ One or more of the following columns are required and are case-sensitive
     - 'cdr3_a_aa', 'cdr3_b_aa', 'cdr3_g_aa', or  'cdr3a_d_aa'
     - 'cdr3_a_nucseq', 'cdr3_b_nucseq, 'cdr3_g_nucseq', or 'cdr3a_d_nucseq' 
 
+
+For v_x_gene, include the full IMGT gene name and allele (e.g., TRBV1*01). If you don’t know the allele, use *01. But an allele must be present to infer v_b_genes based on matching one of the id rows in this `table <https://github.com/kmayerb/tcrdist3>`_.
+
+
 .. tip::
 
     Two of each can be supplied for paired analysis. tcrdistances can be calculated 
-    without nucleotide sequences, but most other features require them.
+    without nucleotide sequences, but some other features require them.
 
 
 The following is required.
@@ -51,6 +55,7 @@ The following are usually inferred from germline reference v-gene but can be sup
 .. tip::
 
   CDR2.5, the pMHC-facing loop between CDR2 and CDR3, are referred to in tcrdist3 as pmhc_a and phmc_b, respectively.
+
 
 
 
