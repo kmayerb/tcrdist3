@@ -199,9 +199,11 @@ def make_vj_matched_background(
     
     df = pd.concat(dfs).reset_index(drop = True)
     df = df[df.cdr3_b_aa.notna()][cols]
+    
     if ts is None:
         from tcrsampler.sampler import TCRsampler
         ts = TCRsampler(default_background = 'britanova_human_beta_t_cb.tsv.sampler.tsv')
+        ts = get_stratified_gene_usage_frequency(ts, replace = True)
     df = get_gene_frequencies(ts = ts, df = df, cols = cols)
     df = df.reset_index(drop = True)
     return(df)
@@ -309,6 +311,7 @@ def _get_britanova_human_beta_chord_blood_subject_stratified_background(size = 1
         # print("CONGRATS 'britanova_human_beta_t_cb.tsv.sampler.tsv' ALREADY INSTALLED")
 
     ts = TCRsampler(default_background='britanova_human_beta_t_cb.tsv.sampler.tsv')
+    ts = get_stratified_gene_usage_frequency(ts = ts, replace = True)
     # In [10]: ts.ref_df.subject.value_counts()
     # Out[10]:
     # A5-S18.txt    1073416

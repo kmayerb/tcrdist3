@@ -11,64 +11,7 @@ import parmap
 from tcrdist.repertoire import TCRrep
 from tcrdist.regex import _index_to_regex_str, _index_to_seqs, _multi_regex 
 from scipy.stats import chi2_contingency
-from tcrsampler.sampler import TCRsampler
 
-
-
-def _get_britanova_human_beta_chord_blood_subject_stratified_background(size = 100000, random_state =24082020):
-    """
-    Produce a background, stratfied by 8 subjects up to 960,000 TCR clones. 
-
-    Unique TCRs are returned without consideration of their clonal frequency.
-
-    Parameters
-    ----------
-    size : int 
-        Size of background
-    random_state : int
-        Seed for random. sample
-    """
-    
-    """Check for background file. If not present, download"""
-    if not 'britanova_human_beta_t_cb.tsv.sampler.tsv' in TCRsampler.currently_available_backgrounds():
-        TCRsampler.download_background_file('britanova_human_beta_t_cb.tsv.sampler.tsv.zip')
-    else:
-        pass 
-        # print("CONGRATS 'britanova_human_beta_t_cb.tsv.sampler.tsv' ALREADY INSTALLED")
-
-    ts = TCRsampler(default_background='britanova_human_beta_t_cb.tsv.sampler.tsv')
-    # In [10]: ts.ref_df.subject.value_counts()
-    # Out[10]:
-    # A5-S18.txt    1073416
-    # A5-S17.txt     825507
-    # A5-S13.txt     692050
-    # A5-S12.txt     573373
-    # A5-S16.txt     559980
-    # A5-S11.txt     519582
-    # A5-S14.txt     302288
-    # A5-S15.txt     120302 (NOTE THIS IS THE SMALLED STAMPLE)
-
-    total = size  #100K
-    nsubject = 8
-    import math
-    per_sample = math.ceil( total / nsubject)
-    if per_sample > 120000:
-        raise ValueError("Size: {size} exceed max size (960000) for valid stratification based on smallest sample")
-
-    samples = []
-    for subject_name, subject_df in ts.ref_df.groupby('subject'):
-        if subject_name == 'A5-S15.txt':
-            samples.append(subject_df.sample(per_sample, 
-                replace = False,
-                random_state = random_state).copy().reset_index(drop = True))
-        else:
-            samples.append(subject_df.sample(per_sample, 
-                replace = False, 
-                random_state = random_state).copy().reset_index(drop = True))
-
-    bitanova_unique_clones_sampled = pd.concat(samples)
-    bitanova_unique_clones_sampled = bitanova_unique_clones_sampled[['v_reps', 'j_reps', 'cdr3']].rename(columns = {'v_reps':'v_b_name', 'j_reps':'j_b_name','cdr3':'cdr3_b_aa'})
-    return bitanova_unique_clones_sampled 
 
 def compute_population_estimate_ecdf(data, weights = None, thresholds=None):
     """
@@ -96,69 +39,6 @@ def compute_population_estimate_ecdf(data, weights = None, thresholds=None):
     return ecdf
 
 
-
-def compute_ecdf(data, weights = None, counts=None, thresholds=None):
-    """
-    Computes the empirical cumulative distribution function at pre-specified
-    thresholds. Assumes thresholds is sorted and should be unique.
-
-    data : np.array
-
-    threshold : np.array or None
-    
-    counts : np.array or None
-
-    weights :  np.array or None
-         vector of W_vj  (i.e  actual_freq_vj / sampled_freq_vj)
-    
-    Example
-    -------
-    >>> compute_ecdf(data = np.array([1,2,3,4,5,6]), counts =np.array([100,100,100,100,100,100]), thresholds = np.array([3]))
-    array([0.5])
-    >>> compute_ecdf(data = np.array([1,2,3,4,5,6]), weights =np.array([1,1,1,1,1,1]), counts =np.array([100,100,100,100,100,100]), thresholds = np.array([3]))
-    array([0.5])
-    >>> compute_ecdf(data = np.array([1,2,3,4,5,6]), weights =np.array([10,1,1,1,1,1]), counts =np.array([100,100,100,100,100,100]), thresholds = np.array([3]))
-    array([0.8])
-
-    Notes
-    -----
-    
-    Weights are used when we enriche for V,J combinations that are rare. 
-    For instance if some V,J pairing 
-    occurs at an actual frequency of 1/100 but we provide it at 1/10, 
-    we provide an enrichment weight 
-    (actual_freq_vj / sampled_freq_v)
-
-
-    -----
-    """
-
-    if thresholds is None:
-        thresholds = np.unique(data[:])
-    if counts is None:
-        counts = np.ones(data.shape)
-    
-    if weights is None:
-        weights = np.ones(data.shape)
-    else:
-        weights = np.array(weights)
-    
-    tot = np.sum(counts * weights) 
-    """Vectorized and faster, using broadcasting for the <= expression"""
-    # Step 1 : compare a set of n distances to a set of say 25 threshold 
-        # (n dists x 1) broadcast against (1 x 25 thresholds) ==> (n, 25), where each column representd number of hits below the threshold 
-    M= 1*(data[:, None] <= thresholds[None, :])
-    # Step 2 : Adjust hit be relative weight (i.e. actual_freq_vj / sampled_freq_vj)
-        # Broadcast (n, 25) on weights (n, 1) ==> (n, 25)
-    M = M * weights[:,None] * counts[:,None]
-    # Step 3: Take row sums, producing the weighted sum at each threshold ==> (25,)
-    M =  np.sum(M, axis = 0)
-    # Step 4: Divide by the weighted total (i.e., the amount if all seqs were present, which because of enrichment is far greater than 1)
-    ecdf = M / tot
-
-    return ecdf
-
-
 def _compute_pop_estimate_ecdf_rowwise(i, thresholds, data):
     """
     This is a warpper for compute_ecdf using parmap
@@ -173,21 +53,6 @@ def _compute_weighted_pop_estimate_ecdf_rowwise(i, thresholds, weights, data):
     ec = compute_population_estimate_ecdf(data = data[i,:], weights = weights, thresholds = thresholds)
     return pd.Series(ec, index = thresholds)
 
-
-
-def _compute_ecdf_rowwise(i, thresholds, data):
-    """
-    This is a warpper for compute_ecdf using parmap
-    """
-    ec = compute_ecdf(data = data[i,:], thresholds = thresholds)
-    return pd.Series(ec, index = thresholds)
-
-def _compute_weighted_ecdf_rowwise(i, thresholds, weights, data):
-    """
-    This is a warpper for compute_ecdf using parmap
-    """
-    ec = compute_ecdf(data = data[i,:], weights = weights, thresholds = thresholds)
-    return pd.Series(ec, index = thresholds)
 
 
 def compute_odds_ratio(pos, neg, bpos, bneg, ps = 1):
@@ -275,7 +140,7 @@ def bkgd_cntl_nn2( tr,
     datasets. 
     """ 
     if weights is None:
-        weights = np.one(1, tr.rw_beta.shape[1])
+        weights = np.ones(tr.rw_beta.shape[1])
     thresholds = np.unique(thresholds)
     # for each TCR, we calculate a empirical cummulative 
     # density function along a range of threshold radi
@@ -309,7 +174,6 @@ def bkgd_cntl_nn2( tr,
               'bkgd_hits': bkgd_hits,
               'bkgd_hits_weighted': bkgd_hits_weighted,
               'bkgd_total' :  bkgd_total,
-              'bkgd_weighted_total' : bkgd_weighted_total,
               'ctrl' : ctrl,
               'ctrl_weighted' : ctrl_weighted})
    
@@ -346,7 +210,8 @@ def bkgd_cntl_nn2( tr,
         col = "j_b_gene" 
         centers_df['background_j'] = [tr_background.clone_df.loc[ar,col].to_list() for ar in background_neighbors]
         col  = 'adj_freq_pVJ'
-        centers_df['adj_freq'] = [tr_background.clone_df.loc[ar,col].to_list() for ar in background_neighbors]
+        if col in tr_background.clone_df.columns:
+            centers_df['adj_freq'] = [tr_background.clone_df.loc[ar,col].to_list() for ar in background_neighbors]
     
     if generate_regex:
         col = "cdr3_b_aa"
@@ -399,6 +264,84 @@ def bkgd_cntl_nn2( tr,
 
 
 
+## SOON TO BE DEPRECIATED BELOW THIS POINT:
+
+def compute_ecdf(data, weights = None, counts=None, thresholds=None):
+    """
+    Computes the empirical cumulative distribution function at pre-specified
+    thresholds. Assumes thresholds is sorted and should be unique.
+
+    data : np.array
+
+    threshold : np.array or None
+    
+    counts : np.array or None
+
+    weights :  np.array or None
+         vector of W_vj  (i.e  actual_freq_vj / sampled_freq_vj)
+    
+    Example
+    -------
+    >>> compute_ecdf(data = np.array([1,2,3,4,5,6]), counts =np.array([100,100,100,100,100,100]), thresholds = np.array([3]))
+    array([0.5])
+    >>> compute_ecdf(data = np.array([1,2,3,4,5,6]), weights =np.array([1,1,1,1,1,1]), counts =np.array([100,100,100,100,100,100]), thresholds = np.array([3]))
+    array([0.5])
+    >>> compute_ecdf(data = np.array([1,2,3,4,5,6]), weights =np.array([10,1,1,1,1,1]), counts =np.array([100,100,100,100,100,100]), thresholds = np.array([3]))
+    array([0.8])
+
+    Notes
+    -----
+    
+    Weights are used when we enriche for V,J combinations that are rare. 
+    For instance if some V,J pairing 
+    occurs at an actual frequency of 1/100 but we provide it at 1/10, 
+    we provide an enrichment weight 
+    (actual_freq_vj / sampled_freq_v)
+
+
+    -----
+    """
+
+    if thresholds is None:
+        thresholds = np.unique(data[:])
+    if counts is None:
+        counts = np.ones(data.shape)
+    
+    if weights is None:
+        weights = np.ones(data.shape)
+    else:
+        weights = np.array(weights)
+    
+    tot = np.sum(counts * weights) 
+    """Vectorized and faster, using broadcasting for the <= expression"""
+    # Step 1 : compare a set of n distances to a set of say 25 threshold 
+        # (n dists x 1) broadcast against (1 x 25 thresholds) ==> (n, 25), where each column representd number of hits below the threshold 
+    M= 1*(data[:, None] <= thresholds[None, :])
+    # Step 2 : Adjust hit be relative weight (i.e. actual_freq_vj / sampled_freq_vj)
+        # Broadcast (n, 25) on weights (n, 1) ==> (n, 25)
+    M = M * weights[:,None] * counts[:,None]
+    # Step 3: Take row sums, producing the weighted sum at each threshold ==> (25,)
+    M =  np.sum(M, axis = 0)
+    # Step 4: Divide by the weighted total (i.e., the amount if all seqs were present, which because of enrichment is far greater than 1)
+    ecdf = M / tot
+
+    return ecdf
+
+
+
+def _compute_ecdf_rowwise(i, thresholds, data):
+    """
+    This is a warpper for compute_ecdf using parmap
+    """
+    ec = compute_ecdf(data = data[i,:], thresholds = thresholds)
+    return pd.Series(ec, index = thresholds)
+
+def _compute_weighted_ecdf_rowwise(i, thresholds, weights, data):
+    """
+    This is a warpper for compute_ecdf using parmap
+    """
+    ec = compute_ecdf(data = data[i,:], weights = weights, thresholds = thresholds)
+    return pd.Series(ec, index = thresholds)
 
 
 
