@@ -48,8 +48,6 @@ Quick Method
 	tcrtree.build_tree()
 
 
-To see output, you can download (`automatic_influenza_alpha_chain_tree.html.zip <https://www.dropbox.com/s/jebu68k961rh1py/influenza_alpha_chain_tree.html%202.zip?dl=1`_)
-
 
 Longform Method
 ---------------
