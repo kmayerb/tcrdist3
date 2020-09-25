@@ -325,6 +325,7 @@ Huang, H., Wang, C., Rubelt, F., Scriba, T. J. & Davis, M. M. Analyzing the Myco
    downloads
    inputs
    pGen
+   tree
    
 .. toctree::
    :caption: Advanced Usage
