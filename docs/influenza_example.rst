@@ -1,11 +1,11 @@
 Influenza Example
 =================
 
-This page illustrates a quick and longform method for performing a standard tcrdistt3 analysis.
+This page illustrates a quick and longform method for performing a standard tcrdist3 analysis.
 
-The data was downloaded from VDJdb and is provided here as a .zip file (`influenza_2020-SEP.tsv.zip <https://www.dropbox.com/s/mkjdaygdl41piw6/influenza_2020-SEP.tsv.zip?dl=1>`_)
+The data were downloaded from VDJdb and are provided here as a .zip file (`influenza_2020-SEP.tsv.zip <https://www.dropbox.com/s/mkjdaygdl41piw6/influenza_2020-SEP.tsv.zip?dl=1>`_)
 
-Both methods produce an interactive D3 graphics that allow one to explore the clustering of biochemically similar TCRs. 
+Both methods produce an interactive D3 graphics that permit exploration of the clustering of biochemically similar TCRs. 
 
 
 Quick Method
