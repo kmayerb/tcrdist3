@@ -11,7 +11,7 @@ Both methods produce an interactive D3 graphics that allow one to explore the cl
 Quick Method
 ------------
 
-.. code-block::python 
+.. code-block:: python 
 
 	import pandas as pd
 	from os.path import join as opj
@@ -56,7 +56,7 @@ Longform Method
 
 The same type of workflow can be conducted step by step. 
 
-.. code-blcok:: python
+.. code-block:: python
 
 	"""imports are listed in the order that they are used, and left in the code below for clarity"""
 	import os
