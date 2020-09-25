@@ -302,7 +302,6 @@ Huang, H., Wang, C., Rubelt, F., Scriba, T. J. & Davis, M. M. Analyzing the Myco
    :maxdepth: 1
    
    index
-   workflow
    
 
 .. toctree::
@@ -312,9 +311,8 @@ Huang, H., Wang, C., Rubelt, F., Scriba, T. J. & Davis, M. M. Analyzing the Myco
    tcrdistances
    visualizing
    motif_gallery
-   
+   influenza_example
   
-   
 
 .. toctree::
    :caption: More Details
