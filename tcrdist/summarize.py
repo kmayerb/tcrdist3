@@ -101,9 +101,9 @@ def test_for_almost_subsets(list_of_sets, thr = 3):
 
     Example 
     -------
-    >>> test_for_subsets([["A","B","C"], ["A","C","D"], ["A","D"], ["B","E"],["B","C"]])
+    >>> test_for_almost_subsets([["A","B","C"], ["A","C","D"], ["A","D"], ["B","E"],["B","C"]], 1)
     [1, 1, 0, 1, 0] 
-    >>> test_for_subsets([ [1,2,3], [1,3,4], [1,4], [2,5],[2,3]])
+    >>> test_for_almost_subsets([ [1,2,3], [1,3,4], [1,4], [2,5],[2,3]], 1)
     [1, 1, 0, 1, 0]
     """
     tracker = [1]

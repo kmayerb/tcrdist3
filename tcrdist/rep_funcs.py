@@ -1,11 +1,18 @@
 """
 tcrdist3: Functional Programming Approach For Higher Memory Demand Use Cases
 """
+
 import pwseqdist as pw
 import pandas as pd
 import numpy as np
 
-__all__ = ['_pw', '_pws']
+import os
+from tcrdist import memory
+import secrets
+import parmap
+import shutil
+
+__all__ = ['_pw', '_pws', 'compute_pw_sparse_out_of_memory']
 
 
 def _pws(df, metrics, weights, kargs, df2 = None, cpu = 1, uniquify = True, store = False):
@@ -122,3 +129,95 @@ def _pw(metric, seqs1, seqs2=None, ncpus=1, uniqify= True, use_numba = False, **
 
     return pw_mat
 
+
+
+def compute_pw_sparse_out_of_memory(tr,
+                                    row_size      = 500,
+                                    pm_processes  = 2,
+                                    pm_pbar       = True,
+                                    max_distance  = 50,
+                                    matrix_name   = 'rw_beta',
+                                    reassemble    = True,
+                                    cleanup       = True):
+    """
+    Instead of calling TCRrep.compute_distances(), this 
+    function permits a parallelizable approach that does 
+    not require holding a large matrix in memory. 
+
+    Default behavior is to reassemble a scipy
+    sparse matrix from a set of sub matrices written to disk fragment. 
+    With <reassemble = True>  function returns a scipy sparse matrix. 
+    Space savings are achieved because any value above <max_distance> is set to zero. 
+    True zero distances are set to 1. 
+
+    Can be used to form a network of TCRs with tcrdistances < max_distance,
+
+    Parameters
+    ----------
+    tr : TCRrep
+        TCRrep instance with clone_df
+    row_size : int
+        How many rows to process in memory at once
+    pm_processes : int
+        Numbe of concurrent parallel processes to run at once
+    pm_bar : bool 
+        If True, show progress bar.
+    max_distance : int
+        Max distance
+    matrix_name : str
+        Name of matrix to return (i.e, 'rw_beta' or 'rw_alpha')
+    reassemble: True
+        If true, makes one matrix from all the sparse sub matrices. 
+    cleanup: bool,
+        if True, deletes temporary files. 
+
+    
+    Examples
+    --------
+    import numpy as np
+    import pandas as pd
+    from tcrdist.repertoire import TCRrep
+    from tcrdist.rep_funcs import  compute_pw_sparse_out_of_memory
+
+    df = pd.read_csv("dash.csv")
+                          #(1)
+    tr = TCRrep(cell_df = df,               #(2)
+                organism = 'mouse', 
+                chains = ['beta'], 
+                db_file = 'alphabeta_gammadelta_db.tsv',
+                compute_distances = True,
+                store_all_cdr = False)
+
+    S = compute_pw_sparse_out_of_memory(tr, matrix_name = "rw_beta", max_distance = 1000)
+    # S is a <1920x1920 sparse matrix of type '<class 'numpy.int16'>'
+    M = S.todense()
+    M[M==1] = 0 
+    np.all(M == tr.pw_beta)
+    S = compute_pw_sparse_out_of_memory(tr, matrix_name = "rw_beta", max_distance = 30)
+    print(S)
+    # S is a <1920x1920 sparse matrix of type '<class 'numpy.int16'>'
+    """ 
+    dest = secrets.token_hex(6)
+    os.mkdir(dest)
+    print(f"CREATED /{dest}/ FOR HOLDING DISTANCE OUT OF MEMORY")
+    row_chunks = memory._partition(range(tr.clone_df.shape[0]), row_size)
+
+    smatrix_chunks = [(tr, ind,  f"{dest}/{i}.{matrix_name}.npz") for i,ind in enumerate(row_chunks)]
+    csrfragments = parmap.starmap(memory.gen_sparse_rw_on_fragment, 
+            smatrix_chunks, 
+            matrix_name = matrix_name, 
+            max_distance=max_distance, 
+            pm_pbar=pm_pbar, 
+            pm_processes = pm_processes)
+    if reassemble:
+        csr_full = memory.collapse_csrs([x[2] for x in smatrix_chunks])
+    else: 
+        csr_full = None
+        
+    if cleanup: 
+        assert os.path.isdir(dest)
+        print(f"CLEANING UP {dest}")
+        shutil.rmtree(dest)
+    print(f"RETURNING scipy.sparse csr_matrix w/dims {csr_full.shape}")
+    
+    return csr_full
