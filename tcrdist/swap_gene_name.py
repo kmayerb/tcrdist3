@@ -10,7 +10,7 @@ adaptive_to_imgt = {
     'human': {  'TCRBV12-03/12-04': 'TRBV12-1*01',   # MANUAL OVERRIDE, NOT WRITTEN WITH universal.py
                 'TCRBV06-02/06-03': 'TRBV6-2*01',      # MANUAL OVERRIDE, NOT WRITTEN WITH universal.py
                 'TCRBV03-01/03-02': 'TRBV3-1*01',    # MANUAL OVERRIDE, NOT WRITTEN WITH universal.py
-                'TCRBV07-05'      : 'TRBV07-1*01',   # MANUAL OVERRIDE, NOT WRITTEN WITH universal.py 
+                'TCRBV07-05'      : 'TRBV7-1*01',   # MANUAL OVERRIDE, NOT WRITTEN WITH universal.py 
                 'TCRAJ01': 'TRAJ1*01',
                 'TCRAJ10': 'TRAJ10*01',
                 'TCRAJ11': 'TRAJ11*01',

@@ -275,7 +275,7 @@ def test_integration_of_compute_pw_sparse_out_of_memory():
                 compute_distances = True,
                 store_all_cdr = False)
 
-    S = compute_pw_sparse_out_of_memory(tr, matrix_name = "rw_beta", max_distance = 1000)
+    S,_ = compute_pw_sparse_out_of_memory(tr, matrix_name = "rw_beta", max_distance = 1000)
     # S is a <1920x1920 sparse matrix of type '<class 'numpy.int16'>'
     M = S.todense()
     M[M==1] = 0

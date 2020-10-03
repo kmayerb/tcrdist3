@@ -130,6 +130,84 @@ def _pw(metric, seqs1, seqs2=None, ncpus=1, uniqify= True, use_numba = False, **
     return pw_mat
 
 
+def compute_n_tally_out_of_memory(fragments, 
+                                 matrix_name = "rw_beta", 
+                                 to_file = False, 
+                                 to_memory = True,
+                                 pm_processes = 2,
+                                 **kwargs):
+    """
+    Parameters 
+    ---------
+    fragments : tuple 
+        3-part tuple
+            0 : TCRrep instance
+            1 : list of rows in each fragment
+            2 : filename holding the distances as a .npz
+    matrix_name : str
+        For 'beta' chain dists use 'rw_beta'
+    to_file : bool
+        If True, than a file is written to disk containing all the n_tally
+    to_memory : bool
+        If True, the n_tally is loaded directly to memory 
+    **kwargs
+        Keyword arguments are passed directly to tcridist.memory.gen_n_tally_on_fragment,
+        including:  
+            x_cols : list
+                categorical variable 'epitope']  
+            count_col : str
+                column for counts  
+            knn_neighbors : bool
+                option to choose a fixed number of neighbors (NOT RECOMMENDED) 
+            knn_radius : int
+                maximum radius for finding neighbors
+
+    Notes
+    -----
+    We envision that user may want to run nndif 
+    multiple times with different categorical variables
+    and may not want to go through the computational 
+    intensive steps of computing TCRdistance each time. 
+
+    This can be accomodated via setting cleanup to False:
+
+    compute_pw_sparse_out_of_memory(cleanup=False) 
+
+    Example 
+    -------
+    from scipy import sparse
+    from tcrdist.repertoire import TCRrep
+    from tcrdist.rep_funcs import  compute_pw_sparse_out_of_memory
+    df = pd.read_csv("dash.csv")
+    tr = TCRrep(cell_df = df,               
+                organism = 'mouse',
+                chains = ['beta'],
+                db_file = 'alphabeta_gammadelta_db.tsv',
+                compute_distances = True,
+                store_all_cdr = False)
+
+    S, chunks = compute_pw_sparse_out_of_memory(tr, matrix_name = "rw_beta", max_distance = 1000, cleanup = False)
+    # dest contains all the shards
+    """
+
+    # [(<tcrdist.repertoire.TCRrep at 0x14035b6d0>,
+    #   range(0, 500),
+    #   'd3be945e8956/0.rw_beta.npz'),
+
+    # rearrange fragments in order (tr, ind, .npz, .csv)
+    fragments =  [(x[0], x[1], x[2], f"{x[2]}.nndif.csv") for x in fragments ] 
+    #fragments = [(tr, f"{dest}/{i}.{matrix_name}.npz", ind, f"{dest}/{i}.nndif.cvs") for i,ind in enumerate(row_chunks)] 
+    csvfragments = parmap.starmap(memory.gen_n_tally_on_fragment, fragments, **kwargs, pm_pbar=True, pm_processes = pm_processes)
+    if to_file:
+        dest =os.path.dirname(csvfragments[0])
+        nndiff_file = memory._concat_to_file(dest =dest, fragments =csvfragments)
+        return nndiff_file
+
+    if to_memory:
+        nndiff = memory._concat_to_memory(fragments = csvfragments)
+        return nndiff
+
+
 
 def compute_pw_sparse_out_of_memory(tr,
                                     row_size      = 500,
@@ -171,6 +249,13 @@ def compute_pw_sparse_out_of_memory(tr,
     cleanup: bool,
         if True, deletes temporary files. 
 
+    Returns
+    -------
+    csr_full : sparse scipy matrix
+            
+    dest : str
+        name of the folder that holds fragments
+
     
     Examples
     --------
@@ -193,7 +278,7 @@ def compute_pw_sparse_out_of_memory(tr,
     M = S.todense()
     M[M==1] = 0 
     np.all(M == tr.pw_beta)
-    S = compute_pw_sparse_out_of_memory(tr, matrix_name = "rw_beta", max_distance = 30)
+    S, chunks = compute_pw_sparse_out_of_memory(tr, matrix_name = "rw_beta", max_distance = 50)
     print(S)
     # S is a <1920x1920 sparse matrix of type '<class 'numpy.int16'>'
     """ 
@@ -211,6 +296,7 @@ def compute_pw_sparse_out_of_memory(tr,
             pm_processes = pm_processes)
     if reassemble:
         csr_full = memory.collapse_csrs([x[2] for x in smatrix_chunks])
+        print(f"RETURNING scipy.sparse csr_matrix w/dims {csr_full.shape}")
     else: 
         csr_full = None
         
@@ -218,6 +304,9 @@ def compute_pw_sparse_out_of_memory(tr,
         assert os.path.isdir(dest)
         print(f"CLEANING UP {dest}")
         shutil.rmtree(dest)
-    print(f"RETURNING scipy.sparse csr_matrix w/dims {csr_full.shape}")
     
-    return csr_full
+    
+    return csr_full, smatrix_chunks
+
+
+
