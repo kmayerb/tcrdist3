@@ -448,9 +448,9 @@ def multistudy_vdjdb_to_tcrdist2(pd_df):
 
     # create list of studies with paired data
     studies_with_AB_data = [k for k in list(tcr_formatted_dfs_split_by_study.keys()) if \
-                            tcr_formatted_dfs_split_by_study[k].shape[0] is not 0]
+                            tcr_formatted_dfs_split_by_study[k].shape[0] != 0]
     studies_without_AB_data = [k for k in list(tcr_formatted_dfs_split_by_study.keys()) if \
-                               tcr_formatted_dfs_split_by_study[k].shape[0] is not 0]
+                               tcr_formatted_dfs_split_by_study[k].shape[0] != 0]
 
     # subset dictionary of dataframes to those with paired data
     ab = { k: tcr_formatted_dfs_split_by_study[k] for k in studies_with_AB_data }

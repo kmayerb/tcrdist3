@@ -69,6 +69,8 @@ def test_quick_pipeline_with_fragmented_compute():
 	# MOTIF GENERATION
 	from tcrsampler.sampler import TCRsampler
 	t = TCRsampler()
+	if  'olga_human_beta_t.sampler.tsv' not in t.currently_available_backgrounds():
+		t.download_background_file('olga_sampler.zip')
 	#t.download_background_file('olga_sampler.zip') # ONLY IF NOT ALREADY DONE
 	tcrsampler_beta = TCRsampler(default_background = 'olga_human_beta_t.sampler.tsv')
 	tcrsampler_beta.build_background(max_rows = 1000)
