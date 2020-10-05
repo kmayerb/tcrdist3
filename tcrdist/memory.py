@@ -6,6 +6,8 @@ import parmap
 import secrets
 from progress.bar import IncrementalBar
 from hierdiff.tally import neighborhood_tally
+
+
 from scipy import sparse
 """
 Large datasets can consume more memory than is typically available. 
