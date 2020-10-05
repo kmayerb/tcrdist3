@@ -3,6 +3,11 @@ import pwseqdist as pw
 import numpy as np
 from tcrdist.rep_funcs import _pws, _pw
 
+# SEE NEW INTEGRATOIN TEST:  test_integration_of_compute_pw_sparse_out_of_memory
+from scipy import sparse
+from tcrdist.repertoire import TCRrep
+from tcrdist.rep_funcs import  compute_pw_sparse_out_of_memory
+
 def test_pw_rectangular():
     df = pd.read_csv("dash.csv")
     rmat = _pw(
@@ -253,3 +258,25 @@ def test_indirect_nw_metric_uniquify_returns_full_dimension():
 
     assert result.shape[1] == 4
     assert isinstance(result, np.ndarray)
+
+
+
+def test_integration_of_compute_pw_sparse_out_of_memory():
+    """
+    INTEGRATION TEST SHOWING HOW MEMORY FUNCTIONS ARE EXPLOITED BY  
+    compute_pw_sparse_out_of_memory()
+    """
+    df = pd.read_csv("dash.csv")
+
+    tr = TCRrep(cell_df = df,               #(2)
+                organism = 'mouse',
+                chains = ['beta'],
+                db_file = 'alphabeta_gammadelta_db.tsv',
+                compute_distances = True,
+                store_all_cdr = False)
+
+    S,_ = compute_pw_sparse_out_of_memory(tr, matrix_name = "rw_beta", max_distance = 1000)
+    # S is a <1920x1920 sparse matrix of type '<class 'numpy.int16'>'
+    M = S.todense()
+    M[M==1] = 0
+    assert np.all(M == tr.pw_beta)
