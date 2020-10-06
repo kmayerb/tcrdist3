@@ -89,18 +89,22 @@ medium- and bulk-sized datasets.
 	nn_associations = cluster_association_test(res = nn_tally_df_cohort, y_col='cmember', method='fishers')
 
 
-A unique feature of tcrdist3 is it ability to handle paired chain data (i.e. 
-single cell data where both the alpha and beta chain sequence are recovered).
-If you want to combine multiple samples and search for 'quasi-public' clones 
-that are similar biochemically across multiple samples, making use of
-tcrdist3's chunked computation can handle much larger numbers of clones 
-than was previously possible. This example makes use of the dash.csv 
-dataset, to show how to memory-conserving approach compares 
-to the original formulation. The function `compute_pw_sparse_out_of_memory2` is useful 
-for large sets of paired alpha/beta comparisont hat could not otherwise be 
-contained in memory. Note how compute_n_tally_out_of_memory2 can also 
-be called to use the chunked distance results to tally 
-neighbors based on catagorical variables.
+Tcrdist3 is built to handle paired chain data (i.e. single-cell data where both the
+alpha and beta chain sequences were recovered). Tcrdist3's chunked computation
+approach is appropriate for finding sets for quasi-public 'clonetypes', cells
+with non-identical but biochemically similar receptors, across multiple
+samples. Tcrdist3's chunked computation can compare a a much larger number of
+clones than was previously possible.
+
+This example makes use of the dash.csv dataset, to show how the
+memory-conserving chunked computation approach compares to the standard
+approach where all distances are retained in memory. For paired or single-chain
+datasets larger than 10K clones (i.e. >10^8 pairwise comparisons) we recommend
+the function `compute_pw_sparse_out_of_memory2`. Furthermore, by setting the
+function argument cleanup to False, one can subsequently call
+compute_n_tally_out_of_memory2, to use the chunked distance results -- already
+written to disk -- to tally neighbors based on categorical variables of
+interest.
 
 
 .. code:: python
