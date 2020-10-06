@@ -106,12 +106,14 @@ neighbors based on catagorical variables.
 .. code:: python
 
 	import pandas as pd
+	import numpy as np
 	from tcrdist.repertoire import TCRrep
 	from tcrdist.rep_funcs import  compute_pw_sparse_out_of_memory2
 	from tcrdist.rep_funcs import  compute_n_tally_out_of_memory2
+	from hierdiff.association_testing import cluster_association_test
 
 	df = pd.read_csv("dash.csv")
-	tr = TCRrep(cell_df = df, 
+	tr = TCRrep(cell_df = df.sample(100, random_state = 1), 
 	            organism = 'mouse', 
 	            chains = ['alpha','beta'], 
 	            db_file = 'alphabeta_gammadelta_db.tsv', 
@@ -124,14 +126,14 @@ neighbors based on catagorical variables.
 	
 
 	S, fragments = compute_pw_sparse_out_of_memory2(	tr = tr,
-														row_size      = 500,
-														pm_processes  = 2,
+														row_size      = 50,
+														pm_processes  = 1,
 														pm_pbar       = True,
 														max_distance  = 1000,
 														reassemble    = True,
 														cleanup       = False,
 														assign        = True)
-	import numpy as np
+	
 	assert np.all(tr.pw_beta == check_beta)
 	assert np.all(tr.pw_alpha == check_alpha)
 
@@ -158,4 +160,6 @@ neighbors based on catagorical variables.
 
 	assert ndif1.shape == ndif2.shape
 	np.all(ndif2['FDRq'].to_list() == ndif2['FDRq'].to_list())
+
+
 
