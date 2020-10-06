@@ -76,7 +76,7 @@ def gen_sparse_rw_on_fragment(tcrrep, ind, outfile, matrix_name = 'rw_beta', max
 	sparse.save_npz(outfile, M)
 	del tr
 	del M
-	return 
+	return True
 
 def gen_sparse_rw_on_fragment2(tcrrep, ind, outfile, max_distance=50):
 	"""
