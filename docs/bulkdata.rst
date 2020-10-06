@@ -126,25 +126,25 @@ neighbors based on catagorical variables.
 	
 
 	S, fragments = compute_pw_sparse_out_of_memory2(	tr = tr,
-														row_size      = 50,
-														pm_processes  = 1,
-														pm_pbar       = True,
-														max_distance  = 1000,
-														reassemble    = True,
-														cleanup       = False,
-														assign        = True)
+		row_size      = 50,
+		pm_processes  = 1,
+		pm_pbar       = True,
+		max_distance  = 1000,
+		reassemble    = True,
+		cleanup       = False,
+		assign        = True)
 	
 	assert np.all(tr.pw_beta == check_beta)
 	assert np.all(tr.pw_alpha == check_alpha)
 
 	ndif1 = compute_n_tally_out_of_memory2(fragments, 
-		                                 to_file = False, 
-		                                 to_memory = True,
-		                                 pm_processes = 2, 
-		                                 x_cols = ['epitope'],
-		                                 count_col='count',
-		                                 knn_neighbors= None,
-		                                 knn_radius =100)
+	     to_file = False, 
+	     to_memory = True,
+	     pm_processes = 2, 
+	     x_cols = ['epitope'],
+	     count_col='count',
+	     knn_neighbors= None,
+	     knn_radius =100)
 
 	from hierdiff.association_testing import cluster_association_test
 	ndif1 = cluster_association_test(res = ndif1, y_col='cmember', method='chi2')
@@ -160,6 +160,5 @@ neighbors based on catagorical variables.
 
 	assert ndif1.shape == ndif2.shape
 	np.all(ndif2['FDRq'].to_list() == ndif2['FDRq'].to_list())
-
 
 
