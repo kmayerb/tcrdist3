@@ -88,3 +88,74 @@ medium- and bulk-sized datasets.
 	from hierdiff.association_testing import cluster_association_test
 	nn_associations = cluster_association_test(res = nn_tally_df_cohort, y_col='cmember', method='fishers')
 
+
+A unique feature of tcrdist3 is it ability to handle paired chain data (i.e. 
+single cell data where both the alpha and beta chain sequence are recovered).
+If you want to combine multiple samples and search for 'quasi-public' clones 
+that are similar biochemically across multiple samples, making use of
+tcrdist3's chunked computation can handle much larger numbers of clones 
+than was previously possible. This example makes use of the dash.csv 
+dataset, to show how to memory-conserving approach compares 
+to the original formulation. The function `compute_pw_sparse_out_of_memory2` is useful 
+for large sets of paired alpha/beta comparisont hat could not otherwise be 
+contained in memory. Note how compute_n_tally_out_of_memory2 can also 
+be called to use the chunked distance results to tally 
+neighbors based on catagorical variables.
+
+
+.. code:: python
+
+	import pandas as pd
+	from tcrdist.repertoire import TCRrep
+	from tcrdist.rep_funcs import  compute_pw_sparse_out_of_memory2
+	from tcrdist.rep_funcs import  compute_n_tally_out_of_memory2
+
+	df = pd.read_csv("dash.csv")
+	tr = TCRrep(cell_df = df, 
+	            organism = 'mouse', 
+	            chains = ['alpha','beta'], 
+	            db_file = 'alphabeta_gammadelta_db.tsv', 
+	            compute_distances = True,
+	            store_all_cdr = False)
+
+	check_beta = tr.pw_beta.copy(); check_beta[check_beta == 0] = 1
+	check_alpha = tr.pw_alpha.copy(); check_alpha[check_alpha == 0] = 1
+	check_alpha_beta = check_beta + check_alpha
+	
+
+	S, fragments = compute_pw_sparse_out_of_memory2(	tr = tr,
+														row_size      = 500,
+														pm_processes  = 2,
+														pm_pbar       = True,
+														max_distance  = 1000,
+														reassemble    = True,
+														cleanup       = False,
+														assign        = True)
+	import numpy as np
+	assert np.all(tr.pw_beta == check_beta)
+	assert np.all(tr.pw_alpha == check_alpha)
+
+	ndif1 = compute_n_tally_out_of_memory2(fragments, 
+		                                 to_file = False, 
+		                                 to_memory = True,
+		                                 pm_processes = 2, 
+		                                 x_cols = ['epitope'],
+		                                 count_col='count',
+		                                 knn_neighbors= None,
+		                                 knn_radius =100)
+
+	from hierdiff.association_testing import cluster_association_test
+	ndif1 = cluster_association_test(res = ndif1, y_col='cmember', method='chi2')
+
+
+	from tcrdist.rep_diff import neighborhood_diff
+	ndif2 = neighborhood_diff(clone_df= tr.clone_df, 
+	    pwmat = np.array(tr.pw_beta.todense() + tr.pw_alpha.todense()),
+	    count_col = 'count', 
+	    x_cols = ['epitope'], 
+	    knn_radius = 100, 
+	    test_method = "chi2")
+
+	assert ndif1.shape == ndif2.shape
+	np.all(ndif2['FDRq'].to_list() == ndif2['FDRq'].to_list())
+

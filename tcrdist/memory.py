@@ -76,6 +76,49 @@ def gen_sparse_rw_on_fragment(tcrrep, ind, outfile, matrix_name = 'rw_beta', max
 	sparse.save_npz(outfile, M)
 	del tr
 	del M
+	return 
+
+def gen_sparse_rw_on_fragment2(tcrrep, ind, outfile, max_distance=50):
+	"""
+	gen_sparse_rw_on_fragment generates a sparse matrix of distances
+	on a fragment of overall comparisons. 
+
+	Suppose a clone_df has m unique clones. A full matrix is m x m. 
+	this computes distances of the rectangular fragment 
+	m[ind,] x m. The fragment is converted to a sparse compressed 
+	format. All true zeros are set to 1, and all values above <max_distance>
+	are set to one, for a massive space savings.
+
+	tcrrep : TCRrep
+		TCRrep instance 
+	ind : list
+		line of row index position specifying the rows of the clone_df
+	outfile : str
+		string name of the fragment
+	matrix_name  : str
+		the matrix attribute to be stored ('rw_beta')
+
+	Example
+	-------
+	See usage in tcrdist.rep_funcs.compute_pw_sparse_out_of_memory
+
+	"""
+	tr = copy.deepcopy(tcrrep)
+	tr.compute_rect_distances(df = tr.clone_df.iloc[ind,], df2 = tr.clone_df, store = False)
+	for chain in tr.chains:
+		M = getattr(tr, f"rw_{chain}")
+		# Set all true 0s to 1s
+		M[M == 0] = 1
+		# Set all values greater than max_distance to zero to create massive scarcity
+		M[M > max_distance] = 0 
+		# convert to scr matrix spa
+		M = sparse.csr_matrix(M)
+		# Write to outfile
+		x = f"rw_{chain}"
+		sparse.save_npz(f"{outfile}.{x}.npz", M)
+		del M
+	
+	del tr
 	return True
 
 
@@ -131,6 +174,44 @@ def gen_n_tally_on_fragment(tcrrep,
 	rwmat = sparse.load_npz(infile)
 	rwmat = np.asarray(rwmat.todense())
 	rwmat[rwmat == 0] = 500
+	ndif = neighborhood_tally(	df_pop = tr.clone_df, 
+								pwmat = rwmat,#tr.pw_beta[ind,], 
+								x_cols = x_cols, 
+								df_centroids=tr.clone_df.iloc[ind,],
+								count_col=count_col, 
+								knn_neighbors= knn_neighbors, 
+								knn_radius =knn_radius)
+
+	ndif.to_csv(outfile, index = False)
+	
+	del ndif
+	
+	return outfile
+
+
+def gen_n_tally_on_fragment2(tcrrep, 
+							ind, 
+							infile, 
+							outfile,
+							x_cols = ['epitope'], 
+							count_col='count', 
+							knn_neighbors= None, 
+							knn_radius =50):
+	import copy
+	tr = copy.deepcopy(tcrrep)
+	
+	rwmat_dict = dict()
+	for chain in tr.chains:
+		rwmat = sparse.load_npz(f"{infile}.rw_{chain}.npz")
+		rwmat = np.asarray(rwmat.todense())
+		rwmat[rwmat == 0] = 500
+		rwmat_dict[chain] = rwmat
+
+	if len(tr.chains) == 1:
+		rwmat = rwmat_dict[tr.chains[0]]
+	if len(tr.chains) == 2:
+		rwmat = np.add(rwmat_dict[tr.chains[0]], rwmat_dict[tr.chains[1]])
+		
 	ndif = neighborhood_tally(	df_pop = tr.clone_df, 
 								pwmat = rwmat,#tr.pw_beta[ind,], 
 								x_cols = x_cols, 

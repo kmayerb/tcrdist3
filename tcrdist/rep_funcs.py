@@ -310,3 +310,199 @@ def compute_pw_sparse_out_of_memory(tr,
 
 
 
+def compute_pw_sparse_out_of_memory2(tr,
+                                    row_size      = 500,
+                                    pm_processes  = 2,
+                                    pm_pbar       = True,
+                                    max_distance  = 50,
+                                    reassemble    = True,
+                                    cleanup       = True,
+                                    assign        = True):
+    """
+    Instead of calling TCRrep.compute_distances(), this 
+    function permits a parallelizable approach that does 
+    not require holding a large matrix in memory. 
+
+    Default behavior is to reassemble a scipy
+    sparse matrix from a set of sub matrices written to disk fragment. 
+    With <reassemble = True>  function returns a scipy sparse matrix. 
+    Space savings are achieved because any value above <max_distance> is set to zero. 
+    True zero distances are set to 1. 
+
+    Can be used to form a network of TCRs with tcrdistances < max_distance,
+
+    Parameters
+    ----------
+    tr : TCRrep
+        TCRrep instance with clone_df
+    row_size : int
+        How many rows to process in memory at once
+    pm_processes : int
+        Numbe of concurrent parallel processes to run at once
+    pm_bar : bool 
+        If True, show progress bar.
+    max_distance : int
+        Max distance
+    matrix_name : str
+        Name of matrix to return (i.e, 'rw_beta' or 'rw_alpha')
+    reassemble: True
+        If true, makes one matrix from all the sparse sub matrices. 
+    cleanup: bool,
+        if True, deletes temporary files. 
+    assign : bool 
+        if True, assigns pw sparse matrices to TCRrep object.
+        That is TCRrep.pw_beta, TCRrep.pw_alpha will be assigned 
+        the reassembled spare matrces.
+
+    Returns
+    -------
+    csr_full : sparse scipy matrix
+            
+    dest : str
+        name of the folder that holds fragments
+
+    
+    Examples
+    --------
+    import numpy as np
+    import pandas as pd
+    from tcrdist.repertoire import TCRrep
+    from tcrdist.rep_funcs import  compute_pw_sparse_out_of_memory
+
+    df = pd.read_csv("dash.csv")
+                          #(1)
+    tr = TCRrep(cell_df = df,               #(2)
+                organism = 'mouse', 
+                chains = ['beta'], 
+                db_file = 'alphabeta_gammadelta_db.tsv',
+                compute_distances = True,
+                store_all_cdr = False)
+
+    S = compute_pw_sparse_out_of_memory(tr, matrix_name = "rw_beta", max_distance = 1000)
+    # S is a <1920x1920 sparse matrix of type '<class 'numpy.int16'>'
+    M = S.todense()
+    M[M==1] = 0 
+    np.all(M == tr.pw_beta)
+    S, chunks = compute_pw_sparse_out_of_memory(tr, matrix_name = "rw_beta", max_distance = 50)
+    print(S)
+    # S is a <1920x1920 sparse matrix of type '<class 'numpy.int16'>'
+    """ 
+
+    # Early warning to save heartache
+    if assign is True and reassemble is False:
+        raise ValueError("If you want to assign results to a TCRrep instance, you must set reassemble to True")
+
+    dest = secrets.token_hex(6)
+    os.mkdir(dest)
+    print(f"CREATED /{dest}/ FOR HOLDING DISTANCE OUT OF MEMORY")
+    row_chunks = memory._partition(range(tr.clone_df.shape[0]), row_size)
+
+
+    smatrix_chunks = [(tr, ind,  f"{dest}/{i}") for i,ind in enumerate(row_chunks)]
+    csrfragments = parmap.starmap(memory.gen_sparse_rw_on_fragment2, 
+            smatrix_chunks,  
+            max_distance=max_distance, 
+            pm_pbar=pm_pbar, 
+            pm_processes = pm_processes)
+
+    if reassemble:
+        csr_full_dict = dict()
+        for chain in tr.chains:
+            chain_str = f"rw_{chain}"
+            csr_full = memory.collapse_csrs([f"{x[2]}.{chain_str}.npz" for x in smatrix_chunks])
+            print(f"RETURNING scipy.sparse csr_matrix w/dims {csr_full.shape}")
+            csr_full_dict[chain] = csr_full
+    else: 
+        csr_full_dict= None
+       
+    if assign:
+        for chain in tr.chains:
+            setattr(tr, f"pw_{chain}", csr_full_dict[chain])
+
+    if cleanup: 
+        assert os.path.isdir(dest)
+        print(f"CLEANING UP {dest}")
+        shutil.rmtree(dest)
+    
+    return csr_full_dict, smatrix_chunks
+
+
+
+
+def compute_n_tally_out_of_memory2(fragments, 
+                                 to_file = False, 
+                                 to_memory = True,
+                                 pm_processes = 2,
+                                 **kwargs):
+    """
+    Parameters 
+    ---------
+    fragments : tuple 
+        3-part tuple
+            0 : TCRrep instance
+            1 : list of rows in each fragment
+            2 : filename holding the distances as a .npz
+    matrix_name : str
+        For 'beta' chain dists use 'rw_beta'
+    to_file : bool
+        If True, than a file is written to disk containing all the n_tally
+    to_memory : bool
+        If True, the n_tally is loaded directly to memory 
+    **kwargs
+        Keyword arguments are passed directly to tcridist.memory.gen_n_tally_on_fragment,
+        including:  
+            x_cols : list
+                categorical variable 'epitope']  
+            count_col : str
+                column for counts  
+            knn_neighbors : bool
+                option to choose a fixed number of neighbors (NOT RECOMMENDED) 
+            knn_radius : int
+                maximum radius for finding neighbors
+
+    Notes
+    -----
+    We envision that user may want to run nndif 
+    multiple times with different categorical variables
+    and may not want to go through the computational 
+    intensive steps of computing TCRdistance each time. 
+
+    This can be accomodated via setting cleanup to False:
+
+    compute_pw_sparse_out_of_memory(cleanup=False) 
+
+    Example 
+    -------
+    from scipy import sparse
+    from tcrdist.repertoire import TCRrep
+    from tcrdist.rep_funcs import  compute_pw_sparse_out_of_memory
+    df = pd.read_csv("dash.csv")
+    tr = TCRrep(cell_df = df,               
+                organism = 'mouse',
+                chains = ['beta'],
+                db_file = 'alphabeta_gammadelta_db.tsv',
+                compute_distances = True,
+                store_all_cdr = False)
+
+    S, chunks = compute_pw_sparse_out_of_memory(tr, matrix_name = "rw_beta", max_distance = 1000, cleanup = False)
+    # dest contains all the shards
+    """
+
+    # [(<tcrdist.repertoire.TCRrep at 0x14035b6d0>,
+    #   range(0, 500),
+    #   'd3be945e8956/0.rw_beta.npz'),
+
+    # rearrange fragments in order (tr, ind, .npz, .csv)
+    fragments =  [(x[0], x[1], x[2], f"{x[2]}.nndif.csv") for x in fragments ] 
+    #fragments = [(tr, f"{dest}/{i}.{matrix_name}.npz", ind, f"{dest}/{i}.nndif.cvs") for i,ind in enumerate(row_chunks)] 
+    csvfragments = parmap.starmap(memory.gen_n_tally_on_fragment2, fragments, **kwargs, pm_pbar=True, pm_processes = pm_processes)
+    if to_file:
+        dest =os.path.dirname(csvfragments[0])
+        nndiff_file = memory._concat_to_file(dest =dest, fragments =csvfragments)
+        return nndiff_file
+
+    if to_memory:
+        nndiff = memory._concat_to_memory(fragments = csvfragments)
+        return nndiff
+
+
