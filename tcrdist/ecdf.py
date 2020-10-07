@@ -28,9 +28,8 @@ def distance_ecdf(pwrect, thresholds=None, weights=None):
 
     Returns
     -------
-    ecdf : vector, thresholds.shape[0]
     thresholds : vector, thresholds.shape[0]
-    """
+    ecdf : vector, thresholds.shape[0]"""
     if weights is None:
         weights = np.ones(pwrect.shape[1])
 
@@ -41,8 +40,7 @@ def distance_ecdf(pwrect, thresholds=None, weights=None):
     ecdf = np.sum((pwrect[:, :, None] <= thresholds[None, None, :]) * \
             weights[None, :, None], axis=1) / np.sum(weights)
     
-    return ecdf
-
+    return thresholds, ecdf
 
 def make_ecdf_step(thresholds, ecdf, add00=False):
     """Create stepped vector for plotting an ECDF,
