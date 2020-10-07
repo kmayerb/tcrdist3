@@ -23,6 +23,8 @@ def test_dash_ecdf():
     from tcrdist.repertoire import TCRrep
     from tcrsampler.sampler import TCRsampler
     from tcrdist.ecdf import distance_ecdf, make_ecdf_step
+    from tcrdist.background import make_gene_usage_counter, make_vj_matched_background, \
+                                    make_flat_vj_background, get_gene_frequencies, calculate_adjustment
 
     df = pd.read_csv('dash.csv')
     tr = TCRrep(cell_df = df, 
@@ -30,18 +32,40 @@ def test_dash_ecdf():
                 chains = ['beta'], 
                 db_file = 'alphabeta_gammadelta_db.tsv')
 
-    TCRsampler.download_background_file(download_file = 'ruggiero_mouse_sampler.zip')
-    ts = TCRsampler(default_background = 'ruggiero_mouse_beta_t.tsv.sampler.tsv')
-    ts.build_background(stratify_by_subject = True, use_frequency = False)
-    
-    tmp = df[['v_b_gene', 'j_b_gene']].applymap(lambda s: s.split('*')[0] + '*01')
+    TCRsampler.download_background_file(download_file='wiraninha_sampler.zip')
+    cols = ['v_b_gene','j_b_gene']
 
-    freqs = tmp.groupby(['v_b_gene', 'j_b_gene']).agg(lambda v: v.shape[0])
-    freqs = list(freqs.to_frame().to_records())
-    ref = ts.sample(freqs, depth=100, seed=110820)
-    ref_df = pd.concat([pd.DataFrame({'cdr3_b_aa':ref[i]}).assign(v_b_gene=v, j_b_gene=j) for i,(v,j,_) in enumerate(freqs)])
-    ref_df.loc[:, 'count'] = 1
+    refs = []
+    for ts_fn in [f'wirasinha_mouse_beta_s_{i}.tsv.sampler.tsv' for i in '48']:
+        ts = TCRsampler(default_background=ts_fn)
+        ts.build_background(stratify_by_subject=True, use_frequency=False)
         
+        """Sanitize the alleles to *01 for TCRSampler"""
+        tmp = df[cols].applymap(lambda s: s.split('*')[0] + '*01')
+        freqs = tmp.groupby(cols).size()
+
+        ref = ts.sample(list(freqs.to_frame().to_records()), depth=25, seed=110820)
+        ref_df = pd.concat([pd.DataFrame({'cdr3_b_aa':ref[i]}).assign(v_b_gene=v, j_b_gene=j) for i,(v,j,_) in enumerate(freqs)])        
+
+        """Assigns pV, pJ and pVJ to ref_df"""
+        ref_df = get_gene_frequencies(ts=ts, df=ref_df) 
+        
+        xdf = freqs.reset_index()
+        xdf.columns = ['v_b_gene','j_b_gene', 'n']
+        
+        """For each V,J pairing compute frequency in this reference"""
+        xdf = xdf.assign(ref_freq=xdf['n'] / xdf['n'].sum())
+        ref_df = ref_df.merge(xdf, how='left', on=cols).reset_index()
+
+        """ Assign weights to ref sequences: Pr_actual / Pr_sampling"""
+        ref_df = ref_df.assign(weights=ref_df['pVJ'] / ref_df['ref_freq'])
+        refs.append(ref_df)
+
+        """Add uniformly sampled sequences"""
+        ref_df = ts.ref_df.sample(1000, random_state=1)
+        refs.append(ref_df)
+
+    ref_df = pd.concat(refs, axis=1)
     ref_tr = TCRrep(cell_df=ref_df, 
                     organism='mouse', 
                     chains=['beta'],
@@ -50,17 +74,44 @@ def test_dash_ecdf():
 
     tr.compute_rect_distances(df=tr.clone_df, df2=ref_tr.clone_df, store=False)
     
-    """TODO: Add weights to correct for sampling. Also add randomly sampled sequences"""
-    thresholds, ecdf = distance_ecdf(tr.rw_beta, thresholds=None, weights=None)
+    thresholds = np.arange(1, 50)
+    thresholds, ref_ecdf = distance_ecdf(tr.rw_beta,
+                                     thresholds=thresholds,
+                                     weights=ref_tr.clone_df['weights'])
+
+    thresholds, target_ecdf = distance_ecdf(tr.pw_beta,
+                                     thresholds=thresholds,
+                                     weights=None)
 
     figh = plt.figure(figsize=(5, 5))
     axh = figh.add_axes([0.15, 0.15, 0.6, 0.7], yscale='log')
     plt.ylabel(f'Proportion of reference TCRs')
     plt.xlabel(f'Distance from target TCR clone')
-
-    for tari in range(ecdf.shape[0]):
-        x, y = make_ecdf_step(thresholds, ecdf[tari, :])
+    for tari in range(ref_ecdf.shape[0]):
+        x, y = make_ecdf_step(thresholds, ref_ecdf[tari, :])
         axh.plot(x, y, color=k, alpha=0.2)
-    
-    x, y = make_ecdf_step(thresholds, np.mean(ecdf, axis=0))
+    x, y = make_ecdf_step(thresholds, np.mean(ref_ecdf, axis=0))
     axh.plot(x, y, color='r', alpha=1)
+
+    figh = plt.figure(figsize=(5, 5))
+    axh = figh.add_axes([0.15, 0.15, 0.6, 0.7], yscale='log')
+    plt.ylabel(f'Proportion of target TCRs')
+    plt.xlabel(f'Distance from target TCR clone')
+    for tari in range(target_ecdf.shape[0]):
+        x, y = make_ecdf_step(thresholds, target_ecdf[tari, :])
+        axh.plot(x, y, color=k, alpha=0.2)
+    x, y = make_ecdf_step(thresholds, np.mean(target_ecdf, axis=0))
+    axh.plot(x, y, color='r', alpha=1)
+
+    """Make an "ROC" plot combining the ECDF against the target (sensitivity)
+    vs. ECDF against the reference (specificity)"""
+    figh = plt.figure(figsize=(5, 5))
+    axh = figh.add_axes([0.15, 0.15, 0.6, 0.7], yscale='log')
+    plt.ylabel(f'Proportion of target TCRs')
+    plt.xlabel(f'Proportion of reference TCRs')
+    for tari in range(target_ecdf.shape[0]):
+        x, y = make_ecdf_step(ref_ecdf[tari, :], target_ecdf[tari, :])
+        axh.plot(x, y, color=k, alpha=0.2)
+    x, y = make_ecdf_step(np.mean(ref_ecdf, axis=0), np.mean(target_ecdf, axis=0))
+    axh.plot(x, y, color='r', alpha=1)
+

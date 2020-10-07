@@ -37,8 +37,15 @@ def distance_ecdf(pwrect, thresholds=None, weights=None):
         thresholds = np.unique(pwrect[:])
 
     """Vectorized and faster, using broadcasting for the <= expression"""
-    ecdf = np.sum((pwrect[:, :, None] <= thresholds[None, None, :]) * \
-            weights[None, :, None], axis=1) / np.sum(weights)
+    """ecdf = np.sum((pwrect[:, :, None] <= thresholds[None, None, :]) * \
+            weights[None, :, None], axis=1) / np.sum(weights)"""
+    
+    """Decided not to vectorize in 3D because it can create an array that's
+    too big for memory"""
+    ecdf = np.zeros((pwrect.shape[0], thresholds.shape[0]))
+    for i in range(pwrect.shape[0]):
+        ecdf[i, :] = np.sum((pwrect[i, :][:, None] <= thresholds[None, :]) * \
+                        weights[:, None], axis=0) / np.sum(weights)
     
     return thresholds, ecdf
 
