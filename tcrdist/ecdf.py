@@ -32,9 +32,15 @@ def distance_ecdf(pwrect, thresholds=None, weights=None):
     ecdf : vector, thresholds.shape[0]"""
     if weights is None:
         weights = np.ones(pwrect.shape[1])
+    else:
+        weights = np.asarray(weights)
 
     if thresholds is None:
         thresholds = np.unique(pwrect[:])
+    else:
+        thresholds = np.asarray(thresholds)
+
+    pwrect = np.asarray(pwrect)
 
     """Vectorized and faster, using broadcasting for the <= expression"""
     """ecdf = np.sum((pwrect[:, :, None] <= thresholds[None, None, :]) * \

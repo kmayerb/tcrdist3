@@ -1,4 +1,5 @@
 import pytest
+import pandas
 
 def test_dash_ecdf():
     """
@@ -20,13 +21,17 @@ def test_dash_ecdf():
     
     """
     import pandas as pd
+    import numpy as np
     from tcrdist.repertoire import TCRrep
     from tcrsampler.sampler import TCRsampler
     from tcrdist.ecdf import distance_ecdf, make_ecdf_step
     from tcrdist.background import make_gene_usage_counter, make_vj_matched_background, \
                                     make_flat_vj_background, get_gene_frequencies, calculate_adjustment
 
+    import matplotlib.pyplot as plt
+
     df = pd.read_csv('dash.csv')
+    df = df.loc[df['epitope'] == 'PB1']
     tr = TCRrep(cell_df = df, 
                 organism = 'mouse', 
                 chains = ['beta'], 
@@ -43,9 +48,9 @@ def test_dash_ecdf():
         """Sanitize the alleles to *01 for TCRSampler"""
         tmp = df[cols].applymap(lambda s: s.split('*')[0] + '*01')
         freqs = tmp.groupby(cols).size()
-
-        ref = ts.sample(list(freqs.to_frame().to_records()), depth=25, seed=110820)
-        ref_df = pd.concat([pd.DataFrame({'cdr3_b_aa':ref[i]}).assign(v_b_gene=v, j_b_gene=j) for i,(v,j,_) in enumerate(freqs)])        
+        freq_records = list(freqs.to_frame().to_records())
+        ref = ts.sample(freq_records, depth=10, seed=110820)
+        ref_df = pd.concat([pd.DataFrame({'cdr3_b_aa':ref[i]}).assign(v_b_gene=v, j_b_gene=j) for i,(v,j,_) in enumerate(freq_records)])        
 
         """Assigns pV, pJ and pVJ to ref_df"""
         ref_df = get_gene_frequencies(ts=ts, df=ref_df) 
@@ -62,11 +67,11 @@ def test_dash_ecdf():
         refs.append(ref_df)
 
         """Add uniformly sampled sequences"""
-        ref_df = ts.ref_df.sample(1000, random_state=1)
+        ref_df = ts.ref_df.sample(100, random_state=1)
         refs.append(ref_df)
 
-    ref_df = pd.concat(refs, axis=1)
-    ref_tr = TCRrep(cell_df=ref_df, 
+    ref_df = pd.concat(refs, axis=0)
+    ref_tr = TCRrep(cell_df=ref_df[cols + ['cdr3_b_aa', 'weights']], 
                     organism='mouse', 
                     chains=['beta'],
                     compute_distances=False,
@@ -77,7 +82,7 @@ def test_dash_ecdf():
     thresholds = np.arange(1, 50)
     thresholds, ref_ecdf = distance_ecdf(tr.rw_beta,
                                      thresholds=thresholds,
-                                     weights=ref_tr.clone_df['weights'])
+                                     weights=ref_tr.clone_df['weights'] * ref_tr.clone_df['count'])
 
     thresholds, target_ecdf = distance_ecdf(tr.pw_beta,
                                      thresholds=thresholds,
@@ -89,7 +94,7 @@ def test_dash_ecdf():
     plt.xlabel(f'Distance from target TCR clone')
     for tari in range(ref_ecdf.shape[0]):
         x, y = make_ecdf_step(thresholds, ref_ecdf[tari, :])
-        axh.plot(x, y, color=k, alpha=0.2)
+        axh.plot(x, y, color='k', alpha=0.2)
     x, y = make_ecdf_step(thresholds, np.mean(ref_ecdf, axis=0))
     axh.plot(x, y, color='r', alpha=1)
 
@@ -99,19 +104,25 @@ def test_dash_ecdf():
     plt.xlabel(f'Distance from target TCR clone')
     for tari in range(target_ecdf.shape[0]):
         x, y = make_ecdf_step(thresholds, target_ecdf[tari, :])
-        axh.plot(x, y, color=k, alpha=0.2)
+        axh.plot(x, y, color='k', alpha=0.2)
     x, y = make_ecdf_step(thresholds, np.mean(target_ecdf, axis=0))
     axh.plot(x, y, color='r', alpha=1)
 
     """Make an "ROC" plot combining the ECDF against the target (sensitivity)
     vs. ECDF against the reference (specificity)"""
-    figh = plt.figure(figsize=(5, 5))
-    axh = figh.add_axes([0.15, 0.15, 0.6, 0.7], yscale='log')
+    figh = plt.figure(figsize=(7, 5))
+    axh = figh.add_axes([0.15, 0.15, 0.6, 0.7], yscale='log', xscale='log')
     plt.ylabel(f'Proportion of target TCRs')
     plt.xlabel(f'Proportion of reference TCRs')
     for tari in range(target_ecdf.shape[0]):
         x, y = make_ecdf_step(ref_ecdf[tari, :], target_ecdf[tari, :])
-        axh.plot(x, y, color=k, alpha=0.2)
+        axh.plot(x, y, color='k', alpha=0.2)
     x, y = make_ecdf_step(np.mean(ref_ecdf, axis=0), np.mean(target_ecdf, axis=0))
     axh.plot(x, y, color='r', alpha=1)
+    yl = plt.ylim()
+    xl = plt.xlim()
+    #yl = (1e-6, 0.3)
+    plt.plot(yl, yl, '--', color='gray')
+    plt.xlim(xl)
+    plt.ylim(yl)
 
