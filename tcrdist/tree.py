@@ -365,7 +365,7 @@ def _auto_hdiff2(tcrrep,
             [['X1','X2'][randint(2)] for x in range(tcrrep.clone_df.shape[0])]
         default_hcluster_diff_kwargs['x_cols'] = ['dummy']
         default_hcluster_diff_kwargs['test_method'] = 'fishers' 
-        warnings.warn(f"Because x_cols was None, setting random dummy values, and using {default_hcluster_diff_kwargs['test_method']}\n")
+        warnings.warn(f"Because x_cols was None, setting random dummy values, and using {default_hcluster_diff_kwargs['test_method']}\n", stacklevel=2)
     
     elif tcrrep.clone_df[x_cols].nunique()[0] == 2: 
         default_hcluster_diff_kwargs['test_method'] = 'fishers' 
@@ -378,7 +378,7 @@ def _auto_hdiff2(tcrrep,
             [['X1','X2'][randint(2)] for x in range(tcrrep.clone_df.shape[0])]
         default_hcluster_diff_kwargs['x_cols'] = ['dummy']
         default_hcluster_diff_kwargs['test_method'] = 'fishers' 
-        warnings.warn(f"Because x_cols was None, setting random dummy values, and using {default_hcluster_diff_kwargs['test_method']}\n")
+        warnings.warn(f"Because x_cols was None, setting random dummy values, and using {default_hcluster_diff_kwargs['test_method']}\n", stacklevel=2)
 
     """ Run hcluster_df """
     

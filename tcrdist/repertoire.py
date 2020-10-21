@@ -495,7 +495,10 @@ class TCRrep:
         if np.sum(self.cell_df['count']) != np.sum(clone_df['count']):
             n_cells_lost = np.sum(self.cell_df['count']) - np.sum(clone_df['count'])
             n_cell = np.sum(self.cell_df['count'])
-            warnings.warn(f"Not all cells/sequences could be grouped into clones. {n_cells_lost} of {n_cell} were not captured. This occurs when any of the values in the index columns are null or missing for a given sequence. To see entries with missing values use: tcrdist.repertoire.TCRrep._show_incomplete()\n")
+            warnings.warn(f"Not all cells/sequences could be grouped into clones."
+                          f"{n_cells_lost} of {n_cell} were not captured. This occurs when "
+                          "any of the values in the index columns are null or missing for a given sequence. "
+                          "To see entries with missing values use: tcrdist.repertoire.TCRrep._show_incomplete()", stacklevel=2)
         
         # if no clone id column provided thetrn create one as a sequence of numbers
         if "clone_id" not in clone_df:
@@ -654,7 +657,7 @@ class TCRrep:
             aa_string = self.all_genes[organism][gene].__dict__[attr][cdr]
         except KeyError:
             aa_string = None
-            warnings.warn("{} gene was not recognized in reference db no cdr seq could be inferred".format(gene))
+            warnings.warn("{} gene was not recognized in reference db no cdr seq could be inferred".format(gene), stacklevel=2)
         return(aa_string)
        
         """
@@ -666,7 +669,7 @@ class TCRrep:
         Issues warning if invalid organism is passed to TCRrep __init__
         """
         if self.db_file not in ['alphabeta_gammadelta_db.tsv','alphabeta_db.tsv','gammadelta_db.tsv']:
-            warnings.warn("db_file must be 'alphabeta_gammadelta_db.tsv' or 'alphabeta_db.tsv' or 'gammadelta_db.tsv' unless you have built tcrdist3 from scratch")
+            warnings.warn("db_file must be 'alphabeta_gammadelta_db.tsv' or 'alphabeta_db.tsv' or 'gammadelta_db.tsv' unless you have built tcrdist3 from scratch", stacklevel=2)
     
     def _validate_organism(self):
         """
@@ -692,35 +695,35 @@ class TCRrep:
         Issues warning if TCRrep.cell_df not properly formatted.
         """
         if not isinstance(self.cell_df, pd.DataFrame):
-            warnings.warn('TCRrep cell_df argument must be pandas.DataFrame unless you are providing a clone_df directly\n')
+            warnings.warn('TCRrep cell_df argument must be pandas.DataFrame unless you are providing a clone_df directly\n', stacklevel=2)
 
         else:
             cell_df_columns = self.cell_df.columns.to_list()
             
             if "count" not in cell_df_columns:
-                warnings.warn("cell_df needs a counts column to track clonal number of frequency\n")
+                warnings.warn("cell_df needs a counts column to track clonal number of frequency\n", stacklevel=2)
                 warnings.warn("No 'count' column provided; count column set to 1")
                 self.cell_df['count'] = 1
             if "alpha" in self.chains:
                 if not "cdr3_a_aa" in cell_df_columns:
-                    warnings.warn("cell_df needs a column called 'cdr3_a_aa' to track the CDR3 amino acid sequence\n")
+                    warnings.warn("cell_df needs a column called 'cdr3_a_aa' to track the CDR3 amino acid sequence\n", stacklevel=2)
                 if not "v_a_gene" in cell_df_columns:
-                    warnings.warn("cell_df needs a column called 'v_a_gene' for default functions\n")
+                    warnings.warn("cell_df needs a column called 'v_a_gene' for default functions\n", stacklevel=2)
             if "beta" in self.chains:
                 if not "cdr3_b_aa" in cell_df_columns:
-                    warnings.warn("cell_df needs a column called 'cdr3_b_aa' to track the CDR3 amino acid sequence\n")
+                    warnings.warn("cell_df needs a column called 'cdr3_b_aa' to track the CDR3 amino acid sequence\n", stacklevel=2)
                 if not "v_b_gene" in cell_df_columns:
-                    warnings.warn("cell_df needs a column called 'v_b_gene' for default functions\n")
+                    warnings.warn("cell_df needs a column called 'v_b_gene' for default functions\n", stacklevel=2)
             if "gamma" in self.chains:
                 if not "cdr3_g_aa" in cell_df_columns:
-                    warnings.warn("cell_df needs a column called 'cdr3_g_aa' to track the CDR3 amino acid sequence\n")
+                    warnings.warn("cell_df needs a column called 'cdr3_g_aa' to track the CDR3 amino acid sequence\n", stacklevel=2)
                 if not "v_g_gene" in cell_df_columns:
-                    warnings.warn("cell_df needs a column called 'v_g_gene' for default functions\n")
+                    warnings.warn("cell_df needs a column called 'v_g_gene' for default functions\n", stacklevel=2)
             if "delta" in self.chains:
                 if not "cdr3_d_aa" in cell_df_columns:
-                    warnings.warn("cell_df needs a column called 'cdr3_d_aa' to track the CDR3 amino acid sequence\n")
+                    warnings.warn("cell_df needs a column called 'cdr3_d_aa' to track the CDR3 amino acid sequence\n", stacklevel=2)
                 if not "v_d_gene" in cell_df_columns:
-                    warnings.warn("cell_df needs a column called 'v_d_gene' for default functions\n")
+                    warnings.warn("cell_df needs a column called 'v_d_gene' for default functions\n", stacklevel=2)
 
     def _validate_imgt_aligned(self):
         """

@@ -263,9 +263,9 @@ def get_stratified_gene_usage_frequency(ts = None, replace = True):
     ts.j_occur_freq_stratified = { x[0]:x[1] for x in df_j_occur_freq.to_dict('split')['data']}
     
     if replace:
-        warnings.warn("REPLACING ts.vj_occur_freq WITH ts.vj_occur_freq_stratified")
-        warnings.warn("REPLACING ts.v_occur_freq  WITH ts.v_occur_freq_stratified")
-        warnings.warn("REPLACING ts.j_occur_freq  WITH ts.j_occur_freq_stratified")
+        warnings.warn("REPLACING ts.vj_occur_freq WITH ts.vj_occur_freq_stratified", stacklevel=2)
+        warnings.warn("REPLACING ts.v_occur_freq  WITH ts.v_occur_freq_stratified", stacklevel=2)
+        warnings.warn("REPLACING ts.j_occur_freq  WITH ts.j_occur_freq_stratified", stacklevel=2)
         ts.vj_occur_freq = ts.vj_occur_freq_stratified 
         ts.v_occur_freq  = ts.v_occur_freq_stratified 
         ts.j_occur_freq  = ts.j_occur_freq_stratified 
