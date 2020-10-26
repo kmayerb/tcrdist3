@@ -252,13 +252,13 @@ def fuzzy_diversity(counts, pwmat, order=2, threshold=1, nsamples=1000, force_sa
         """The pwmat represents drawing two members and seeing if they are similar
         so order = 2 is just a simple summary of the pairwise distance matrix:
         the proportion of distance pairs that represent similar members"""
-        div = np.sum(cts[up] * (pwmat < threshold)[up]) / np.sum(cts)
+        div = np.sum(cts[up] * (pwmat <= threshold)[up]) / np.sum(cts)
     else:
         """Higher orders could be computed using a sampling approach
         since its not scalable to compute all possible triplets, etc.
         to see which are all similar. A triplet consists of 3 pairwise distances
         that must all be within the threshold to be a similar triplet."""
-        dvec = (pwmat < threshold)[up]
+        dvec = (pwmat <= threshold)[up]
         prob = cts[up] / np.sum(cts[up])
         samples = np.random.choice(dvec, size=(order, nsamples), replace=True, p=prob)
         

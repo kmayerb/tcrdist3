@@ -177,7 +177,7 @@ class OlgaModel:
                # print(f"pgen_model.V_mask_mapping: {self.pgen_model.V_mask_mapping[gene_to_num_str(V, 'V')]}")
                 vnum = random.choice(self.pgen_model.V_mask_mapping[gene_to_num_str(V, "V")])
             except KeyError:
-                warnings.warn(f"{V}:{gene_to_num_str(V, 'V')} not supported in Olga pgen_model, returning None")
+                warnings.warn(f"{V}:{gene_to_num_str(V, 'V')} not supported in Olga pgen_model, returning None", stacklevel=2)
                 return None
         else:
             vnum = None  
@@ -191,7 +191,7 @@ class OlgaModel:
                 #print(f"pgen_model.J_mask_mapping: {self.pgen_model.J_mask_mapping[gene_to_num_str(J, 'J')]}")
                 jnum = random.choice(self.pgen_model.J_mask_mapping[gene_to_num_str(J, "J")])
             except KeyError:
-                warnings.warn(f"{J}:{gene_to_num_str(J, 'J')} not supported in Olga pgen_model, returning None")
+                warnings.warn(f"{J}:{gene_to_num_str(J, 'J')} not supported in Olga pgen_model, returning None", stacklevel=2)
                 return None
         else:
             jnum = None       

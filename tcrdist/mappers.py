@@ -519,7 +519,7 @@ def map_genes_to_first_alleles(genes, organism):
             alleles.append(d[organism][g])
         except KeyError:
             alleles.append(None)
-            warnings.warn("{} not found in mapping DB, no allele could be mapped for this gene".format(g))
+            warnings.warn("{} not found in mapping DB, no allele could be mapped for this gene".format(g), stacklevel=2)
     return(alleles)
 
 def populate_legacy_fields(df, chains =['alpha', 'beta']):
