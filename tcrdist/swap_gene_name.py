@@ -19,8 +19,8 @@ mapping = pd.read_csv(opj(path_to_db, 'adaptive_imgt_mapping.csv'))
 hum = mapping.loc[mapping['species'] == 'human'].set_index('adaptive')['imgt'].to_dict()
 mus = mapping.loc[mapping['species'] == 'mouse'].set_index('adaptive')['imgt'].to_dict()
 
-adapt = {'human':hum,
-         'mouse':mus}
+adaptive_to_imgt = {'human':hum,
+                    'mouse':mus}
 
 # This quickly makes a dictionary from  'TRGV7*00' -> 'TRGV7*01'
 vdj00_to_imgt = dict()
