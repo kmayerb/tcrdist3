@@ -16,8 +16,8 @@ __all__ = ['adaptive_to_imgt']
 
 mapping = pd.read_csv(opj(path_to_db, 'adaptive_imgt_mapping.csv'))
 
-hum = mapping.loc[mapping['species'] == 'human'].set_index('adaptive')['imgt'].to_dict()
-mus = mapping.loc[mapping['species'] == 'mouse'].set_index('adaptive')['imgt'].to_dict()
+hum = mapping.loc[mapping['species'] == 'human'].set_index('adaptive')['imgt'].fillna('NA').to_dict()
+mus = mapping.loc[mapping['species'] == 'mouse'].set_index('adaptive')['imgt'].fillna('NA').to_dict()
 
 adaptive_to_imgt = {'human':hum,
                     'mouse':mus}
