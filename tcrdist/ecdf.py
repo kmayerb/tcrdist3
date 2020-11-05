@@ -1,10 +1,18 @@
 import numpy as np
 import pandas as pd
+from scipy import sparse
 
 __all__ = ['distance_ecdf',
            'make_ecdf_step']
 
-def distance_ecdf(pwrect, thresholds=None, weights=None):
+def _todense(pw, maxd):
+    """Make a pairwise distance matrix dense"""
+    pw = np.asarray(pw.todense())
+    pw[pw == 0] = maxd + 1
+    pw[np.diag_indices_from(pw)] = 0
+    return pw
+
+def distance_ecdf(pwrect, thresholds=None, weights=None, pseudo_count=0):
     """Computes the empirical cumulative distribution function (ECDF) for
     each TCR in a set of target TCRs [rows of pwrect] as the proportion
     of reference TCRs [columns of pwrect] within a distance radius less
@@ -18,13 +26,15 @@ def distance_ecdf(pwrect, thresholds=None, weights=None):
 
     Parameters
     ----------
-    clone_df : pd.DataFrame
     pwrect : np.ndarray or scipy.sparse.csr_matrix, (clone_df.shape[0], n_ref)
     thresholds : np.ndarray
         Vector of thresholds at which the ECDF should be evaluated.
         By default will use all unique values in pwrect.
     weights : np.ndarray or list, (clone_df.shape[0], )
         Relative weight of each TCR in the reference (column dimension of pwrect)
+    pseudo_count : int
+        Added to the numerator and denominator at each threshold
+        to avoid zero. Useful if end goal is a log-scale plot.
 
     Returns
     -------
@@ -36,11 +46,12 @@ def distance_ecdf(pwrect, thresholds=None, weights=None):
         weights = np.asarray(weights)
 
     if thresholds is None:
-        thresholds = np.unique(pwrect[:])
+        if sparse.issparse(pwrect):
+            thresholds = np.unique(pwrect.data)
+        else:
+            thresholds = np.unique(pwrect[:])
     else:
         thresholds = np.asarray(thresholds)
-
-    pwrect = np.asarray(pwrect)
 
     """Vectorized and faster, using broadcasting for the <= expression"""
     """ecdf = np.sum((pwrect[:, :, None] <= thresholds[None, None, :]) * \
@@ -49,9 +60,24 @@ def distance_ecdf(pwrect, thresholds=None, weights=None):
     """Decided not to vectorize in 3D because it can create an array that's
     too big for memory"""
     ecdf = np.zeros((pwrect.shape[0], thresholds.shape[0]))
+    sum_weights = np.sum(weights)
     for i in range(pwrect.shape[0]):
-        ecdf[i, :] = np.sum((pwrect[i, :][:, None] <= thresholds[None, :]) * \
-                        weights[:, None], axis=0) / np.sum(weights)
+        if sparse.issparse(pwrect):
+            # row = np.asarray(pwrect[i, :].todense()).swapaxes(0, 1)
+            # row[row == 0] = thresholds[-1] + 1
+            # row[i, 0] = 0 # dist to itself is assumed 0
+            row = pwrect[i, :]
+            """Assume row[i] = -1 so always subtract weights[i]"""
+            numer = np.sum((row.data[:, None] <= thresholds[None, :]) * weights[row.indices, None], axis=0) - weights[i]
+        else:
+            row = np.reshape(pwrect[i, :], (pwrect.shape[0], 1))
+            numer = np.sum((row <= thresholds[None, :]) * weights[:, None], axis=0) - weights[i]
+        """Make sure to remove the distance of a TCR to itself from the numer and denom"""
+        """Deleting is probably slower than the subtraction below"""
+        # row = np.delete(row, [i])
+        # w = np.delete(weights, [i])
+        denom = sum_weights - weights[i]
+        ecdf[i, :] = (numer + pseudo_count) / (denom + pseudo_count)
     
     return thresholds, ecdf
 
