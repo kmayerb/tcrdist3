@@ -17,7 +17,7 @@ import multiprocessing
 __all__ = ['_pw',
            '_pws',
            'compute_pw_sparse_out_of_memory',
-           '_pws_sparse',
+           'compute_pws_sparse',
            'pw2dense']
 
 def pw2dense(pw, maxd):
@@ -145,7 +145,7 @@ def _pw(metric, seqs1, seqs2=None, ncpus=1, uniqify= True, use_numba = False, **
     return pw_mat
 
 
-def _pws_sparse(df, metrics, weights, kargs, radius=50, df2=None, cpu=1, chunk_size=500, store=False, pm_pbar=True):
+def compute_pws_sparse(df, metrics, weights, kargs, radius=50, df2=None, cpu=1, chunk_size=500, store=False, pm_pbar=True):
     """   
     compute_pw_sparse performs pairwise distance calculation across multiple 
     columns of a Pandas DataFrame. This naturally permits calculation of
@@ -277,7 +277,7 @@ def _pws_sparse(df, metrics, weights, kargs, radius=50, df2=None, cpu=1, chunk_s
                                kargs,
                                radius,
                                df2,
-                               pm_parallel=False,
+                               pm_parallel=True,
                                pm_pool=pool,
                                pm_pbar=pm_pbar)
 

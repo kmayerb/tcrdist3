@@ -3,7 +3,7 @@ import pwseqdist as pw
 import numpy as np
 import warnings
 from . import repertoire_db
-from tcrdist.rep_funcs import _pws, _pws_sparse
+from tcrdist.rep_funcs import _pws, compute_pws_sparse
 from zipdist.zip2 import Zipdist2
 import sys
 
@@ -334,7 +334,7 @@ class TCRrep:
         self._rect_distances(pw_dist_func=_pws, df = df, df2 = df2, store = store)
     
     def compute_sparse_rect_distances(self, df=None, df2=None, radius=50, chunk_size=500):
-        self._rect_distances(pw_dist_func=_pws_sparse, df=df, df2=df2, radius=radius, chunk_size=chunk_size)
+        self._rect_distances(pw_dist_func=compute_pws_sparse, df=df, df2=df2, radius=radius, chunk_size=chunk_size)
     
     def _rect_distances(self, pw_dist_func, df = None, df2 = None, **kwargs):
         if df is None:
@@ -469,21 +469,21 @@ class TCRrep:
                                                              organism = self.organism,
                                                              attr ='cdrs')
         if chain == "alpha":
-            self.cell_df['cdr1_a_aa'] = list(map(f0, self.cell_df.v_a_gene))
-            self.cell_df['cdr2_a_aa'] = list(map(f1, self.cell_df.v_a_gene))
-            self.cell_df['pmhc_a_aa'] = list(map(f2, self.cell_df.v_a_gene))
+            self.cell_df = self.cell_df.assign(cdr1_a_aa=list(map(f0, self.cell_df.v_a_gene)),
+                                               cdr2_a_aa=list(map(f1, self.cell_df.v_a_gene)),
+                                               pmhc_a_aa=list(map(f2, self.cell_df.v_a_gene)))
         if chain == "beta":
-            self.cell_df['cdr1_b_aa'] = list(map(f0, self.cell_df.v_b_gene))
-            self.cell_df['cdr2_b_aa'] = list(map(f1, self.cell_df.v_b_gene))
-            self.cell_df['pmhc_b_aa'] = list(map(f2, self.cell_df.v_b_gene))
+            self.cell_df = self.cell_df.assign(cdr1_b_aa=list(map(f0, self.cell_df.v_b_gene)),
+                                               cdr2_b_aa=list(map(f1, self.cell_df.v_b_gene)),
+                                               pmhc_b_aa=list(map(f2, self.cell_df.v_b_gene)))
         if chain == "gamma":
-            self.cell_df['cdr1_g_aa'] = list(map(f0, self.cell_df.v_g_gene))
-            self.cell_df['cdr2_g_aa'] = list(map(f1, self.cell_df.v_g_gene))
-            self.cell_df['pmhc_g_aa'] = list(map(f2, self.cell_df.v_g_gene))
+            self.cell_df = self.cell_df.assign(cdr1_g_aa=list(map(f0, self.cell_df.v_g_gene)),
+                                               cdr2_g_aa=list(map(f1, self.cell_df.v_g_gene)),
+                                               pmhc_g_aa=list(map(f2, self.cell_df.v_g_gene)))
         if chain == "delta":
-            self.cell_df['cdr1_d_aa'] = list(map(f0, self.cell_df.v_d_gene))
-            self.cell_df['cdr2_d_aa'] = list(map(f1, self.cell_df.v_d_gene))
-            self.cell_df['pmhc_d_aa'] = list(map(f2, self.cell_df.v_d_gene))
+            self.cell_df = self.cell_df.assign(cdr1_d_aa=list(map(f0, self.cell_df.v_d_gene)),
+                                               cdr2_d_aa=list(map(f1, self.cell_df.v_d_gene)),
+                                               pmhc_d_aa=list(map(f2, self.cell_df.v_d_gene)))
     
     def infer_index_cols(self):
         """

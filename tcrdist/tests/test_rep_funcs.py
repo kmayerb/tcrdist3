@@ -278,5 +278,5 @@ def test_integration_of_compute_pw_sparse_out_of_memory():
     S,_ = compute_pw_sparse_out_of_memory(tr, matrix_name = "rw_beta", max_distance = 1000)
     # S is a <1920x1920 sparse matrix of type '<class 'numpy.int16'>'
     M = S.todense()
-    M[M==1] = 0
+    M[M==-1] = 0
     assert np.all(M == tr.pw_beta)

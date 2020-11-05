@@ -63,22 +63,13 @@ def distance_ecdf(pwrect, thresholds=None, weights=None, pseudo_count=0):
     sum_weights = np.sum(weights)
     for i in range(pwrect.shape[0]):
         if sparse.issparse(pwrect):
-            # row = np.asarray(pwrect[i, :].todense()).swapaxes(0, 1)
-            # row[row == 0] = thresholds[-1] + 1
-            # row[i, 0] = 0 # dist to itself is assumed 0
             row = pwrect[i, :]
-            """Assume row[i] = -1 so always subtract weights[i]"""
-            numer = np.sum((row.data[:, None] <= thresholds[None, :]) * weights[row.indices, None], axis=0) - weights[i]
+            numer = np.sum((row.data[:, None] <= thresholds[None, :]) * weights[row.indices, None], axis=0)
         else:
-            row = np.reshape(pwrect[i, :], (pwrect.shape[0], 1))
-            numer = np.sum((row <= thresholds[None, :]) * weights[:, None], axis=0) - weights[i]
-        """Make sure to remove the distance of a TCR to itself from the numer and denom"""
-        """Deleting is probably slower than the subtraction below"""
-        # row = np.delete(row, [i])
-        # w = np.delete(weights, [i])
-        denom = sum_weights - weights[i]
+            row = np.reshape(pwrect[i, :], (pwrect.shape[1], 1))
+            numer = np.sum((row <= thresholds[None, :]) * weights[:, None], axis=0)
+        denom = sum_weights
         ecdf[i, :] = (numer + pseudo_count) / (denom + pseudo_count)
-    
     return thresholds, ecdf
 
 def make_ecdf_step(thresholds, ecdf, add00=False):
