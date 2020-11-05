@@ -3,7 +3,7 @@ import pwseqdist as pw
 import numpy as np
 import warnings
 from . import repertoire_db
-from tcrdist.rep_funcs import _pws
+from tcrdist.rep_funcs import _pws, _pws_sparse
 from zipdist.zip2 import Zipdist2
 import sys
 
@@ -331,51 +331,57 @@ class TCRrep:
             self._assign_distance_attributes(d = pw_delta, chain = 'delta')
     
     def compute_rect_distances(self, df = None, df2 = None, store = None):
+        self._rect_distances(pw_dist_func=_pws, df = df, df2 = df2, store = store)
+    
+    def compute_sparse_rect_distances(self, df=None, df2=None, radius=50, chunk_size=500):
+        self._rect_distances(pw_dist_func=_pws_sparse, df=df, df2=df2, radius=radius, chunk_size=chunk_size)
+    
+    def _rect_distances(self, pw_dist_func, df = None, df2 = None, **kwargs):
         if df is None:
             df = self.clone_df
         if df2 is None:
             df2 = self.df2
-        if store is None:
-            store = self.store_all_cdr
+        if not 'store' in kwargs or kwargs['store'] is None:
+            kwargs['store'] = self.store_all_cdr
         if 'alpha' in self.chains:
-            pw_alpha  = _pws(
+            pw_alpha  = pw_dist_func(
                 df = df,
                 df2 = df2,
                 metrics = self.metrics_a, 
                 weights = self.weights_a, 
                 kargs   = self.kargs_a, 
                 cpu     = self.cpus, 
-                store   = store)
+                **kwargs)
             self._assign_distance_attributes(d = pw_alpha, chain = 'alpha',prefix = "rw")
         if 'beta' in self.chains:
-            pw_beta = _pws(
+            pw_beta = pw_dist_func(
                 df = df,
                 df2 = df2, 
                 metrics = self.metrics_b, 
                 weights = self.weights_b, 
                 kargs   = self.kargs_b, 
                 cpu     = self.cpus, 
-                store   = store)
+                **kwargs)
             self._assign_distance_attributes(d = pw_beta, chain = 'beta',prefix = "rw")
         if 'gamma' in self.chains:
-            pw_gamma = _pws(
+            pw_gamma = pw_dist_func(
                 df = df,
                 df2 = df2, 
                 metrics = self.metrics_g, 
                 weights = self.weights_g, 
                 kargs   = self.kargs_g, 
                 cpu     = self.cpus, 
-                store   = store)
+                **kwargs)
             self._assign_distance_attributes(d = pw_gamma, chain = 'gamma', prefix = "rw")
         if 'delta' in self.chains:
-            pw_delta = _pws(
+            pw_delta = pw_dist_func(
                 df = df,
                 df2 = df2,
                 metrics = self.metrics_d,
                 weights = self.weights_d, 
                 kargs   = self.kargs_d, 
                 cpu     = self.cpus, 
-                store   = store)
+                **kwargs)
             self._assign_distance_attributes(d = pw_delta, chain = 'delta', prefix = "rw")
 
     def _assign_distance_attributes(self, d:dict, chain:str, prefix = 'pw'):

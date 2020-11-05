@@ -5,14 +5,29 @@ tcrdist3: Functional Programming Approach For Higher Memory Demand Use Cases
 import pwseqdist as pw
 import pandas as pd
 import numpy as np
+from scipy import sparse
 
 import os
 from tcrdist import memory
 import secrets
 import parmap
 import shutil
+import multiprocessing
 
-__all__ = ['_pw', '_pws', 'compute_pw_sparse_out_of_memory']
+__all__ = ['_pw',
+           '_pws',
+           'compute_pw_sparse_out_of_memory',
+           '_pws_sparse',
+           'pw2dense']
+
+def pw2dense(pw, maxd):
+    """Make a pairwise distance matrix dense
+    assuming -1 is used to encode D = 0"""
+    pw = np.asarray(pw.todense())
+    pw[pw == 0] = maxd + 1
+    # pw[np.diag_indices_from(pw)] = 0
+    pw[pw == -1] = 0
+    return pw
 
 
 def _pws(df, metrics, weights, kargs, df2 = None, cpu = 1, uniquify = True, store = False):
@@ -128,6 +143,157 @@ def _pw(metric, seqs1, seqs2=None, ncpus=1, uniqify= True, use_numba = False, **
     #     pw_mat = squareform(pw_mat)
 
     return pw_mat
+
+
+def _pws_sparse(df, metrics, weights, kargs, radius=50, df2=None, cpu=1, chunk_size=500, store=False, pm_pbar=True):
+    """   
+    compute_pw_sparse performs pairwise distance calculation across multiple 
+    columns of a Pandas DataFrame. This naturally permits calculation of
+    a CDR-weighted tcrdistance that incorporates dissimilarity across 
+    multiple complimentarity determining regions (see example below):
+
+    Radius is applied per chain.
+    TODO: allow for different radius per chain
+
+    Parameters 
+    ----------
+    df : pd.DataFrame
+        Clones DataFrame containing, at a minimum, columns with CDR sequences
+    df2 : pd.DataFrame or None
+        Second clones DataFrame containing, at a minimum, columns with CDR sequences
+    metrics : dict
+        Dictionary of functions, specifying the distance metrics to apply to each CDR
+    weights : dict
+        Weights determining the contributions of each CDR distance to the aggregate distance
+    kargs : dict
+        Dictionary of Dictionaries
+    cpu : int 
+        Number of available cpus
+    radius : int
+        Only distances <= radius will be retained.
+    chunk_size : int
+        Number of rows that will make up each row chunk of [df x df2]
+        which will be computed densely.
+    store : bool
+        IGNORED
+        
+    Returns
+    -------
+    s : dictionary with tcr_distance.
+
+    Example
+    -------
+    import pwseqdist as pw
+    import pandas as pd
+    from tcrdist.rep_funcs import _pw, _pw2
+    
+    # Define metrics for each region
+    metrics = { "cdr3_a_aa" : pw.metrics.nb_vector_tcrdist,
+                "pmhc_a_aa" : pw.metrics.nb_vector_tcrdist,
+                "cdr2_a_aa" : pw.metrics.nb_vector_tcrdist,
+                "cdr1_a_aa" : pw.metrics.nb_vector_tcrdist,
+                "cdr3_b_aa" : pw.metrics.nb_vector_tcrdist,
+                "pmhc_b_aa" : pw.metrics.nb_vector_tcrdist,
+                "cdr2_b_aa" : pw.metrics.nb_vector_tcrdist,
+                "cdr1_b_aa" : pw.metrics.nb_vector_tcrdist}
+
+    # Define weights
+    weights = { 
+                "cdr3_a_aa" : 3,
+                "pmhc_a_aa" : 1,
+                "cdr2_a_aa" : 1,
+                "cdr1_a_aa" : 1,
+                "cdr3_b_aa" : 3,
+                "pmhc_b_aa" : 1,
+                "cdr2_b_aa" : 1,
+                "cdr1_b_aa" : 1}
+
+    kargs = {   "cdr3_a_aa" : {'use_numba': True, 'distance_matrix': pw.matrices.tcr_nb_distance_matrix, 'dist_weight': 1, 'gap_penalty':4, 'ntrim':3, 'ctrim':2, 'fixed_gappos':False},
+                "pmhc_a_aa" : {'use_numba': True, 'distance_matrix': pw.matrices.tcr_nb_distance_matrix, 'dist_weight': 1, 'gap_penalty':4, 'ntrim':0, 'ctrim':0, 'fixed_gappos':True},
+                "cdr2_a_aa" : {'use_numba': True, 'distance_matrix': pw.matrices.tcr_nb_distance_matrix, 'dist_weight': 1, 'gap_penalty':4, 'ntrim':0, 'ctrim':0, 'fixed_gappos':True},
+                "cdr1_a_aa" : {'use_numba': True, 'distance_matrix': pw.matrices.tcr_nb_distance_matrix, 'dist_weight': 1, 'gap_penalty':4, 'ntrim':0, 'ctrim':0, 'fixed_gappos':True},
+                "cdr3_b_aa" : {'use_numba': True, 'distance_matrix': pw.matrices.tcr_nb_distance_matrix, 'dist_weight': 1, 'gap_penalty':4, 'ntrim':3, 'ctrim':2, 'fixed_gappos':False},
+                "pmhc_b_aa" : {'use_numba': True, 'distance_matrix': pw.matrices.tcr_nb_distance_matrix, 'dist_weight': 1, 'gap_penalty':4, 'ntrim':0, 'ctrim':0, 'fixed_gappos':True},
+                "cdr2_b_aa" : {'use_numba': True, 'distance_matrix': pw.matrices.tcr_nb_distance_matrix, 'dist_weight': 1, 'gap_penalty':4, 'ntrim':0, 'ctrim':0, 'fixed_gappos':True},
+                "cdr1_b_aa" : {'use_numba': True, 'distance_matrix': pw.matrices.tcr_nb_distance_matrix, 'dist_weight': 1, 'gap_penalty':4, 'ntrim':0, 'ctrim':0, 'fixed_gappos':True}}
+
+    df = pd.DataFrame("dash2.csv")
+    _pws(df = df, metrics = metrics, weights= weights, kargs=kargs, cpu = 1, store = False)
+    """
+    metric_keys = [k for k in metrics.keys() if not 'cdr3' in k]
+    weight_keys = [k for k in weights.keys() if not 'cdr3' in k]
+    assert metric_keys == weight_keys, "metrics and weights keys must be identical"
+    
+    if kargs is not None:
+        kargs_keys  = [k for k in kargs.keys() if not 'cdr3' in k]
+        assert metric_keys == kargs_keys,  "metrics and kargs keys must be identical"
+    
+    n1 = df.shape[0]
+    
+    """Compute all but CDR3 as normal, but do not reexpand.
+    Computing unique distances should not be memory or CPU intensive"""
+    tcrdist = None
+    components = dict()
+    for k in metric_keys:
+        if df2 is None:
+            seqs2 = None
+        else:
+            seqs2 = df2[k].values
+
+        """With reexapnd = False, returns: pw_mat, uind_i1, uind_i2"""
+        pwmat, ind1, ind2 = pw.apply_pairwise_rect(metric=metrics[k], 
+                                                    seqs1=df[k].values, 
+                                                    seqs2=seqs2, 
+                                                    ncpus=min(cpu, 2),
+                                                    uniqify=True, 
+                                                    reexpand=False,
+                                                    **kargs[k])
+
+        components[k] = (pwmat * weights[k], ind1, ind2) 
+
+    """Can't do this because it will be huge. Also can't compute list of
+    potential D < radius because that also could be too large.
+    But need to pre-compute these non-CDR3 because otherwise the CDR3
+    matrix won't be sparse enough with the radius.
+
+    Solution: chunk the computation here. Only compute subsets of potential
+    seqs pairs sparsely and spread across processors."""
+
+    if cpu > 1 and n1 > chunk_size:
+        """Chunk along df (rows) only"""
+        chunk_func = lambda l, n: [np.array(l[i:i + n], dtype=np.int64) for i in range(0, len(l), n)]
+        # chunksz = max(len(pw_indices) // cpu, 1)
+        """Chunked indices is a list of arrays of indices"""
+        """List of the chunked [chunk_size,] arrays"""
+        chunked_indices = chunk_func(np.arange(n1, dtype=np.int64), chunk_size)
+        
+        with multiprocessing.Pool(cpu) as pool:
+            dists = parmap.map(memory._sparse_cdr3_tcrdist_shard,
+                               chunked_indices,
+                               components,
+                               df,
+                               metrics,
+                               weights,
+                               kargs,
+                               radius,
+                               df2,
+                               pm_parallel=False,
+                               pm_pool=pool,
+                               pm_pbar=pm_pbar)
+
+        full_S = sparse.vstack(dists)
+    else:
+        full_S = memory._sparse_cdr3_tcrdist_shard(np.arange(n1, dtype=np.int64),
+                                                components,
+                                                df,
+                                                metrics,
+                                                weights,
+                                                kargs,
+                                                radius,
+                                                df2)  
+    
+    return {'tcrdist': full_S}
+
 
 
 def compute_n_tally_out_of_memory(fragments, 
@@ -327,7 +493,7 @@ def compute_pw_sparse_out_of_memory2(tr,
     sparse matrix from a set of sub matrices written to disk fragment. 
     With <reassemble = True>  function returns a scipy sparse matrix. 
     Space savings are achieved because any value above <max_distance> is set to zero. 
-    True zero distances are set to 1. 
+    True zero distances are set to -1. 
 
     Can be used to form a network of TCRs with tcrdistances < max_distance,
 
@@ -504,5 +670,6 @@ def compute_n_tally_out_of_memory2(fragments,
     if to_memory:
         nndiff = memory._concat_to_memory(fragments = csvfragments)
         return nndiff
+
 
 
