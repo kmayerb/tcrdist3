@@ -12,7 +12,7 @@ def _todense(pw, maxd):
     pw[np.diag_indices_from(pw)] = 0
     return pw
 
-def distance_ecdf(pwrect, thresholds=None, weights=None, pseudo_count=0):
+def distance_ecdf(pwrect, thresholds=None, weights=None, pseudo_count=0, skip_diag=False):
     """Computes the empirical cumulative distribution function (ECDF) for
     each TCR in a set of target TCRs [rows of pwrect] as the proportion
     of reference TCRs [columns of pwrect] within a distance radius less
@@ -35,6 +35,8 @@ def distance_ecdf(pwrect, thresholds=None, weights=None, pseudo_count=0):
     pseudo_count : int
         Added to the numerator and denominator at each threshold
         to avoid zero. Useful if end goal is a log-scale plot.
+    skip_diag : bool
+        Skip counting the diagonal for computing ECDF of seqs against same seqs.
 
     Returns
     -------
@@ -69,6 +71,9 @@ def distance_ecdf(pwrect, thresholds=None, weights=None, pseudo_count=0):
             row = np.reshape(pwrect[i, :], (pwrect.shape[1], 1))
             numer = np.sum((row <= thresholds[None, :]) * weights[:, None], axis=0)
         denom = sum_weights
+        if skip_diag:
+            numer = numer - weights[i]
+            denom = denom - weights[i]
         ecdf[i, :] = (numer + pseudo_count) / (denom + pseudo_count)
     return thresholds, ecdf
 
