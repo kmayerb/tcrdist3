@@ -77,7 +77,7 @@ def distance_ecdf(pwrect, thresholds=None, weights=None, pseudo_count=0, skip_di
         ecdf[i, :] = (numer + pseudo_count) / (denom + pseudo_count)
     return thresholds, ecdf
 
-def make_ecdf_step(thresholds, ecdf, add00=False):
+def make_ecdf_step(thresholds, ecdf, add_mnx=False, add_mny=False, add_mnmn=False, enforce_mn=False, mn=(0, 0), xjitter=0):
     """Create stepped vector for plotting an ECDF,
     since the ECDF should naturally have discrete steps
     but will not unless they are explictly added prior
@@ -94,8 +94,8 @@ def make_ecdf_step(thresholds, ecdf, add00=False):
     ecdf : np.ndarray [n_thresholds, ]
         Vector of increasing probabilities
         (typically the y-axis of the plot)
-    add00 : bool
-        Will add a step to (x=0, y=0) to complete
+    add_mnmn : bool
+        Will add a step to (x=mn[0], y=mn[1]) to complete
         the ECDF.
 
     Returns
@@ -104,13 +104,29 @@ def make_ecdf_step(thresholds, ecdf, add00=False):
         Vectors for plotting"""
     y = np.asarray(ecdf)
     t = np.asarray(thresholds)
-    if add00:
-        t = np.concatenate(([0], t.ravel()))
-        y = np.concatenate(([0], y.ravel()))
+
+    if enforce_mn:
+        t[t<mn[0]] = mn[0]
+        y[y<mn[1]] = mn[1]
+
+    if add_mnx:
+        t = np.concatenate(([mn[0]], t.ravel()))
+        y = np.concatenate(([y[0]], y.ravel()))
+    if add_mny:
+        t = np.concatenate(([t[0]], t.ravel()))
+        y = np.concatenate(([mn[1]], y.ravel()))
+
+    if add_mnmn:
+        t = np.concatenate(([mn[0]], t.ravel()))
+        y = np.concatenate(([mn[1]], y.ravel()))
 
     t = np.concatenate(([t[0]], np.repeat(t[1:].ravel(), 2)))
     y = np.repeat(y.ravel(), 2)[:-1]
-    return t, y
+
+    jx = t + (np.random.rand(1) - 0.5) * xjitter
+    jx[0] = t[0]
+    jx[-1] = t[-1]
+    return jx, y
 
 def gmean10(vec, axis=0):
     """Geometric mean which may be useful for
