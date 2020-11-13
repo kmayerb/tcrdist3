@@ -29,6 +29,19 @@ tra.clone_df['radius'] = 23
 tsampler_alpha = _default_tcrsampler_mouse_alpha()
 
 
+def test_TCRpublic():
+	df = pd.read_csv("dash.csv").query('epitope == "PA"').reset_index().copy()
+	tr = TCRrep(cell_df = df.head(100).copy(), 
+	            organism = 'mouse', 
+	            chains = ['beta'], 
+	            db_file = 'alphabeta_gammadelta_db.tsv', 
+	            compute_distances = True)
+	tr.clone_df['radius'] = 40
+	from tcrdist.public import TCRpublic
+	tp = TCRpublic(tcrrep = tr, organism = 'mouse', chain = 'beta')
+	tp.report()
+
+
 def test__neighbors_fixed_radius():
 	""" Returns the list of neighbor column indices if within the fixed radius """
 	result = _neighbors_fixed_radius(pwmat = tr.pw_beta, radius = 20) 

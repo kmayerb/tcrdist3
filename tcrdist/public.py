@@ -11,7 +11,7 @@ import os
 from palmotif import compute_pal_motif, svg_logo
 from tcrdist.summarize import _occurs_N_str, member_summ, filter_is, test_for_subsets
 from progress.bar import IncrementalBar
-
+from tcrdist.tree import _default_sampler, _default_sampler_olga
 
 __all__ = ['_neighbors_fixed_radius',
 		   '_K_neighbors_fixed_radius',
@@ -19,6 +19,102 @@ __all__ = ['_neighbors_fixed_radius',
 		   '_K_neighbors_variable_radius',
 		   'make_motif_logo',
 		   '_quasi_public_meta_clonotypes']
+
+
+
+class TCRpublic():
+	def __init__(self, tcrrep, organism, chain, output_html_name = "quasi_public_clones.html"):
+		
+		assert chain in ['alpha','beta', 'gamma','delta'], "TCRPublic <chain> argument must be 'alpha', 'beta', 'gamma' or 'delta'"
+		assert organism in ['human', 'mouse'], "TCRPublic <organism> argument must be 'human' or 'mouse'"
+		self.tcrrep = tcrrep
+		self.organism = organism
+		self.chain = chain
+		self.output_html_name = output_html_name
+		# Get chain specific atributes
+		self.pw_mat_str = {'alpha': 'pw_alpha',
+						  'beta' : 'pw_beta', 
+						  'gamma': 'pw_gamma',
+						  'delta': 'pw_delta'}[self.chain]
+		
+		self.cdr3_name = {'alpha': 'cdr3_a_aa',
+						  'beta' : 'cdr3_b_aa', 
+						  'gamma': 'cdr3_g_aa',
+						  'delta': 'cdr3_d_aa'}[self.chain]
+
+		self.v_gene_name = {'alpha': 'v_a_gene',
+						   'beta'  : 'v_b_gene', 
+						   'gamma' : 'v_g_gene',
+						   'delta' : 'v_d_gene'}[self.chain]
+
+		self.j_gene_name = {'alpha': 'j_a_gene',
+						   'beta'  : 'j_b_gene', 
+						   'gamma' : 'j_g_gene',
+						   'delta' : 'j_d_gene'}[self.chain]
+
+		self.nr_filter = True
+		
+		self.output_html_name = output_html_name
+
+		self.labels = ['clone_id',
+						self.cdr3_name, 
+						self.v_gene_name,
+						self.j_gene_name,
+						'radius',
+						'neighbors',
+						'K_neighbors',
+						'nsubject',
+						'qpublic',
+						f'{self.cdr3_name}.summary', 
+						f'{self.v_gene_name}.summary',
+						f'{self.j_gene_name}.summary',
+						f'{self.cdr3_name}.summary',
+						'subject.summary']
+		
+		self.fixed_radius = False
+		
+		self.radius = None
+		
+		self.query_str = 'qpublic == True & K_neighbors > 1'
+		
+		self.kargs_member_summ = {
+			'key_col'   : 'neighbors', 
+			'count_col' : 'count',
+			'addl_cols' : ['subject'],
+			'addl_n'    : 4}
+		
+		self.kargs_motif = {
+			'pwmat_str'  : self.pw_mat_str,
+			'cdr3_name'  : self.cdr3_name,
+			'v_name'     : self.v_gene_name,
+			'gene_names' : [self.v_gene_name, self.j_gene_name]}
+
+		# Here we get a default sampler
+		try: 
+			self.tcrsampler = _default_sampler_olga(organism = organism, chain = chain)()
+		except KeyError:
+			self.tcrsampler = _default_sampler(organism = organism, chain = chain)()
+
+	def report(self):
+
+		result = _quasi_public_meta_clonotypes(clone_df    = self.tcrrep.clone_df, 
+									  pwmat       = getattr(self.tcrrep, self.pw_mat_str),
+									  tcrsampler  = self.tcrsampler,
+									  cdr3_name   = self.cdr3_name,
+									  v_gene_name = self.v_gene_name,
+									  nr_filter   = self.nr_filter,
+									  output_html_name  = self.output_html_name, 
+									  labels            = self.labels,
+									  fixed_radius      = self.fixed_radius,
+									  radius            = self.radius,
+									  query_str         = self.query_str, 
+									  kargs_member_summ = self.kargs_member_summ,
+									  kargs_motif       = self.kargs_motif)
+		
+		print(f"WRITING: {self.output_html_name}")
+		return result
+
+
 
 def _neighbors_fixed_radius(pwmat, radius):
 	""" Returns the list of neighbor column indices if within the fixed radius """
