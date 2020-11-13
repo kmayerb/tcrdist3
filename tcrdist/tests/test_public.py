@@ -8,17 +8,16 @@ import pytest
 from tcrdist.repertoire import TCRrep
 from tcrsampler.sampler import TCRsampler
 from tcrdist.public import *
-
+from tcrdist.tree import _default_tcrsampler_mouse_beta, _default_tcrsampler_mouse_alpha
 # Fixture Mouse Beta
 df = pd.read_csv("dash.csv").query('epitope == "PA"').reset_index().copy()
-
 tr = TCRrep(cell_df = df.head(300).copy(), 
             organism = 'mouse', 
             chains = ['beta'], 
             db_file = 'alphabeta_gammadelta_db.tsv', 
             compute_distances = True)
 tr.clone_df['radius'] = 23
-tsampler_beta = TCRsampler(default_background='olga_mouse_beta_t.sampler.tsv')
+tsampler_beta = _default_tcrsampler_mouse_beta()
 
 # Fixture Mouse Alpha
 tra = TCRrep(cell_df = df.head(300).copy(), 
@@ -27,7 +26,7 @@ tra = TCRrep(cell_df = df.head(300).copy(),
             db_file = 'alphabeta_gammadelta_db.tsv', 
             compute_distances = True)
 tra.clone_df['radius'] = 23
-tsampler_alpha = TCRsampler(default_background='ruggiero_mouse_alpha_t.tsv.sampler.tsv')
+tsampler_alpha = _default_tcrsampler_mouse_alpha()
 
 
 def test__neighbors_fixed_radius():
@@ -130,7 +129,6 @@ def test_quasi_public_meta_clonotypes_beta_from_nieghbor_diff():
 							  			'radius',
 							  			'neighbors',
 							  			'K_neighbors',
-							  			#'cdr3s',
 							  			'nsubject',
 							  			'qpublic',
 							  			'cdr3_b_aa.summary',
