@@ -23,14 +23,73 @@ __all__ = ['_neighbors_fixed_radius',
 
 
 class TCRpublic():
-	def __init__(self, tcrrep, organism, chain, output_html_name = "quasi_public_clones.html"):
+	"""
+
+	Attributes
+
+	tcrrep : tcrdist.repertoire.TCRrep
+
+	clone_df : pd.DataFrame
+		Clones information with standard tcrdist3 column names.
+	pwmat : np.array
+		Pairwise distances
+	tcrsamper : tcrsampler.TCRsampler
+		TCRSampler instance initialized with appropriate background
+		set.
+	cdr3_name : str
+		Column name for amino acid CDR3 e.g., 'cdr3_d_aa'.
+	v_gene_name : str
+		Column name for TR[ABGD]V gene e.g., 'v_d_gene'.
+	nr_filter : bool
+		If True, sequqences with the exact same neighbors as another set will be
+		dropped
+	output_html_name : str
+		Filename for the output html output.
+	labels : list
+		List of columns to display on html output beneath each logo plot. 
+	fixed_radius : False
+		If False, clone_df must have a column radius. 
+		If True, argument radius will be used to define 
+		maximum distance from centroid to neighboring TCR.
+	radius : int or None
+		Theshold distance (<=) for neighborhood membership.
+		If int, then all centroids will be assigned the same
+		radius. Alterntively radius can be provided for each
+		centroid sequence by including radius as a numeric column
+		in clone_df.
+	query_str : str
+		The string to include sequences in output. For instance
+		'qpublic == True and K_neighbors > 3', implies that only 
+		grouping of 4 or more TCRs from at leåast two individuals
+		will be retained. Alternatively, 'nsubject > 1' or 
+		'qpublic == True' could be used as true minimum requirements 
+		for quasi-publicity.
+	kargs_member_summ : dict
+		kwargs 
+	kargs_motif : dict
+		kwargs for the motif genertation 
+	"""
+	def __init__(self, tcrrep, organism = None, chain = None, output_html_name = "quasi_public_clones.html"):
 		
-		assert chain in ['alpha','beta', 'gamma','delta'], "TCRPublic <chain> argument must be 'alpha', 'beta', 'gamma' or 'delta'"
-		assert organism in ['human', 'mouse'], "TCRPublic <organism> argument must be 'human' or 'mouse'"
 		self.tcrrep = tcrrep
-		self.organism = organism
-		self.chain = chain
+		
+		if organism is None:
+			self.organism = tcrrep.organism 
+		else:
+			assert organism in ['human', 'mouse'], "TCRPublic <organism> argument must be 'human' or 'mouse'"
+			self.organism = organism 
+		
+		if chain is None:
+			self.chain= tcrrep.chains[0]
+		else:
+			assert chain in ['alpha','beta', 'gamma','delta'], "TCRPublic <chain> argument must be 'alpha', 'beta', 'gamma' or 'delta'"
+			self.chain = chain
+
 		self.output_html_name = output_html_name
+
+		self.sort_columns = ['nsubject','K_neighbors']
+		self.sort_ascending = False
+		
 		# Get chain specific atributes
 		self.pw_mat_str = {'alpha': 'pw_alpha',
 						  'beta' : 'pw_beta', 
@@ -71,11 +130,11 @@ class TCRpublic():
 						f'{self.cdr3_name}.summary',
 						'subject.summary']
 		
-		self.fixed_radius = False
+		self.fixed_radius = True
 		
-		self.radius = None
+		self.radius = 18
 		
-		self.query_str = 'qpublic == True & K_neighbors > 1'
+		self.query_str = 'nsubject > 3'
 		
 		self.kargs_member_summ = {
 			'key_col'   : 'neighbors', 
@@ -89,21 +148,23 @@ class TCRpublic():
 			'v_name'     : self.v_gene_name,
 			'gene_names' : [self.v_gene_name, self.j_gene_name]}
 
-		# Here we get a default sampler
+		# Get the Default sampler
 		try: 
-			self.tcrsampler = _default_sampler_olga(organism = organism, chain = chain)()
+			self.tcrsampler = _default_sampler_olga(organism = self.organism, chain = self.chain)()
 		except KeyError:
-			self.tcrsampler = _default_sampler(organism = organism, chain = chain)()
+			self.tcrsampler = _default_sampler(organism = self.organism, chain = self.chain)()
 
 	def report(self):
 
-		result = _quasi_public_meta_clonotypes(clone_df    = self.tcrrep.clone_df, 
+		result = _quasi_public_meta_clonotypes(clone_df    = self.tcrrep.clone_df.copy(), 
 									  pwmat       = getattr(self.tcrrep, self.pw_mat_str),
 									  tcrsampler  = self.tcrsampler,
 									  cdr3_name   = self.cdr3_name,
 									  v_gene_name = self.v_gene_name,
 									  nr_filter   = self.nr_filter,
 									  output_html_name  = self.output_html_name, 
+									  sort_columns = self.sort_columns,
+									  sort_ascending = self.sort_ascending,
 									  labels            = self.labels,
 									  fixed_radius      = self.fixed_radius,
 									  radius            = self.radius,
@@ -206,6 +267,8 @@ def _quasi_public_meta_clonotypes(clone_df,
 								  v_gene_name = 'v_d_gene',
 								  nr_filter = True,
 								  output_html_name = "quasi_public_clones.html",
+								  sort_columns = ['nsubject','K_neighbors'],
+								  sort_ascending = False,
 								  labels = ['clone_id',
 								  			'cdr3_d_aa', 
 								  			'v_d_gene',
@@ -306,6 +369,7 @@ def _quasi_public_meta_clonotypes(clone_df,
 	"""
 	if 'neighbors' not in clone_df.columns:
 		if fixed_radius:
+			clone_df['radius'] = radius
 			clone_df['neighbors']   = _neighbors_fixed_radius(pwmat = pwmat, radius = radius)
 			clone_df['K_neighbors'] = _K_neighbors_fixed_radius(pwmat = pwmat, radius = radius)
 		else:
@@ -313,11 +377,13 @@ def _quasi_public_meta_clonotypes(clone_df,
 			clone_df['neighbors']   = _neighbors_variable_radius(pwmat = pwmat, radius_list = clone_df.radius)
 			clone_df['K_neighbors'] = _K_neighbors_variable_radius(pwmat = pwmat, radius_list = clone_df.radius)
 
-	clone_df['nsubject']   = clone_df['neighbors'].\
-		apply(lambda x: clone_df['subject'].iloc[x].nunique())
+	if 'nsubject' not in clone_df.columns:
+		clone_df['nsubject']   = clone_df['neighbors'].\
+			apply(lambda x: clone_df['subject'].iloc[x].nunique())
 
-	clone_df['qpublic']     = clone_df['neighbors'].\
-		apply(lambda x: clone_df['subject'].iloc[x].nunique() > 1)
+	if 'qpublic' not in clone_df.columns:
+		clone_df['qpublic']     = clone_df['nsubject'].\
+			apply(lambda x: x > 1)
 
 	nn_summary = member_summ(res_df   = clone_df,
 							clone_df  = clone_df,
@@ -329,10 +395,20 @@ def _quasi_public_meta_clonotypes(clone_df,
 
 	clone_df = pd.concat([clone_df, nn_summary], axis = 1)
 
-	quasi_public_df = clone_df.query(query_str).sort_values(['nsubject','K_neighbors'], ascending = False ).copy()
+	quasi_public_df = clone_df.query(query_str).\
+		sort_values(sort_columns, ascending = sort_ascending).\
+		reset_index(drop = True).\
+		copy()
 	
 	if quasi_public_df.shape[0] == 0:
 		raise ValueError("UNFORTUNATELY NO QUASI PUBLIC CLOONES WERE FOUND, CONSIDER YOUR QUERY STRINGENCY")
+
+	quasi_public_df['unique_set'] = test_for_subsets(quasi_public_df['neighbors'])
+
+	if nr_filter:
+		quasi_public_df = filter_is(quasi_public_df, 'unique_set', 1).reset_index(drop = True)
+
+	print(f"GENERATING {quasi_public_df.shape[0]} QUASI-PUBLIC MOTIFS SATISFYING {query_str}")
 	bar = IncrementalBar('Processing', max = quasi_public_df.shape[0])
 	svgs = list()
 	svgs_raw = list()
@@ -353,11 +429,6 @@ def _quasi_public_meta_clonotypes(clone_df,
 
 	quasi_public_df['svg'] = svgs
 	quasi_public_df['svg_raw'] = svgs_raw
-	
-	quasi_public_df['unique_set'] = test_for_subsets(quasi_public_df['neighbors'])
-	
-	if nr_filter:
-		quasi_public_df = filter_is(quasi_public_df, 'unique_set', 1)
 
 	def shrink(s):
 		s = s.replace('height="100%"', 'height="20%"')
@@ -377,4 +448,4 @@ def _quasi_public_meta_clonotypes(clone_df,
 			output_handle.write(pd.DataFrame(r[labels]).transpose().to_html())
 			output_handle.write("<br></br>")
 
-	return {'nn_summary': nn_summary, 'quasi_public_df': quasi_public_df}
+	return {'nn_summary': nn_summary, 'quasi_public_df': quasi_public_df, 'clone_df': clone_df}
