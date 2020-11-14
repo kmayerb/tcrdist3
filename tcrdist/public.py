@@ -232,6 +232,18 @@ def make_motif_logo(tcrsampler,
 	svg : str
 	svg_raw : str
 
+	Notes
+	-----
+	
+	There is a safety first, efficiency loss involved 
+	since we are relocating neighbors that 
+	may already be know, but by looking 
+	up the row index <irow> fisrst matching V,CDR3 this 
+	function can be evoked without knowing 
+	anything about the positions of 
+	the neighbors ahead of time. This is particularly useful 
+	since clone_df order is not stable after groupby 
+	and deduplication. 
 	"""
 	irow = clone_df[(clone_df[cdr3_name] == centroid) & (clone_df[v_name ] == v_gene)].index[0]
 

@@ -31,7 +31,7 @@ tsampler_alpha = _default_tcrsampler_mouse_alpha()
 
 def test_TCRpublic():
 	df = pd.read_csv("dash.csv").query('epitope == "PA"').reset_index().copy()
-	tr = TCRrep(cell_df = df.head(100).copy(), 
+	tr = TCRrep(cell_df = df.head(200).copy(), 
 	            organism = 'mouse', 
 	            chains = ['beta'], 
 	            db_file = 'alphabeta_gammadelta_db.tsv', 
@@ -124,7 +124,7 @@ def test_quasi_public_meta_clonotypes_beta_from_nieghbor_diff():
 								pwmat = tr.pw_beta, 
 								count_col = 'count', 
 								x_cols = ['epitope'], 
-								knn_radius = 50)
+								knn_radius = 25)
 
 	nn_clone_df = pd.concat([tr.clone_df, ndif[['neighbors', 'K_neighbors','val_0','ct_0']] ], axis = 1)
 	RB = _quasi_public_meta_clonotypes(clone_df = nn_clone_df, 
