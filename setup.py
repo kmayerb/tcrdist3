@@ -27,7 +27,7 @@ install_reqs = [
       'numpy>=1.16.4',
       'parasail>=1.1.17',
       'scipy>=1.4.1',
-      'pwseqdist>=0.2.1',
+      'pwseqdist>=0.5',
       'numba',
       'zipdist>=0.1.5',
       'fishersapi',
