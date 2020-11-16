@@ -309,6 +309,7 @@ Huang, H., Wang, C., Rubelt, F., Scriba, T. J. & Davis, M. M. Analyzing the Myco
    :maxdepth: 1
 
    tcrdistances
+   public
    visualizing
    motif_gallery
    influenza_example
