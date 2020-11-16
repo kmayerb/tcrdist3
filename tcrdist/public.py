@@ -7,18 +7,105 @@ Assist the user in finding quasi public meta-clonotypes
 import pandas as pd
 import numpy as np
 import os
+import scipy.sparse
 
 from palmotif import compute_pal_motif, svg_logo
 from tcrdist.summarize import _occurs_N_str, member_summ, filter_is, test_for_subsets
 from progress.bar import IncrementalBar
-from tcrdist.tree import _default_sampler, _default_sampler_olga
+from tcrdist.tree import _default_sampler, _default_sampler_olga, allele_01
 
 __all__ = ['_neighbors_fixed_radius',
 		   '_K_neighbors_fixed_radius',
 		   '_neighbors_variable_radius',
 		   '_K_neighbors_variable_radius',
+		   '_neighbors_sparse_fixed_radius',
+		   '_neighbors_sparse_variable_radius',
 		   'make_motif_logo',
+		   'make_motif_logo_from_index',
 		   '_quasi_public_meta_clonotypes']
+
+def _neighbors_fixed_radius(pwmat, radius):
+	""" Returns the list of neighbor column indices if within the fixed radius """
+	return [list(np.nonzero(pwmat[ii,]<=radius)[0]) for ii in range(pwmat.shape[0]) ]
+
+def _K_neighbors_fixed_radius(pwmat, radius):
+	""" Returns the number of neighbors (self-inclusive) if within the fixed radius"""
+	return [len(list(np.nonzero(pwmat[ii,]<=radius)[0])) for ii in range(pwmat.shape[0]) ]
+
+def _neighbors_variable_radius(pwmat, radius_list):
+	""" Returns the list of neighbor column indices if within the fixed radius """
+	return [list(np.nonzero(pwmat[ii,]<=radius)[0]) for ii, radius in zip(range(pwmat.shape[0]), radius_list) ]
+
+def _K_neighbors_variable_radius(pwmat, radius_list):
+	""" Returns the number of neighbors (self-inclusive) if within the fixed radius"""
+	return [len(list(np.nonzero(pwmat[ii,]<=radius)[0])) for ii, radius in zip(range(pwmat.shape[0]), radius_list) ]
+
+def _neighbors_sparse_fixed_radius(csrmat, radius):
+	""" 
+	Returns the list of neighbor column indices within the fixed radius
+
+	Parameter
+	--------- 
+	csrmat : scipy.sparse.csr_matrix
+
+	radius : int
+
+	Return
+	------
+	list of lists of ints
+
+	Example 
+	-------
+	>>> M = np.array([[-1,0,1,4],[1,-1,0,2],[0,10,-1,3],[0,0,2,-1]])
+	>>> S = scipy.sparse.csr_matrix(M)
+	>>> NN = _neighbors_sparse_fixed_radius(csrmat = S, radius = 4)
+	>>> NN
+	[[0, 2], [0, 1, 3], [2, 3], [2, 3]]
+	>>> assert NN == [[0, 2], [0, 1, 3], [2, 3], [2, 3]]
+	"""
+	S = csrmat.copy()
+	S[S > radius] = 0
+	S.eliminate_zeros()
+	return [list(x) for x in np.split(S.indices, S.indptr[1:-1])]
+
+
+def _neighbors_sparse_variable_radius(csrmat, radius_list):
+	""" 
+	Returns the list of neighbor column indices within the fixed radius
+
+	Parameter
+	--------- 
+	csrmat : scipy.sparse.csr_matrix
+	
+	radius : int
+
+	Return
+	------
+	list of lists of ints
+
+	Example 
+	-------
+	>>> M = np.array([[-1,0,1,4],[1,-1,0,2],[0,10,-1,3],[5,0,2,-1]])
+	>>> S = scipy.sparse.csr_matrix(M)
+	>>> N = _neighbors_sparse_variable_radius(csrmat = S, radius_list = [1,1,20,2])
+	>>> N
+	[[0, 2, 3], [0, 1, 3], [1, 2, 3], [2, 3]]
+	>>> assert NN == [[0, 2, 3], [0, 1, 3], [1, 2, 3], [2, 3]]
+	"""
+	assert np.all([x > 0 for x in radius_list]), "Radius value must be greater than zero"
+	#S = csrmat.copy()
+	#for ii,radius in enumerate(radius_list):
+	#		S[ii,:][S[ii,:] >= radius] = 0
+	#S.eliminate_zeros()
+	#return [list(x) for x in np.split(S.indices, S.indptr[1:-1])]
+	S = csrmat.copy()
+	for ii,radius in enumerate(radius_list):
+		X = S[ii,:].todense()
+		X[X > radius] = 0
+		S[ii,:] = X 
+	S.eliminate_zeros()
+	return [list(x) for x in np.split(S.indices, S.indptr[1:-1])]
+
 
 
 
@@ -177,21 +264,6 @@ class TCRpublic():
 
 
 
-def _neighbors_fixed_radius(pwmat, radius):
-	""" Returns the list of neighbor column indices if within the fixed radius """
-	return [list(np.nonzero(pwmat[ii,]<=radius)[0]) for ii in range(pwmat.shape[0]) ]
-
-def _K_neighbors_fixed_radius(pwmat, radius):
-	""" Returns the number of neighbors (self-inclusive) if within the fixed radius"""
-	return [len(list(np.nonzero(pwmat[ii,]<=radius)[0])) for ii in range(pwmat.shape[0]) ]
-
-def _neighbors_variable_radius(pwmat, radius_list):
-	""" Returns the list of neighbor column indices if within the fixed radius """
-	return [list(np.nonzero(pwmat[ii,]<=radius)[0]) for ii, radius in zip(range(pwmat.shape[0]), radius_list) ]
-
-def _K_neighbors_variable_radius(pwmat, radius_list):
-	""" Returns the number of neighbors (self-inclusive) if within the fixed radius"""
-	return [len(list(np.nonzero(pwmat[ii,]<=radius)[0])) for ii, radius in zip(range(pwmat.shape[0]), radius_list) ]
 
 def make_motif_logo(tcrsampler,
 					clone_df,
@@ -247,7 +319,9 @@ def make_motif_logo(tcrsampler,
 	"""
 	irow = clone_df[(clone_df[cdr3_name] == centroid) & (clone_df[v_name ] == v_gene)].index[0]
 
-	dfnode = clone_df[pd.Series(pwmat[irow , :]) <= radius]
+	dfnode = clone_df[pd.Series(pwmat[irow , :]) <= radius].copy()
+	dfnode[gene_names[0]] = dfnode[gene_names[0]].apply(lambda x : allele_01(x))
+	dfnode[gene_names[1]] = dfnode[gene_names[1]].apply(lambda x : allele_01(x))
 
 	gene_usage = dfnode.groupby(gene_names).size()
 	
@@ -270,6 +344,47 @@ def make_motif_logo(tcrsampler,
 	svg_raw = svg_logo(motif_raw, return_str= True)
 
 	return svg, svg_raw
+
+
+def make_motif_logo_from_index(tcrsampler,
+							   ind,
+						       clone_df,
+						       centroid,
+							   cdr3_name = 'cdr3_b_aa',
+							   v_name = 'v_b_gene',
+							   gene_names = ['v_b_gene','j_b_gene']):
+
+	"""
+	make motif logo from a specific index
+	"""
+	dfnode = clone_df.iloc[ind,:].copy()
+
+	dfnode[gene_names[0]] = dfnode[gene_names[0]].apply(lambda x : allele_01(x))
+	dfnode[gene_names[1]] = dfnode[gene_names[1]].apply(lambda x : allele_01(x))
+
+	gene_usage = dfnode.groupby(gene_names).size()
+	
+	sampled_rep = tcrsampler.sample( gene_usage.reset_index().to_dict('split')['data'],
+					flatten = True, depth = 100)
+
+	sampled_rep  = [x for x in sampled_rep if x is not None]
+
+	motif, stat = compute_pal_motif(
+					seqs = dfnode[cdr3_name],
+					refs = sampled_rep,
+					centroid = centroid)
+
+	svg = svg_logo(motif, return_str= True)
+
+	motif_raw, _ = compute_pal_motif(
+				seqs     = dfnode[cdr3_name],
+				centroid = centroid)
+
+	svg_raw = svg_logo(motif_raw, return_str= True)
+
+	return svg, svg_raw
+
+
 
 
 def _quasi_public_meta_clonotypes(clone_df, 

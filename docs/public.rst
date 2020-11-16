@@ -3,20 +3,20 @@
 (Quasi)Public Clones
 ====================
 
-**Public TCRs** are shared clonotype 
+**Public TCRs** are shared clonotypes 
 found in multiple individuals, arising 
-from VDJ recombination biases and commmon selection pressures. 
+from VDJ recombination biases and common selection pressures. 
 Repertoire analyses often focuses on public clones; however
 finding public antigen-specific TCRs is not always possible 
 because TCR repertoires are characterized by extreme
 diversity. As a consequence, only a small fraction of the repertoire 
-can be assayed in a sigle sample,
+can be assayed in a single sample,
 making it difficult to reproducibly sample TCR clonotypes 
 from an individual, let alone reliably detect shared clonotypes in a population. 
 
 Enter, stage left, the **quasi-public TCRs** -- two or more TCRs, with a 
 high degree of biochemical similarity -- that are found in two or more individuals. 
-Identifyign quasi public TCRs becomes useful when evaluating an
+Identifying quasi public TCRs becomes useful when evaluating an
 antigen enriched repertoire putatively recognizing the same epitope. 
 
 Finding similar receptors from multiple individuals provides
@@ -26,7 +26,7 @@ reveals mechanistic basis for CDR-peptide-MHC binding.
 Moreover, meta-clonotypes are by definition more abundant 
 than exact clonotype and thus can be more reliably be
 detected in a single bulk unenriched sample,
-fascilitating more robust function comparisions across populations.
+facilitating more robust function comparisons across populations.
 
 
 I am happy to use the defaults
@@ -44,7 +44,7 @@ input data.
     :language: python
 
 In addition to the summary DataFrames returned, 
-a html `quasi-publicity report <_static/quasi_public_clones.html>`_ is generated, 
+a HTML `quasi-publicity report <_static/quasi_public_clones.html>`_ is generated, 
 allowing for the inspection of logo-motifs formed from highly similar 
 antigen-enriched TCR sequences found in multiple subjects.
 
@@ -101,7 +101,7 @@ stores all options as attributes:
 
 
 The default only summarizes subjects 'addl_cols': ['subject'], so adding an additional 
-catagorical variable to include in the summary is as easy as:
+categorical variable to include in the summary is as easy as:
 
 .. code-block:: python
 
@@ -138,7 +138,7 @@ I want my search radius to be sequence specific
 -----------------------------------------------
 
 The radius applied to each centroid can be specified 
-in a column of the clone df.
+in a column of the clone_df.
 
 .. literalinclude:: ../tcrdist/tests/test_example_19.py
     :linenos:
@@ -161,7 +161,7 @@ Working from neighbor_diff output
 I hate OOP just show me the functions
 -------------------------------------
 
-`TCRpublic` is for conveience. You can customize a lot including 
+`TCRpublic` is for convenience. You can customize a lot including 
 the background tcrsampler; but the power users may want to work with the 
 underlying functions directly. Here are some examples of how:
 
@@ -177,18 +177,48 @@ I just want to quickly find neighbors and (quasi)public clones
 
 
 
-Will this work with sparse matrix option
-++++++++++++++++++++++++++++++++++++++++
+I have neighbors and radii already, I want logos
+++++++++++++++++++++++++++++++++++++++++++++++++
 
-Yes. Here's a full example:
+Suppose you want to specify exactly what to include in a 
+motif logo report. This example is slightly different 
+then those above because we are going to use two 
+inputs files. The first input file includes all
+of the TCRs in antigen enriched repertoire. The
+second file is a subset of the first, 
+specifying exactly the TCRs centroids to 
+report. Remember that any element of a 
+clone_df can be included/excluded from the 
+HTML report. Those fields to include can be 
+specified as labels.
 
-[INSERT EXAMPLE USING SPARSE OPTION]
+
+.. literalinclude:: ../tcrdist/tests/test_example_22.py
+    :linenos:
+    :lines: 6-100
+    :dedent: 4
+    :language: python
 
 
-I have neighbors and radius already, I want logos
-+++++++++++++++++++++++++++++++++++++++++++++++++
+Will this work with sparse matrix option ?
+++++++++++++++++++++++++++++++++++++++++++
 
-This can be a bit tricky. It is important that your neighbors match the clone_df.
+tcrdist3 has a memory efficient options for larger datasets 
+that produce scipy.sparse rather than dense representations 
+of distance relationships. 
+
+Currently you can't call TCRpublic() on this sparse representation. 
+However, here is an example of how you can achieve similar results
+via a script, reporting (quasi)Public meta-clonotypes from a sparse 
+format.
+
+.. literalinclude:: ../tcrdist/tests/test_example_23.py
+    :linenos:
+    :lines: 6-150
+    :dedent: 4
+    :language: python
+
+For more on sparse matrices in tcrdist3 see the tab on 'Working With Bulk Data'.
 
 
 

@@ -9,6 +9,8 @@ from tcrdist.repertoire import TCRrep
 from tcrsampler.sampler import TCRsampler
 from tcrdist.public import *
 from tcrdist.tree import _default_tcrsampler_mouse_beta, _default_tcrsampler_mouse_alpha
+import scipy
+
 # Fixture Mouse Beta
 df = pd.read_csv("dash.csv").query('epitope == "PA"').reset_index().copy()
 tr = TCRrep(cell_df = df.head(300).copy(), 
@@ -41,7 +43,6 @@ def test_TCRpublic():
 	tp = TCRpublic(tcrrep = tr, organism = 'mouse', chain = 'beta')
 	tp.report()
 
-
 def test__neighbors_fixed_radius():
 	""" Returns the list of neighbor column indices if within the fixed radius """
 	result = _neighbors_fixed_radius(pwmat = tr.pw_beta, radius = 20) 
@@ -60,6 +61,18 @@ def test__K_neighbors_variable_radius():
 	""" Returns the number of neighbors (self-inclusive) if within the fixed radius"""
 	result = _K_neighbors_variable_radius(pwmat = tr.pw_beta, radius_list = tr.clone_df['radius'].to_list())
 	assert isinstance(result, list)
+
+def test_neighbors_sparse_fixed_radius():
+	M = np.array([[-1,0,1,4],[1,-1,0,2],[0,10,-1,3],[0,0,2,-1]])
+	S = scipy.sparse.csr_matrix(M)
+	NN = _neighbors_sparse_fixed_radius(csrmat = S, radius = 4)
+	assert NN == [[0, 2, 3], [0, 1, 3], [2, 3], [2, 3]]
+
+def test_neighbors_sparse_variable_radius():
+	M = np.array([[-1,0,1,4],[1,-1,0,2],[0,10,-1,3],[5,0,2,-1]])
+	S = scipy.sparse.csr_matrix(M)
+	NN = _neighbors_sparse_variable_radius(csrmat = S, radius_list = [1,1,20,2])
+	assert NN == [[0, 2], [0, 1], [1, 2, 3], [2, 3]]
 
 def test_make_motif_logo():
 	
