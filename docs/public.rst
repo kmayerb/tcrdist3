@@ -200,7 +200,7 @@ specified as labels.
     :language: python
 
 
-Will this work with sparse matrix option ?
+Will this work with sparse matrix options?
 ++++++++++++++++++++++++++++++++++++++++++
 
 tcrdist3 has a memory efficient options for larger datasets 
