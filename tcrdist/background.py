@@ -15,7 +15,7 @@ import warnings
 from collections import Counter
 from tcrdist.pgen import OlgaModel
 from tcrsampler.sampler import TCRsampler
-from tcrdist.repertoire import TCRrep
+
 from tcrdist.automate import auto_pgen
 from tcrdist.neighbors import compute_ecdf, bkgd_cntl_nn2
 
@@ -345,3 +345,53 @@ def _get_britanova_human_beta_chord_blood_subject_stratified_background(size = 1
     bitanova_unique_clones_sampled = bitanova_unique_clones_sampled[['v_reps', 'j_reps', 'cdr3']].rename(columns = {'v_reps':'v_b_gene', 'j_reps':'j_b_gene','cdr3':'cdr3_b_aa'})
     return bitanova_unique_clones_sampled 
 
+
+def _synthesize_human_beta_vj_background(ts,fn = None, df = None):
+    """
+    _build_vj_background
+
+    Parameters
+    ----------
+    ts: tcrsampler.TCRsampler() 
+        a TCRsampler instance, with gene usage frequencies (ideally computed get_stratified_gene_usage_frequency()
+    fn: str
+        file path to MIRA set of TCRs
+    df : pandas DataFrame
+        MIRA set of TCRs
+    Returns
+    -------
+    df_vj_bkgd : Pandas DataFrame
+        A set of background TCRs with the same V and J gene usage as the input set. 
+        These are generated using OLGA (Sethna et al.)
+    """
+    if fn is not None and df is not None:
+        raise ValueError("_build_vj_background can accept <df> or <fn> arguments but not both")
+    if fn is not None:
+        # Load a set set of TCRs.
+        df_target = pd.read_csv(fn)
+    if df is not None:
+        df_target = df.copy()
+    # Subset columns
+    df_target = df_target[['v_b_gene','j_b_gene','cdr3_b_aa']]
+    # Make a gene usage counter
+    gene_usage_counter = make_gene_usage_counter(df_target)                             # 2
+    print("MAKING A V-GENE, J-GENE MATCHED BACKGROUND.")
+    # Check that sampler is using sample stratified frequencies. 
+    assert ts.v_occur_freq is ts.v_occur_freq_stratified
+    print("USING STRATIFIED FREQUENCIES.")
+    # Make a vj matched background. 
+    #   Note: <size> aregument should be greater than desired, because Olga can return none due to non-productive CDR3s.
+    df_vj_bkgd = make_vj_matched_background(ts = ts,
+        gene_usage_counter = gene_usage_counter,    
+        size = 150000, 
+        recomb_type="VDJ", 
+        chain_folder = "human_T_beta",
+        cols = ['v_b_gene', 'j_b_gene', 'cdr3_b_aa'])
+    # Sample to get the desired number of TCRs from teh v,j matched set
+    df_vj_bkgd = df_vj_bkgd.sample(100000, random_state = 1).reset_index(drop = True)
+    print("CALCULATE INVERSE PROBABILITY WEIGHT ADJUSTMENT.")
+    # Calculate the invese weighting adjustmetn
+    df_vj_bkgd['weights'] = calculate_adjustment(df = df_vj_bkgd, adjcol = "pVJ")
+    df_vj_bkgd['source'] = "vj_matched"
+    # Combine
+    return df_vj_bkgd

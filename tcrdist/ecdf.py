@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 from scipy import sparse
+from matplotlib import pyplot as plt
+import matplotlib as mpl
 
 __all__ = ['distance_ecdf',
            'make_ecdf_step']
@@ -77,7 +79,7 @@ def distance_ecdf(pwrect, thresholds=None, weights=None, pseudo_count=0, skip_di
         ecdf[i, :] = (numer + pseudo_count) / (denom + pseudo_count)
     return thresholds, ecdf
 
-def make_ecdf_step(thresholds, ecdf, add_mnx=False, add_mny=False, add_mnmn=False, enforce_mn=False, mn=(0, 0), xjitter=0):
+def make_ecdf_step(thresholds, ecdf, add_mnx=False, add_mny=False, add_mnmn=False,enforce_mn=False , mn=(0, 0), xjitter=0):
     """Create stepped vector for plotting an ECDF,
     since the ECDF should naturally have discrete steps
     but will not unless they are explictly added prior
@@ -132,3 +134,123 @@ def gmean10(vec, axis=0):
     """Geometric mean which may be useful for
     summarizing many ECDF functions"""
     return 10 ** (np.mean(np.log10(vec), axis=axis))
+
+
+def plot_ecdf(
+    thresholds,
+    ecdf_mat, 
+    ax = None,
+    ylim = None,
+    xlabel = f'Distance From Target TCR Clone',
+    ylabel = f'Proportion of Reference TCRs', 
+    plot_mean = True,
+    min_freq = 1E-10):
+    """
+    A very basic ecdf plot
+
+    Parameters
+    ----------
+    thresholds : np.array
+        1D array tcrdistance threshold trdistance units (tdus)
+    ecdf_mat : np.array
+        2D array, each row repressents a TCR and the proportion of neighbors with tdus
+    ax : matplotlib axes or None
+
+    ylabel : str
+        'Proportion of X TCRs'
+    xlabel : str
+        'Proportion of Reference TCRs'
+    plot_mean : bool
+        If true, plot the mean value
+    """
+    if ax is None:
+        ax = plt.gca()
+    if not ylim is None:
+        ax.set_ylim(ylim)
+
+    ax.set_yscale('log')
+    ax.set_ylabel(ylabel)
+    ax.set_xlabel(xlabel)
+    
+    for row_i in range(ecdf_mat.shape[0]):
+        make_ecdf_step(thresholds, ecdf_mat[row_i, :], add_mnx=True, enforce_mn=True, mn=(0, min_freq), xjitter=1)
+        x, y = make_ecdf_step(thresholds, ecdf_mat[row_i, :])
+        ax.plot(x, y, color='k', alpha=0.2)
+    if plot_mean:
+        x, y = make_ecdf_step(thresholds, np.mean(ecdf_mat, axis=0))
+        ax.plot(x, y, color='r', alpha=1)
+    return True
+
+
+
+def _plot_manuscript_ecdfs(
+    thresholds, 
+    ecdf_mat, 
+    ylab = 'Proportion of X TCRs', 
+    cdr3_len=None, 
+    min_freq=1e-6,
+    cdr3_len_min=10., 
+    cdr3_len_max=16.,
+    cmap=mpl.cm.viridis_r):
+    """
+    _plot_manuscript_ecdfs, recreate the manuscript type ecdf
+
+    Parameters
+    ----------
+    thresholds : np.array
+        1D array tcrdistance threshold trdistance units (tdus)
+    ecdf_mat : np.array
+        2D array, each row repressents a TCR and the proportion of neighbors with tdus
+    ylab : str
+        'Proportion of X TCRs'
+    cdr3_len : list or pd.Series
+        Lengths of cdr3, must match order and dimension of rows in ecdf_mat
+    min_freq : float
+        Minimum frequency or proportion to display
+    cdr3_len_min : float 
+
+    cdr3_len_max : float
+
+    """
+    # Define colormap range for CDR3 length
+    norm = mpl.colors.Normalize(vmin=cdr3_len_min, vmax=cdr3_len_max)
+    if cdr3_len is None:
+        cdr3_len = 10 * np.ones(ecdf_mat.shape[0])
+
+    # Declare Figure <figh>
+    figh = plt.figure(figsize=(11, 8))
+    # Declare Grid
+    gs = plt.GridSpec(nrows=2, ncols=2, width_ratios=[10, 1], height_ratios=[7, 1], hspace=0.15)
+        
+    # [0,1] : Assign color bar axis
+    cbar = mpl.colorbar.ColorbarBase(figh.add_subplot(gs[0, 1]), cmap=cmap,
+                            norm=norm,
+                            orientation='vertical')
+    cbar.set_label('CDR3 length')
+
+    # [0,0] : Asign ECDF axis
+    axh = figh.add_subplot(gs[0, 0], yscale='log')
+    axh.set_ylabel(ylab)
+    # plt.xlabel(f'Neighborhood radius\n(tcrdist units)')
+    for tari in range(ecdf_mat.shape[0]):
+        x, y = make_ecdf_step(thresholds, ecdf_mat[tari, :], add_mnx=True, enforce_mn=True, mn=(0, min_freq), xjitter=1)
+        axh.plot(x, y, color=mpl.cm.viridis_r(norm(cdr3_len[tari]))[:3], alpha=0.4)
+    plt.annotate(text=f'n={ecdf_mat.shape[0]}',
+                 xy=(min_freq, 0.5),
+                 xytext=(3, -3),
+                 textcoords='offset points',
+                 ha='left',
+                 va='top')
+    axh.set_xticklabels([])
+    axh.set_ylim((min_freq, 0.5))
+    axh.set_xlim((0, thresholds[-1]))
+
+    # [1, 0] : Assign underplot
+    axh2 = figh.add_subplot(gs[1, 0])
+    x, y = make_ecdf_step(thresholds, np.mean(ecdf_mat<1e-5, axis=0), add_mnx=False)
+    axh2.fill_between(x, np.zeros(y.shape[0]), 100*y, color='gray')
+    axh2.set_ylim((0, 100))
+    axh2.set_ylabel('% TCRs\n$ECDF < 10^{-5}$')
+    axh2.set_xlabel(f'Neighborhood radius\n(tcrdist units)')
+    axh2.set_xlim((0, thresholds[-1]))
+    return figh

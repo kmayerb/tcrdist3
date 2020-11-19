@@ -4,8 +4,12 @@ import numpy as np
 import warnings
 from . import repertoire_db
 from tcrdist.rep_funcs import _pws, compute_pws_sparse
+from tcrdist.sample import _default_sampler
+from tcrdist.background import get_stratified_gene_usage_frequency
+from tcrdist.background import _synthesize_human_beta_vj_background
 from zipdist.zip2 import Zipdist2
 import sys
+
 
 class TCRrep:
     """
@@ -192,6 +196,9 @@ class TCRrep:
                 self._initialize_chain_specific_attributes()
         
             if compute_distances:
+                # This is a safety, measure so that a new user doesn't accidently try to compute a pairwise matrix that won't fit in memory
+                if self.clone_df.shape[0] > 10000:
+                    warnings.warn(f"<clone_df> size {self.clone_df.shape[0]} > 10,000. TCRrep.compute_distances() must be called explicitly by user with knowledge of system memory availability")
                 self.compute_distances()
 
             if self.archive_result:
@@ -638,6 +645,41 @@ class TCRrep:
                 "cdr2_d_aa" : {'use_numba': True, 'distance_matrix': pw.matrices.tcr_nb_distance_matrix, 'dist_weight': 1, 'gap_penalty':4, 'ntrim':0, 'ctrim':0, 'fixed_gappos':True},
                 "cdr1_d_aa" : {'use_numba': True, 'distance_matrix': pw.matrices.tcr_nb_distance_matrix, 'dist_weight': 1, 'gap_penalty':4, 'ntrim':0, 'ctrim':0, 'fixed_gappos':True}}
       
+
+    def synthesize_vj_matched_background(self, ts  = None, chain = "beta"):
+        """
+        tcrsampler : TCRsampler or None
+       
+        chain : str 
+            'beta' (in future, TODO: add 'alpha')
+        TODO
+        -------
+        ONLY WORKS CURRENTLY FOR HUMAN BETA, VIA OLGA
+        """
+        if chain not in ["beta", "alpha"]:
+            raise ValueError("Invalid <chain> argument.")
+        if chain == "beta":
+            if ts is None:
+                ts = _default_sampler(organism = self.organism, chain = "beta")()
+                ts = get_stratified_gene_usage_frequency(ts = ts, replace = True) 
+            if self.organism == "human":
+                vj_background = _synthesize_human_beta_vj_background(ts = ts, df = self.clone_df)
+            elif self.organism == "mouse":
+                #vj_background = _synthesize_mouse_beta_vj_background(ts = ts, df = self.clone_df)
+                raise ValueError("TODO: FUTURE VERSIONS NEED BETA(MOUSE)")
+        # TODO: ADD OTHER OPTIONS
+        elif chain == "alpha":
+            if self.organism == "human":
+                raise ValueError("TODO: FUTURE VERSIONS NEED ALPHA(HUMAN)")
+                #vj_background = _synthesize_human_alpha_vj_background(ts = ts, df = self.clone_df)
+            elif self.organism == "mouse":
+                raise ValueError("TODO: FUTURE VERSIONS NEED ALPHA(MOUSE)")
+                #vj_background = _synthesize_alpha_beta_vj_background(ts = ts, df = self.clone_df)
+        return vj_background   
+
+
+
+
 
     def _map_gene_to_reference_seq2(self,
                                     organism,

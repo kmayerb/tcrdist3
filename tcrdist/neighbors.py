@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import parmap
 
-from tcrdist.repertoire import TCRrep
+#from tcrdist.repertoire import TCRrep
 from tcrdist.regex import _index_to_regex_str, _index_to_seqs, _multi_regex 
 from scipy.stats import chi2_contingency
 
