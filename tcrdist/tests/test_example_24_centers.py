@@ -85,7 +85,7 @@ def test_example_with_report():
     rp = tp.report()
         # OPTIONAL: ECDF Figure, against reference
     f1 = _plot_manuscript_ecdfs(
-        thresholds = tresholds, 
+        thresholds = thresholds, 
         ecdf_mat = ecdfs, 
         ylab= 'Proportion of Background TCRs', 
         cdr3_len=tr.clone_df.cdr3_b_aa.str.len(), 
