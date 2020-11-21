@@ -69,10 +69,10 @@ def test_neighbors_sparse_fixed_radius():
 	assert NN == [[0, 2, 3], [0, 1, 3], [2, 3], [2, 3]]
 
 def test_neighbors_sparse_variable_radius():
-	M = np.array([[-1,0,1,4],[1,-1,0,2],[0,10,-1,3],[5,0,2,-1]])
+	M = np.array([[-1,1,1,4],[1,-1,1,2],[1,10,-1,3],[5,1,2,-1]])
 	S = scipy.sparse.csr_matrix(M)
-	NN = _neighbors_sparse_variable_radius(csrmat = S, radius_list = [1,1,20,2])
-	assert NN == [[0, 2], [0, 1], [1, 2, 3], [2, 3]]
+	N = _neighbors_sparse_variable_radius(csrmat = S, radius_list = [1,1,20,1])
+	assert N ==  [[0, 1, 2], [0, 1, 2], [0, 1, 2, 3], [1,3]]
 
 def test_make_motif_logo():
 	

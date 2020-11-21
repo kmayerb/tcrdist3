@@ -8,11 +8,12 @@ import pandas as pd
 import numpy as np
 import os
 import scipy.sparse
-
+import warnings
 from palmotif import compute_pal_motif, svg_logo
 from tcrdist.summarize import _occurs_N_str, member_summ, filter_is, test_for_subsets
 from progress.bar import IncrementalBar
 from tcrdist.tree import _default_sampler, _default_sampler_olga, allele_01
+from tcrdist.ecdf import _todense_row
 
 __all__ = ['_neighbors_fixed_radius',
 		   '_K_neighbors_fixed_radius',
@@ -56,6 +57,7 @@ def _neighbors_sparse_fixed_radius(csrmat, radius):
 
 	Example 
 	-------
+
 	>>> M = np.array([[-1,0,1,4],[1,-1,0,2],[0,10,-1,3],[0,0,2,-1]])
 	>>> S = scipy.sparse.csr_matrix(M)
 	>>> NN = _neighbors_sparse_fixed_radius(csrmat = S, radius = 4)
@@ -69,7 +71,7 @@ def _neighbors_sparse_fixed_radius(csrmat, radius):
 	return [list(x) for x in np.split(S.indices, S.indptr[1:-1])]
 
 
-def _neighbors_sparse_variable_radius(csrmat, radius_list):
+def _neighbors_sparse_variable_radius(csrmat, radius_list, maxd= 50):
 	""" 
 	Returns the list of neighbor column indices within the fixed radius
 
@@ -85,27 +87,30 @@ def _neighbors_sparse_variable_radius(csrmat, radius_list):
 
 	Example 
 	-------
-	>>> M = np.array([[-1,0,1,4],[1,-1,0,2],[0,10,-1,3],[5,0,2,-1]])
+	>>> from tcrdist.public import _neighbors_sparse_variable_radius
+	>>> import scipy.sparse
+	>>> M = np.array([[-1,1,1,4],[1,-1,1,2],[1,10,-1,3],[5,1,2,-1]])
 	>>> S = scipy.sparse.csr_matrix(M)
-	>>> N = _neighbors_sparse_variable_radius(csrmat = S, radius_list = [1,1,20,2])
+	>>> N = _neighbors_sparse_variable_radius(csrmat = S, radius_list = [1,1,20,1])
 	>>> N
-	[[0, 2, 3], [0, 1, 3], [1, 2, 3], [2, 3]]
-	>>> assert NN == [[0, 2, 3], [0, 1, 3], [1, 2, 3], [2, 3]]
+	[[0, 1, 2], [0, 1, 2], [0, 1, 2, 3], [1,3]]
+	>>> assert N ==  [[0, 1, 2], [0, 1, 2], [0, 1, 2, 3], [1,3]]
 	"""
-	assert np.all([x > 0 for x in radius_list]), "Radius value must be greater than zero"
-	#S = csrmat.copy()
-	#for ii,radius in enumerate(radius_list):
-	#		S[ii,:][S[ii,:] >= radius] = 0
-	#S.eliminate_zeros()
-	#return [list(x) for x in np.split(S.indices, S.indptr[1:-1])]
 	S = csrmat.copy()
-	for ii,radius in enumerate(radius_list):
-		X = S[ii,:].todense()
-		X[X > radius] = 0
-		S[ii,:] = X 
-	S.eliminate_zeros()
-	return [list(x) for x in np.split(S.indices, S.indptr[1:-1])]
-
+	NN = list()
+	for i,radius in enumerate(radius_list):
+		if radius == 0:
+			#row = np.asarray(S[i, :].todense())[0]
+			#row[row == 0] = radius + 1
+			#x = np.nonzero(row == -1)[0]
+			ind = np.nonzero(S.data[S.indptr[i]:S.indptr[i+1]] == -1)[0]
+			col_indices = S.indices[S.indptr[i]:S.indptr[i+1]][ind].tolist()
+			NN.append(col_indices)
+		else:
+			ind = np.nonzero(S.data[S.indptr[i]:S.indptr[i+1]] <= radius)[0]
+			col_indices = S.indices[S.indptr[i]:S.indptr[i+1]][ind].tolist()
+			NN.append(col_indices)
+	return NN 
 
 
 
@@ -156,7 +161,7 @@ class TCRpublic():
 	kargs_motif : dict
 		kwargs for the motif genertation 
 	"""
-	def __init__(self, tcrrep, organism = None, chain = None, output_html_name = "quasi_public_clones.html"):
+	def __init__(self, tcrrep, organism = None, chain = None, fixed_radius = True, output_html_name = "quasi_public_clones.html"):
 		
 		self.tcrrep = tcrrep
 		
@@ -217,7 +222,7 @@ class TCRpublic():
 						f'{self.cdr3_name}.summary',
 						'subject.summary']
 		
-		self.fixed_radius = True
+		self.fixed_radius = fixed_radius
 		
 		self.radius = 18
 		
@@ -348,8 +353,8 @@ def make_motif_logo(tcrsampler,
 
 def make_motif_logo_from_index(tcrsampler,
 							   ind,
-						       clone_df,
-						       centroid,
+							   clone_df,
+							   centroid,
 							   cdr3_name = 'cdr3_b_aa',
 							   v_name = 'v_b_gene',
 							   gene_names = ['v_b_gene','j_b_gene']):
@@ -397,29 +402,29 @@ def _quasi_public_meta_clonotypes(clone_df,
 								  sort_columns = ['nsubject','K_neighbors'],
 								  sort_ascending = False,
 								  labels = ['clone_id',
-								  			'cdr3_d_aa', 
-								  			'v_d_gene',
-								  			'j_d_gene',
-								  			'radius',
-								  			'neighbors',
-								  			'K_neighbors',
-								  			#'cdr3s',
-								  			'nsubject',
-								  			'qpublic',
-								  			'cdr3_d_aa.summary',
-								  			'v_d_gene.summary',
-								  			'j_d_gene.summary',
-								  			'subject.summary'],
+											'cdr3_d_aa', 
+											'v_d_gene',
+											'j_d_gene',
+											'radius',
+											'neighbors',
+											'K_neighbors',
+											#'cdr3s',
+											'nsubject',
+											'qpublic',
+											'cdr3_d_aa.summary',
+											'v_d_gene.summary',
+											'j_d_gene.summary',
+											'subject.summary'],
 								  fixed_radius = False,
 								  radius = None,
 								  query_str = 'qpublic == True & K_neighbors > 1',
 								  kargs_member_summ = {
-								 	'key_col'   : 'neighbors', 
-								 	'count_col' : 'count',
-								 	'addl_cols' : ['subject'],
-								 	'addl_n'    : 4},
+									'key_col'   : 'neighbors', 
+									'count_col' : 'count',
+									'addl_cols' : ['subject'],
+									'addl_n'    : 4},
 								  kargs_motif = {
-								  	'pwmat_str'  : 'pw_delta',
+									'pwmat_str'  : 'pw_delta',
 									'cdr3_name'  : 'cdr3_d_aa',
 									'v_name'     : 'v_d_gene',
 									'gene_names' : ['v_d_gene','j_d_gene']}):
@@ -498,11 +503,16 @@ def _quasi_public_meta_clonotypes(clone_df,
 		if fixed_radius:
 			clone_df['radius'] = radius
 			clone_df['neighbors']   = _neighbors_fixed_radius(pwmat = pwmat, radius = radius)
-			clone_df['K_neighbors'] = _K_neighbors_fixed_radius(pwmat = pwmat, radius = radius)
 		else:
 			assert 'radius' in clone_df.columns, "if not using fixed_radius, the clone_df must have a numeric 'radius' columns"
 			clone_df['neighbors']   = _neighbors_variable_radius(pwmat = pwmat, radius_list = clone_df.radius)
+
+	if 'K_neighbors' not in clone_df.columns:
+		if fixed_radius:
+			clone_df['K_neighbors'] = _K_neighbors_fixed_radius(pwmat = pwmat, radius = radius)
+		else: 
 			clone_df['K_neighbors'] = _K_neighbors_variable_radius(pwmat = pwmat, radius_list = clone_df.radius)
+
 
 	if 'nsubject' not in clone_df.columns:
 		clone_df['nsubject']   = clone_df['neighbors'].\

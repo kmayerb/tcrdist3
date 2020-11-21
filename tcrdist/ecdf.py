@@ -14,7 +14,13 @@ def _todense(pw, maxd):
     pw[np.diag_indices_from(pw)] = 0
     return pw
 
-def distance_ecdf(pwrect, thresholds=None, weights=None, pseudo_count=0, skip_diag=False):
+def _todense_row(pw, maxd):
+    """Make a pairwise distance matrix dense"""
+    pw = np.asarray(pw.todense())
+    pw[pw == 0] = maxd + 1
+    return pw
+
+def distance_ecdf(pwrect, thresholds=None, weights=None, pseudo_count=0, skip_diag=False, absolute_weight = False):
     """Computes the empirical cumulative distribution function (ECDF) for
     each TCR in a set of target TCRs [rows of pwrect] as the proportion
     of reference TCRs [columns of pwrect] within a distance radius less
@@ -39,7 +45,8 @@ def distance_ecdf(pwrect, thresholds=None, weights=None, pseudo_count=0, skip_di
         to avoid zero. Useful if end goal is a log-scale plot.
     skip_diag : bool
         Skip counting the diagonal for computing ECDF of seqs against same seqs.
-
+    absolute_weight : bool
+        if True, denominator is number of total sequences in pwrect.shape[2] rather than sum of the weights. 
     Returns
     -------
     thresholds : vector, thresholds.shape[0]
@@ -65,14 +72,23 @@ def distance_ecdf(pwrect, thresholds=None, weights=None, pseudo_count=0, skip_di
     too big for memory"""
     ecdf = np.zeros((pwrect.shape[0], thresholds.shape[0]))
     sum_weights = np.sum(weights)
+    if absolute_weight:
+        denom = pwrect.shape[1]
+
     for i in range(pwrect.shape[0]):
         if sparse.issparse(pwrect):
             row = pwrect[i, :]
+                #row = _todense_row(row, maxd = 50)
+                #row = np.reshape(row, (pwrect.shape[1], 1))
+                #numer = np.sum((row <= thresholds[None, :]) * weights[:, None], axis=0)
             numer = np.sum((row.data[:, None] <= thresholds[None, :]) * weights[row.indices, None], axis=0)
         else:
             row = np.reshape(pwrect[i, :], (pwrect.shape[1], 1))
             numer = np.sum((row <= thresholds[None, :]) * weights[:, None], axis=0)
-        denom = sum_weights
+        if absolute_weight:
+            denom = pwrect.shape[1]
+        else:
+            denom = sum_weights
         if skip_diag:
             numer = numer - weights[i]
             denom = denom - weights[i]

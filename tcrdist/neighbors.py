@@ -20,7 +20,7 @@ def compute_population_estimate_ecdf(data, weights = None, thresholds=None):
         thresholds = np.unique(data[:])
   
     if weights is None:
-        weights = np.ones(data.shape)
+        weights = np.ones(data.shape[0])
     else:
         weights = np.array(weights)
     
@@ -34,7 +34,7 @@ def compute_population_estimate_ecdf(data, weights = None, thresholds=None):
     # Step 3: Take row sums, producing the weighted sum at each threshold ==> (25,)
     M =  np.sum(M, axis = 0)
     # Step 4: Divide by the weighted total (i.e., the amount if all seqs were present, which because of enrichment is far greater than 1)
-    print(M)   
+    # print(M)   
     ecdf = M / len(weights) 
     return ecdf
 
@@ -88,7 +88,7 @@ def compute_rate(pos,neg, ps = 1):
 def bkgd_cntl_nn2( tr, 
                    tr_background,
                    weights = None,
-                   ctrl_bkgd = 2*10**-5, 
+                   ctrl_bkgd = 10**-5, 
                    col = 'cdr3_b_aa',
                    add_cols = ['v_b_gene', 'j_b_gene'],
                    ncpus = 4,
@@ -144,7 +144,9 @@ def bkgd_cntl_nn2( tr,
     thresholds = np.unique(thresholds)
     # for each TCR, we calculate a empirical cummulative 
     # density function along a range of threshold radi
-    ecdfs = parmap.map(_compute_weighted_ecdf_rowwise, range(0,tr.rw_beta.shape[0]), 
+    #_compute_weighted_pop_estimate_ecdf_rowwise OR _compute_weighted_ecdf_rowwise ?
+    print("_compute_weighted_pop_estimate_ecdf_rowwise")
+    ecdfs = parmap.map(_compute_weighted_pop_estimate_ecdf_rowwise, range(0,tr.rw_beta.shape[0]), 
         data = tr.rw_beta, 
         weights = weights,
         thresholds = thresholds, 

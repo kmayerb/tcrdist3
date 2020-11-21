@@ -1,10 +1,110 @@
+"""
+centers 
+
+Module contains functions for evaluating TCRs as center(oids) of meta-clonotypes.
+
+find_center 
+"""
+import warnings 
+import numpy as np
+from tcrdist.ecdf import distance_ecdf
+
+def calc_radii(tr, tr_bkgd, chain = 'beta', ctrl_bkgd = 10**-5, use_sparse = True, max_radius=50, chunk_size=100, **kwargs):
+	"""
+	Simply find maximum radii based on an antigen enriched repertoires <tr> 
+	and a background antigen-naive background. 
+
+	IMPORTANT: This function will work with a precomputed TCRrep.rw_chain matrix if it 
+	is supplied and matches row dimensions of tr_bkgd. This way the user does 
+	not have to recompute it each time they with to change ctrl_bkgd. It 
+	also allows them to customize the distance prior to this stage, although 
+	**kwargs can be passed to the compute_sparse_rect_distances or 
+	compute_rect_distances function
+
+	Parameters
+	----------
+	tr : tcrdist.repertoire.TCRrep
+		An antigen enriched repertoires TCRrep object
+	tr_bkgd : tcrdist.repertoire.TCRrep
+		A background antigen-naive background TCRrep object
+	chain : str
+		e.g, 'beta', ctrl_bkgd = 10**-5, use_sparse = True, max_radius=50, chunk_size=50
+	ctrl_bkgd : float
+		e.g., 10**-5, 
+	use_sparse : bool 
+		If True, uses a sparse implementation, 
+	max_radius : int 
+		Values beyond this max_radius are set to 0 in sparcification
+	chunk_size : int
+		How many rows to process at a time, based on memory available (100 is a good default, but for more see notes)
+	**kwargs will be passed to either compute_sparse_rect_distances or compute_rect_distances
+	Returns
+	-------
+	max_radii : list
+		List of length equal to the numer of rows in <tr> clond_df. 
+		These are radius at which the number of expected background 
+		sequences are 'controlled' at a rate of <ctlr_bkgd> 
+
+	Notes
+	-----
+	TODO: Discuss chunk size and memory
+	"""
+	assert chain in ['alpha','beta','gamma', 'delta']
+	if 'weights' not in tr_bkgd.clone_df.columns:
+		warnings.warn("No weights provided in background repertoire, setting to 1")
+		tr_bkgd.clone_df['weights'] = 1
+
+	# USER MAY HAVE ALRRADY COMPUTED TCRrep.rw_
+	if getattr(tr, f"rw_{chain}", None) is not None:
+		if getattr(tr, f"rw_{chain}").shape[1] == tr_bkgd.clone_df.shape[0]:
+			print(f"IT APPEARS THAT (TCRrep.rw_{chain}) HAS ALREDY BEEN COMPUTED AND MATCHES BACKGROUND TCRrep SIZE")
+			print(f"USING EXISTING (TCRrep.rw_{chain}). SET TCRrep.rw_{chain} = None IF YOU WANT TO RECOMPUTE IT.")
+	else:
+		if use_sparse:
+			print(f"COMPUTING SPARSE RECT MATRIX TO FIND RADIUS: (TCRrep.rw_{chain})")
+			print(f"USING {tr.cpus} CPUS")
+			tr.compute_sparse_rect_distances(df = tr.clone_df, 
+											 df2 = tr_bkgd.clone_df,
+											 radius=max_radius,
+											 chunk_size=chunk_size,
+											 **kwargs)
+		else:
+			print(f"COMPUTING FULL RECT MATRIX TO FIND RADIUS, (TCRrep.rw_{chain})")
+			tr.compute_rect_distances(df = tr.clone_df, 
+									  df2 = tr_bkgd.clone_df, 
+									  store = False,
+									  **kwargs)
+	print(f"COMPUTING ECDFS PER TCR, TO FIND APPROPRIATE MAX RADII AT {ctrl_bkgd}")
+	thresholds, ecdfs = distance_ecdf(pwrect = getattr(tr, f"rw_{chain}"), 
+						  thresholds = np.array(range(0,max_radius, 2)), 
+						  weights=tr_bkgd.clone_df.weights, 
+						  pseudo_count=0, 
+						  skip_diag=False, 
+						  absolute_weight = True)
+	# Based on acceptable ctrl_bkgd, we find max acceptable radi from each TCR
+	#import pdb; import pdb; pdb.set_trace()
+	all_radii = [pd.Series(x, index = thresholds) for x in ecdfs]
+	max_radii = [s[s<=ctrl_bkgd].last_valid_index() for s in all_radii]
+		# WARNING: There is a potential BUG in the output of the above line. 
+		# That is, iF a radius is None (the next line will fail, thus set Nones to 0.
+	max_radii = [i if (i is not None) else 0 for i in max_radii]
+	print(f"RETURNING LIST OF MAX RADII")
+	
+	return max_radii, thresholds, ecdfs 
+
+
+
+
+
+
+
 def find_centers_beta(	
 	background_filename,
- 	target_filename,
- 	ncpus,
- 	min_nsubject,
- 	ctrl_bkgd = 10**-6, 
- 	prefilter = False):
+	target_filename,
+	ncpus,
+	min_nsubject,
+	ctrl_bkgd = 10**-5, 
+	prefilter = False):
 	import os
 	import pandas as pd
 	import numpy as np 
@@ -73,7 +173,7 @@ def find_centers_beta(
 
 	centers_df = bkgd_cntl_nn2(	tr = tr, 
 								tr_background = tr_background,
-								ctrl_bkgd = ctrl_bkgd, 
+								ctrl_bkgd = ctrl_bkgd,  #ctrl_bkgd = 2*10**-5
 								weights =tr_background.clone_df.weights,
 								col = 'cdr3_b_aa',
 								ncpus = ncpus,
