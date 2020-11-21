@@ -6,7 +6,7 @@ from . import repertoire_db
 from tcrdist.rep_funcs import _pws, compute_pws_sparse
 from tcrdist.sample import _default_sampler
 from tcrdist.background import get_stratified_gene_usage_frequency
-from tcrdist.background import _synthesize_human_beta_vj_background
+from tcrdist.background import _synthesize_human_beta_vj_background, _synthesize_human_alpha_vj_background, _synthesize_mouse_beta_vj_background
 from zipdist.zip2 import Zipdist2
 import sys
 
@@ -665,8 +665,7 @@ class TCRrep:
             if self.organism == "human":
                 vj_background = _synthesize_human_beta_vj_background(ts = ts, df = self.clone_df)
             elif self.organism == "mouse":
-                #vj_background = _synthesize_mouse_beta_vj_background(ts = ts, df = self.clone_df)
-                raise ValueError("TODO: FUTURE VERSIONS NEED BETA(MOUSE)")
+                vj_background = _synthesize_mouse_beta_vj_background(ts = ts, df = self.clone_df)
         # TODO: ADD OTHER OPTIONS
         elif chain == "alpha":
             if self.organism == "human":
