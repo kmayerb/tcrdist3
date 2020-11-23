@@ -207,6 +207,7 @@ def _plot_manuscript_ecdfs(
     min_freq=1e-6,
     cdr3_len_min=10., 
     cdr3_len_max=16.,
+    low_pass = -5,       
     cmap=mpl.cm.viridis_r):
     """
     _plot_manuscript_ecdfs, recreate the manuscript type ecdf
@@ -226,9 +227,13 @@ def _plot_manuscript_ecdfs(
     cdr3_len_min : float 
 
     cdr3_len_max : float
+    
+    low_pass : int
+           controls threshold frequencyh to show on lower gray bar (-5) corresponds with 10^-5
 
     """
     # Define colormap range for CDR3 length
+    low_pass_num = 1**low_pass # -5 -> 10^-5
     norm = mpl.colors.Normalize(vmin=cdr3_len_min, vmax=cdr3_len_max)
     if cdr3_len is None:
         cdr3_len = 10 * np.ones(ecdf_mat.shape[0])
@@ -263,10 +268,10 @@ def _plot_manuscript_ecdfs(
 
     # [1, 0] : Assign underplot
     axh2 = figh.add_subplot(gs[1, 0])
-    x, y = make_ecdf_step(thresholds, np.mean(ecdf_mat<1e-5, axis=0), add_mnx=False)
+    x, y = make_ecdf_step(thresholds, np.mean(ecdf_mat<low_pass_num, axis=0), add_mnx=False)
     axh2.fill_between(x, np.zeros(y.shape[0]), 100*y, color='gray')
     axh2.set_ylim((0, 100))
-    axh2.set_ylabel('% TCRs\n$ECDF < 10^{-5}$')
+    axh2.set_ylabel(f'% TCRs\n$ECDF < 10^{low_pass}$')
     axh2.set_xlabel(f'Neighborhood radius\n(tcrdist units)')
     axh2.set_xlim((0, thresholds[-1]))
     return figh
