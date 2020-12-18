@@ -155,29 +155,7 @@ def bkgd_cntl_nn2( tr,
         # for each TCR, we calculate a empirical cummulative 
         # density function along a range of threshold radii
 
-    #          888      888 
-    #          888      888 
-    #          888      888 
-    #  .d88b.  888  .d88888 
-    # d88""88b 888 d88" 888 
-    # 888  888 888 888  888 
-    # Y88..88P 888 Y88b 888 
-    #  "Y88P"  888  "Y88888 
 
-    print("USING : _compute_weighted_pop_estimate_ecdf_rowwise")
-    ecdfs = parmap.map(_compute_weighted_pop_estimate_ecdf_rowwise, range(0,rw_mat.shape[0]), 
-       data = rw_mat, 
-       weights = weights,
-       thresholds = thresholds, 
-       pm_pbar = True, 
-       pm_processes = ncpus)
-    #<max_radi> Based on acceptable ctrl_bkgd, we find max acceptable radius from each TCR
-    max_radi = [x[x<=ctrl_bkgd].last_valid_index() for x in ecdfs]
-    # TO SOLVE NOTABLE BUG IN THE ABOVE LINE!! If a radius is None (the next line will fail, thus set Nones to 0.
-    max_radi = [x if (x is not None) else 0 for x in max_radi]  
-    
-    if forced_max_radius is not None:
-        max_radi = [min(x,forced_max_radius) for x in max_radi]
 
     # 88888b.   .d88b.  888  888  888 
     # 888 "88b d8P  Y8b 888  888  888 
@@ -203,11 +181,34 @@ def bkgd_cntl_nn2( tr,
     if forced_max_radius is not None:
         max_radi2 = [min(x,forced_max_radius) for x in max_radi2]
 
+    #          888      888 
+    #          888      888 
+    #          888      888 
+    #  .d88b.  888  .d88888 
+    # d88""88b 888 d88" 888 
+    # 888  888 888 888  888 
+    # Y88..88P 888 Y88b 888 
+    #  "Y88P"  888  "Y88888 
+
+    # print("USING : _compute_weighted_pop_estimate_ecdf_rowwise")
+    # ecdfs = parmap.map(_compute_weighted_pop_estimate_ecdf_rowwise, range(0,rw_mat.shape[0]), 
+    #    data = rw_mat, 
+    #    weights = weights,
+    #    thresholds = thresholds, 
+    #    pm_pbar = True, 
+    #    pm_processes = ncpus)
+    # #<max_radi> Based on acceptable ctrl_bkgd, we find max acceptable radius from each TCR
+    # max_radi = [x[x<=ctrl_bkgd].last_valid_index() for x in ecdfs]
+    # # TO SOLVE NOTABLE BUG IN THE ABOVE LINE!! If a radius is None (the next line will fail, thus set Nones to 0.
+    # max_radi = [x if (x is not None) else 0 for x in max_radi]  
+    
+    # if forced_max_radius is not None:
+    #     max_radi = [min(x,forced_max_radius) for x in max_radi]
     # old vs. new methods must yield same results, 
     # TODO: remove old in next version, so there is a commit record
     #import pdb; pdb.set_trace()
-    assert np.all(max_radi2 == max_radi)
-    print("SUCCESS COMPARING METHODS")
+    #assert np.all(max_radi2 == max_radi)
+    #print("SUCCESS COMPARING METHODS")
     
         # <target_hits> number of hits within the antigen enriched repertoire at the control radius 
     if scipy.sparse.issparse(pw_mat):
@@ -377,57 +378,57 @@ def bkgd_cntl_nn2( tr,
 # 
 # THIS WAS ONCE USED FOR COMPUTING ECDFS BUT WE CAN NOW RELY ONLY ON distance_ecdf
 
-def compute_population_estimate_ecdf(data, weights = None, thresholds=None):
-    """
-    """
-    if thresholds is None:
-        thresholds = np.unique(data[:])
+# def compute_population_estimate_ecdf(data, weights = None, thresholds=None):
+#     """
+#     """
+#     if thresholds is None:
+#         thresholds = np.unique(data[:])
   
-    if weights is None:
-        weights = np.ones(data.shape[0])
-    else:
-        weights = np.array(weights)
+#     if weights is None:
+#         weights = np.ones(data.shape[0])
+#     else:
+#         weights = np.array(weights)
     
-    """Vectorized and faster, using broadcasting for the <= expression"""
-    # Step 1 : compare a set of n distances to a set of say 25 threshold 
-        # (n dists x 1) broadcast against (1 x 25 thresholds) ==> (n, 25), where each column representd number of hits below the threshold 
-    M= 1*(data[:, None] <= thresholds[None, :])
-    # Step 2 : Adjust hit be relative weight (i.e. actual_freq_vj / sampled_freq_vj)
-        # Broadcast (n, 25) on weights (n, 1) ==> (n, 25)
-    M = M * weights[:,None]
-    # Step 3: Take row sums, producing the weighted sum at each threshold ==> (25,)
-    M =  np.sum(M, axis = 0)
-    # Step 4: Divide by the weighted total (i.e., the amount if all seqs were present, which because of enrichment is far greater than 1)
-    # print(M)   
-    ecdf = M / len(weights) 
-    return ecdf
+#     """Vectorized and faster, using broadcasting for the <= expression"""
+#     # Step 1 : compare a set of n distances to a set of say 25 threshold 
+#         # (n dists x 1) broadcast against (1 x 25 thresholds) ==> (n, 25), where each column representd number of hits below the threshold 
+#     M= 1*(data[:, None] <= thresholds[None, :])
+#     # Step 2 : Adjust hit be relative weight (i.e. actual_freq_vj / sampled_freq_vj)
+#         # Broadcast (n, 25) on weights (n, 1) ==> (n, 25)
+#     M = M * weights[:,None]
+#     # Step 3: Take row sums, producing the weighted sum at each threshold ==> (25,)
+#     M =  np.sum(M, axis = 0)
+#     # Step 4: Divide by the weighted total (i.e., the amount if all seqs were present, which because of enrichment is far greater than 1)
+#     # print(M)   
+#     ecdf = M / len(weights) 
+#     return ecdf
 
 
-def _compute_weighted_pop_estimate_ecdf_rowwise(i, thresholds, weights, data, max_radius = 50):
-    """
-    This is a wrapper for compute_ecdf using parmap
-    """
-    if scipy.sparse.issparse(data):
-        row = data[i,:].toarray()[0]
-        row[row==0] = (max_radius + 1)
-        row[row==-1] = 0
-        ec = compute_population_estimate_ecdf(data = row,  weights = weights, thresholds = thresholds)
-    else:
-        ec = compute_population_estimate_ecdf(data = data[i,:],  weights = weights, thresholds = thresholds)
-    return pd.Series(ec, index = thresholds)
+# def _compute_weighted_pop_estimate_ecdf_rowwise(i, thresholds, weights, data, max_radius = 50):
+#     """
+#     This is a wrapper for compute_ecdf using parmap
+#     """
+#     if scipy.sparse.issparse(data):
+#         row = data[i,:].toarray()[0]
+#         row[row==0] = (max_radius + 1)
+#         row[row==-1] = 0
+#         ec = compute_population_estimate_ecdf(data = row,  weights = weights, thresholds = thresholds)
+#     else:
+#         ec = compute_population_estimate_ecdf(data = data[i,:],  weights = weights, thresholds = thresholds)
+#     return pd.Series(ec, index = thresholds)
 
-def _compute_pop_estimate_ecdf_rowwise(i, thresholds, data, max_radius = 50):
-    """
-    This is a warpper for compute_ecdf using parmap
-    """
-    if scipy.sparse.issparse(data):
-        row = data[i,:].toarray()[0]
-        row[row==0] = (max_radius + 1)
-        row[row==-1] = 0
-        ec = compute_population_estimate_ecdf(data = row, thresholds = thresholds)
-    else:
-        ec = compute_population_estimate_ecdf(data = data[i,:], thresholds = thresholds)
-    return pd.Series(ec, index = thresholds)
+# def _compute_pop_estimate_ecdf_rowwise(i, thresholds, data, max_radius = 50):
+#     """
+#     This is a warpper for compute_ecdf using parmap
+#     """
+#     if scipy.sparse.issparse(data):
+#         row = data[i,:].toarray()[0]
+#         row[row==0] = (max_radius + 1)
+#         row[row==-1] = 0
+#         ec = compute_population_estimate_ecdf(data = row, thresholds = thresholds)
+#     else:
+#         ec = compute_population_estimate_ecdf(data = data[i,:], thresholds = thresholds)
+#     return pd.Series(ec, index = thresholds)
 
 
               
