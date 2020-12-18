@@ -34,11 +34,11 @@ def auto_pgen(tcrrep):
 		raise ValueError("UNFORTUNATELY OLGA DOES NOT YET SUPPORT MOUSE ALPHA PGEN ESTIMATES")
 
 	for chain in tcrrep.chains:
-		tcrrep = _auto_pgen(tcrrep=tcrrep, organism = tcrrep.organism, chain = chain)
+		tcrrep = _auto_pgen(tcrrep=tcrrep, organism = tcrrep.organism, chain = chain, ncpus = tcrrep.cpus)
 	return tcrrep
 
 
-def _auto_pgen(tcrrep = None, organism = 'human', chain = 'beta'):
+def _auto_pgen(tcrrep = None, organism = 'human', chain = 'beta', ncpus = 2):
 	"""
 	Automate a pgen estimation of cdr3s alpha/beta given a tcrrep with a clones_df attribute
 
@@ -77,7 +77,7 @@ def _auto_pgen(tcrrep = None, organism = 'human', chain = 'beta'):
 	
 	olga_model = olga_models[(organism, chain)]
 
-	pgens = parmap.map(olga_model.compute_aa_cdr3_pgen, cdr3s, pm_pbar = True)
+	pgens = parmap.map(olga_model.compute_aa_cdr3_pgen, cdr3s, pm_pbar = True, pm_processes = ncpus)
 	tcrrep.clone_df[f"pgen_{cdr3_col}"] = pgens
 
 	return tcrrep
