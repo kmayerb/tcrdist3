@@ -58,17 +58,17 @@ def test_current_example():
 	rw_beta_sparse = scipy.sparse.csr_matrix(tr.rw_beta)
 	scipy.sparse.save_npz(out_fn_rw_beta_sparse_matrix, rw_beta_sparse)
 
-
-def test_compute_population_estimate_ecdf():
-	"""
-	Test import, and ecdf with some or all optional arguments
-	"""
-	from tcrdist.neighbors import compute_population_estimate_ecdf
-	import numpy as np
-	assert isinstance(compute_population_estimate_ecdf(data = np.array([1,2,3,4,5,6])), np.ndarray)
-	assert isinstance(compute_population_estimate_ecdf(data = np.array([1,2,3,4,5,6]), thresholds = np.array([3])), np.ndarray)
-	r = compute_population_estimate_ecdf(data = np.array([1,2,3,4,5,6]), thresholds = np.array([3]))
-	assert np.all( np.isclose(r, np.array([0.5]) ) )
+# NOTE USED ANYMORE
+# def test_compute_population_estimate_ecdf():
+# 	"""
+# 	Test import, and ecdf with some or all optional arguments
+# 	"""
+# 	from tcrdist.neighbors import compute_population_estimate_ecdf
+# 	import numpy as np
+# 	assert isinstance(compute_population_estimate_ecdf(data = np.array([1,2,3,4,5,6])), np.ndarray)
+# 	assert isinstance(compute_population_estimate_ecdf(data = np.array([1,2,3,4,5,6]), thresholds = np.array([3])), np.ndarray)
+# 	r = compute_population_estimate_ecdf(data = np.array([1,2,3,4,5,6]), thresholds = np.array([3]))
+# 	assert np.all( np.isclose(r, np.array([0.5]) ) )
 
 @pytest.mark.skip(reason="This test documents an example, but is redundant. Skipped in the interest of CI time.")
 def test_old_example():
