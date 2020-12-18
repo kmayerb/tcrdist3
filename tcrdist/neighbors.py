@@ -78,7 +78,8 @@ def bkgd_cntl_nn2( tr,
                    generate_regex = True,
                    test_regex = True,
                    beta_re = 1,
-                   beta_dist = 1):   
+                   beta_dist = 1,
+                   forced_max_radius = None):   
 
     """
     bkgd_cntl_nn2 stands for background controlled nearest neighbors. 
@@ -107,7 +108,8 @@ def bkgd_cntl_nn2( tr,
         for joint chi2, weight for regex based portion
     beta_dist : int of float
         for joint chi2, weight for distance based portion
-
+    forced_max_radius : int or None
+        if not None, radius cannot exceed this amount
     Notes
     -----
 
@@ -174,12 +176,15 @@ def bkgd_cntl_nn2( tr,
     # TO SOLVE NOTABLE BUG IN THE ABOVE LINE!! If a radius is None (the next line will fail, thus set Nones to 0.
     max_radi = [x if (x is not None) else 0 for x in max_radi]  
     
+    if forced_max_radius is not None:
+        max_radi = [min(x,forced_max_radius) for x in max_radi]
 
     # 88888b.   .d88b.  888  888  888 
     # 888 "88b d8P  Y8b 888  888  888 
     # 888  888 88888888 888  888  888 
     # 888  888 Y8b.     Y88b 888 d88P 
     # 888  888  "Y8888   "Y8888888P" 
+
     # KMB: I’ve confirmed that the distance_ecdf(absolute_weight = True) and my function provide same ecdfs. Therefore distance_ecdf can be our ONLY ecdf function (which is nice because it will be used for both plots and results).  My function now relies on it. I have commented out my code but will remove completely in a later version.
     
     from tcrdist.ecdf import distance_ecdf
@@ -194,13 +199,16 @@ def bkgd_cntl_nn2( tr,
     max_radi2 = [x[x<=ctrl_bkgd].last_valid_index() for x in ecdfs2]
     # TO SOLVE NOTABLE BUG IN THE ABOVE LINE!! If a radius is None (the next line will fail, thus set Nones to 0.
     max_radi2 = [x if (x is not None) else 0 for x in max_radi2]
-    
+
+    if forced_max_radius is not None:
+        max_radi2 = [min(x,forced_max_radius) for x in max_radi2]
+
     # old vs. new methods must yield same results, 
     # TODO: remove old in next version, so there is a commit record
     #import pdb; pdb.set_trace()
     assert np.all(max_radi2 == max_radi)
     print("SUCCESS COMPARING METHODS")
- 
+    
         # <target_hits> number of hits within the antigen enriched repertoire at the control radius 
     if scipy.sparse.issparse(pw_mat):
         # sparse implementation, relies on _todense_row (see above in this module)
