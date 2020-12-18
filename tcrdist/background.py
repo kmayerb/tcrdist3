@@ -17,7 +17,7 @@ from tcrdist.pgen import OlgaModel
 from tcrsampler.sampler import TCRsampler
 
 from tcrdist.automate import auto_pgen
-from tcrdist.neighbors import compute_ecdf, bkgd_cntl_nn2
+
 
 flatten = lambda l: [item for sublist in l for item in sublist]
 

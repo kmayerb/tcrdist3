@@ -77,9 +77,9 @@ def calc_radii(tr, tr_bkgd, chain = 'beta', ctrl_bkgd = 10**-5, use_sparse = Tru
 	print(f"COMPUTING ECDFS PER TCR, TO FIND APPROPRIATE MAX RADII AT {ctrl_bkgd}")
 	thresholds, ecdfs = distance_ecdf(pwrect = getattr(tr, f"rw_{chain}"), 
 						  thresholds = np.array(range(0,max_radius, 2)), 
-						  weights=tr_bkgd.clone_df.weights, 
+						  weights= tr_bkgd.clone_df.weights, 
 						  pseudo_count=0, 
-						  skip_diag=False, 
+						  skip_diag = False, 
 						  absolute_weight = True)
 	# Based on acceptable ctrl_bkgd, we find max acceptable radi from each TCR
 	#import pdb; import pdb; pdb.set_trace()
