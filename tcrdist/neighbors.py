@@ -209,7 +209,7 @@ def bkgd_cntl_nn2( tr,
     #import pdb; pdb.set_trace()
     #assert np.all(max_radi2 == max_radi)
     #print("SUCCESS COMPARING METHODS")
-    
+    max_radi = max_radi2
         # <target_hits> number of hits within the antigen enriched repertoire at the control radius 
     if scipy.sparse.issparse(pw_mat):
         # sparse implementation, relies on _todense_row (see above in this module)
