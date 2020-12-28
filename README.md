@@ -19,14 +19,14 @@ pip install tcrdist3
 or 
 
 ```
-pip install git+https://github.com/kmayerb/tcrdist3.git@0.1.8
+pip install git+https://github.com/kmayerb/tcrdist3.git@0.1.9
 ```
 
 ## Docker
 [![Docker Repository on Quay](https://quay.io/repository/kmayerb/tcrdist3/status "Docker Repository on Quay")](https://quay.io/repository/kmayerb/tcrdist3)
 
 ```
-docker pull quay.io/kmayerb/tcrdist3:0.1.8
+docker pull quay.io/kmayerb/tcrdist3:0.1.9
 ```
 
 ## Documentation
@@ -56,7 +56,7 @@ tr.pw_cdr3_b_aa
 
 ##### TCR meta-clonotypes for biomarker discovery with tcrdist3: quantification of public, HLA-restricted TCR biomarkers of SARS-CoV-2 infection
 
-Mayer-Blackwell K, Schattgen S, Cohen-Lavi L, Crawford JC, Souquette A, Gaevert JA, Hertz T, Thomas PG, Bradley PH, Fiore-Gartland A. 2020. bioRxiv doi:10.1101/2020.12.24.424260
+Mayer-Blackwell K, Schattgen S, Cohen-Lavi L, Crawford JC, Souquette A, Gaevert JA, Hertz T, Thomas PG, Bradley PH, Fiore-Gartland A. [bioRxiv (2020)](https://www.biorxiv.org/content/10.1101/2020.12.24.424260v1).
 
 
 ##### Quantifiable predictive features define epitope-specific T cell receptor repertoires
