@@ -1,6 +1,4 @@
-FROM continuumio/miniconda3:4.8.2
-
-RUN apt-get update && apt-get install -y procps && apt-get install -y nano && apt-get -y install gcc && apt-get -y install unzip && apt-get -y install curl && apt-get -y install wget
+FROM quay.io/kmayerb/miniconda3:0.0.2
 
 RUN pip install git+https://github.com/kmayerb/tcrdist3.git@0.1.8
 
