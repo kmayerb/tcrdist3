@@ -17,7 +17,7 @@ Installation
 
 .. code-block:: none
 
-   pip install git+https://github.com/kmayerb/tcrdist3.git@0.1.6
+   pip install git+https://github.com/kmayerb/tcrdist3.git@0.1.8
 
 
 Docker Container
@@ -25,7 +25,7 @@ Docker Container
 
 .. code-block:: none
 
-   docker pull quay.io/kmayerb/tcrdist3:0.1.6
+   docker pull quay.io/kmayerb/tcrdist3:0.1.8
 
 If you need more details, checkout out the page on the tcrdist3 :ref:`docker` container.
 
