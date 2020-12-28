@@ -18,7 +18,7 @@ Pull the image:
 
 .. code-block:: none
     
-    docker pull quay.io/kmayerb/tcrdist3:0.1.8
+    docker pull quay.io/kmayerb/tcrdist3:0.1.9
 
 
 Running a Container
@@ -29,7 +29,7 @@ Run a container iteractively (flag `-it`):
 
 .. code-block:: none
     
-    docker run -it quay.io/kmayerb/tcrdist3:0.1.8
+    docker run -it quay.io/kmayerb/tcrdist3:0.1.9
 
 
 The tcrdist3 image runs Python 3.7.6 and IPython, so the fastest way to try things out
