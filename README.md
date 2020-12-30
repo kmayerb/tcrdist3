@@ -23,13 +23,6 @@ or
 pip install git+https://github.com/kmayerb/tcrdist3.git@0.1.9
 ```
 
-## Docker
-[![Docker Repository on Quay](https://quay.io/repository/kmayerb/tcrdist3/status "Docker Repository on Quay")](https://quay.io/repository/kmayerb/tcrdist3)
-
-```
-docker pull quay.io/kmayerb/tcrdist3:0.1.9
-```
-
 ## Documentation
 [![Documentation Status](https://readthedocs.org/projects/tcrdist3/badge/?version=latest)](https://tcrdist3.readthedocs.io/en/latest/?badge=latest)
 
