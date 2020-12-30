@@ -5,7 +5,7 @@ RUN apt-get update --fix-missing && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
-RUN apt-get install -y python3 && apt-get install -y python3-pip
+RUN apt-get update && apt-get install -y python3 && apt-get install -y python3-pip
 RUN pip3 install python-levenshtein==0.12.0
 RUN pip3 install pytest 
 RUN pip3 install jedi==0.17.2
