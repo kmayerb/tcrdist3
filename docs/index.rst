@@ -292,6 +292,7 @@ Huang, H., Wang, C., Rubelt, F., Scriba, T. J. & Davis, M. M. Analyzing the Myco
    :caption: Gallery
    :maxdepth: 1
 
+   welcome
    tcrdistances
    radius
    public

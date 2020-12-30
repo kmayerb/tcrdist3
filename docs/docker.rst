@@ -32,7 +32,7 @@ Run a container iteractively (flag `-it`):
     docker run -it quay.io/kmayerb/tcrdist3:0.1.9
 
 
-The tcrdist3 image runs Python 3.7.6 and IPython, so the fastest way to try things out
+The tcrdist3 image runs Python 3.8 and IPython, so the fastest way to try things out
 is to run IPython and copy and paste the code snippets on this doc page. It's easy to copy 
 a file from inside a running Docker container to your host machine, but remember once you 
 exit a container your files don't persist. 
@@ -48,7 +48,7 @@ Copying Files
     docker ps 
     """
     CONTAINER ID        IMAGE                            COMMAND
-    3a51162eb585        quay.io/kmayerb/tcrdist3:0.1.4   "/bin/bash"
+    3a51162eb585        quay.io/kmayerb/tcrdist3:0.1.9   "/bin/bash"
     """
     docker cp 3a51162eb585:hierdiff_example_PA_v_PB1.html hierdiff_example_PA_v_PB1.html
 
@@ -59,7 +59,7 @@ Copying Files
     
     .. code-block::
     
-        docker run -v ${HOME}/foo:/data -it quay.io/kmayerb/tcrdist3:0.1.4
+        docker run -v ${HOME}/foo:/data -it quay.io/kmayerb/tcrdist3:0.1.9
         ls data 
     
 
