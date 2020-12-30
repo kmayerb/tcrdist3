@@ -7,6 +7,7 @@ Flexible distance measures for comparing T cell receptors
 
 tcrdist3 is a python API-enabled toolkit for analyzing T-cell receptor repertoires. Some of the functionality and code is adapted from the original tcr-dist package which was released with the publication of Dash et al. Nature (2017) doi:10.1038/nature22383. This package contains a new API for computing tcrdistance measures as well as new features.
 
+<img src="https://user-images.githubusercontent.com/46639063/103338268-aa3ee180-4a32-11eb-8149-056fb385b33b.gif" width="720">
 
 ## Installation
 
