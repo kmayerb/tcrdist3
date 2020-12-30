@@ -3,7 +3,7 @@ tcrdist3
 
 `tcrdist3 <https://github.com/kmayerb/tcrdist3>`_ is an open-source python package that enables a broad array of T cell receptor sequence analyses.
 
-In addition to the docstrings found throughout the code, we provide an example in a minimal TCR analysis workflow. A gallery of runnable examples demonstrates the suite of features and more complext analyses.
+In addition to the docstrings found throughout the code, we provide an example in a minimal TCR analysis workflow. A gallery of runnable examples demonstrates the suite of features and more complex analyses.
 
 
 Installation
@@ -11,7 +11,17 @@ Installation
 
 .. code-block:: none
 
-   pip install git+https://github.com/kmayerb/tcrdist3.git@0.1.8
+   pip install git+https://github.com/kmayerb/tcrdist3.git@0.1.9
+
+
+Docker Container
+----------------
+
+.. code-block:: none
+
+   docker pull quay.io/kmayerb/tcrdist3:0.1.9
+
+If you need more details, checkout out the page on the tcrdist3 :ref:`docker` container.
 
 
 Brief background
