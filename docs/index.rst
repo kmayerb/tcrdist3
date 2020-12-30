@@ -1,9 +1,3 @@
-.. tip::
-   
-   NOTE: tcrdist3 is in a pre-release phase and these docs are currently being drafted. 
-   All code snippets are actual working unit and integration tests, but some 
-   described features may not be available until the 1.0.0 release (Expected August 31st, 2020)
-
 tcrdist3
 ========
 
