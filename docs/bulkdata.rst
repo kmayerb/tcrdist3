@@ -20,11 +20,7 @@ biochemcially similar TCRs within large bulk (> 100K unique clones) or combine
 TCR dataset from multiple individuals, with computationally intensive task of
 comparing all TCRs to one another distributed across multiple computing nodes.
 For instance, computing a tcrdistance network among 100,000 clones involves
-computing on the order of 10 billion distances, which can be computed  in ___
-minutes using ___ concurrent CPUs with ____ GB of available memory. For users
-without access to advanced computing infrastructure, the same task can be
-achieved on laptop in ___ minutes using ____ CPUs with only ___ GB of available
-memory.
+computing on the order of 10 billion distances.
 
 Based on available compute resources, the user can configure the chunked
 computation to the size of their bulk dataset., critical arguments `row_size`

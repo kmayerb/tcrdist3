@@ -1,13 +1,33 @@
 .. _adaptive:
 
-Adaptive Biotechnology Data
-===========================
+Adaptive ImmunoSEQ Data
+=======================
+
+The primary challenge in using ImmunoSEQ files is the different naming convention for TRV and TRJ genes. Adatptive's technical team explained the difference clearly, which I will paraphrase here: Adaptive uses a distinct naming convention to `IMGT Nomenclature <http://www.imgt.org/IMGTScientificChart/Nomenclature/IMGTnomenclature.html>`_. Both follow a [locus and family]-[gene]*[allele] convention, where IMGT naming prioritizes brevity, opting for "a single letter or number where possible" (except for alleles). IMGT also leaves out gene-level information when there is only one gene in the family. For instance, the gene-level info is dropped in naming TRBV15*02. According to Adaptive's technical team: "Adaptive's nomenclature is more expanded to both facilitate alphanumeric sorting, and also specify the precision of the identification."
+
+* A gene with allele-level identification: TRBV15-01*01
+* Gene-level identification: TRBV15-01
+* Family-level only: TRBV15
+
+When Gene-level resolution is missing, we have found a that some of Adaptive's output files can contain gene-level names within the bioidentiy field like TRBV15-X, when there is ambiguity about the gene-level assignment.
+
+tcrdist3 uses IMGT gene names throughout, so the first step to working with ImmunoSEQ files is name conversion.  To avoid losing lots of CDR3 data, when V gene may not be full resolved we often use Adaptive gene-level calls and replace allele with *01. You may want to do this cleaning by hand and include genes resolved at the allele level, so let's take a look at how to convert Adaptive's `v_gene` into it's IMGT*01 equivalent:
+
+.. code-block:: python
+    :emphasize-lines: 5
+
+    !wget https://raw.githubusercontent.com/kmayerb/tcrdist3/master/Adaptive2020.tsv
+    import pandas as pd
+    from tcrdist.swap_gene_name import adaptive_to_imgt
+    adpt_input = pd.read_csv('Adaptive2020.tsv', sep = '\t')
+    adpt_input['v_b_gene'] = adpt_input['v_gene'].apply(lambda x : adaptive_to_imgt['human'].get(x))
+
+
 
 .. _loading_adaptive_biotechnology:
 
-Cleaning Adaptive Biotechnology Files
--------------------------------------
-
+Cleaning Adaptive ImmunoSEQ Files
+---------------------------------
 
 import_adaptive_file
 ++++++++++++++++++++
@@ -24,29 +44,6 @@ import_adaptive_file
 .. autofunction:: import_adaptive_file
 
 
-
-Input
-+++++
-
-+-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------+--------------------+-----------+------------+--------------------+-----------------------+------------------+---------------------------+------------------+---------------------------+------------------+-------------+---------+----------+---------+----------+---------+-------------+---------------+--------------+--------------+---------------+-------------+-----------------+-----------------+---------------+-----------------+-----------------+---------------+----------+-----------------+-----------------+-----------------------+-----------------------+---------------+---------------+----------+---------------+------------+---------------+-------------------+---------------+---------------+----------+---------------+------------+---------------+---------------+-----------------------------+------------+
-| rearrangement                                                                           | extended_rearrangement                                                                                                                                                                                                                                                                                                                                                                                                    | bio_identity                             | amino_acid         | templates | frame_type | rearrangement_type | productive_frequency  | cdr1_start_index | cdr1_rearrangement_length | cdr2_start_index | cdr2_rearrangement_length | cdr3_start_index | cdr3_length | v_index | n1_index | d_index | n2_index | j_index | v_deletions | n2_insertions | d3_deletions | d5_deletions | n1_insertions | j_deletions | chosen_j_allele | chosen_j_family | chosen_j_gene | chosen_v_allele | chosen_v_family | chosen_v_gene | d_allele | d_allele_ties   | d_family        | d_family_ties         | d_gene                | d_gene_ties   | d_resolved    | j_allele | j_allele_ties | j_family   | j_family_ties | j_gene            | j_gene_ties   | j_resolved    | v_allele | v_allele_ties | v_family   | v_family_ties | v_gene        | v_gene_ties                 | v_resolved |
-+-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------+--------------------+-----------+------------+--------------------+-----------------------+------------------+---------------------------+------------------+---------------------------+------------------+-------------+---------+----------+---------+----------+---------+-------------+---------------+--------------+--------------+---------------+-------------+-----------------+-----------------+---------------+-----------------+-----------------+---------------+----------+-----------------+-----------------+-----------------------+-----------------------+---------------+---------------+----------+---------------+------------+---------------+-------------------+---------------+---------------+----------+---------------+------------+---------------+---------------+-----------------------------+------------+
-| GATTCTGGAGTCCGCCAGCACCAACCAGACATCTATGTACCTCTGTGCCAGGGGAGGATCTAGACCTACGAGCAGTACTTCGGGCCG | unknown                                                                                                                                                                                                                                                                                                                                                                                                                   | X+TCRBV28-01+TCRBJ02-07                  | na                 | 1135      | Out        | VDJ                | naunknown             | unknown          | unknown                   | unknown          | unknown                   | 38               | 43          | -1      | 51       | 57      | 64       | 9       | no data     | 1             | 9            | 7            | 2             | no data     | no data         | no data         | no data       | no data         | no data         | 02            | no data  | TCRBD02         | no data         | TCRBD02-01            | no data               | TCRBD02-01*02 | 01            | no data  | TCRBJ02       | no data    | TCRBJ02-07    | no data           | TCRBJ02-07*01 | 01            | no data  | TCRBV28       | no data    | TCRBV28-01    | no data       | TCRBV28-01*01               |            |
-+-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------+--------------------+-----------+------------+--------------------+-----------------------+------------------+---------------------------+------------------+---------------------------+------------------+-------------+---------+----------+---------+----------+---------+-------------+---------------+--------------+--------------+---------------+-------------+-----------------+-----------------+---------------+-----------------+-----------------+---------------+----------+-----------------+-----------------+-----------------------+-----------------------+---------------+---------------+----------+---------------+------------+---------------+-------------------+---------------+---------------+----------+---------------+------------+---------------+---------------+-----------------------------+------------+
-| TTGGAGCTGGACGACTCGGCCCTGTATCTCTGTGCCAGCAGCTTGGGTATGGGGACAGCCGCTAACTATGGCTACACCTTCGGTTCG | ATGGGCCCTGGGCTCCTCTGCTGGGCGCTGCTTTGTCTCCTGGGAGCAGGCTCAGTGGAGACTGGAGTCACCCAAAGTCCCACACACCTGATCAAAACGAGAGGACAGCAAGTGACTCTGAGATGCTCTTCTCAGTCTGGGCACAACACTGTGTCCTGGTACCAACAGGCCCTGGGTCAGGGGCCCCAGTTTATCTTTCAGTATTATAGGGAGGAAGAGAATGGCAGAGGAAACTTCCCTCCTAGATTCTCAGGTCTCCAGTTCCCTAATTATAGCTCTGAGCTGAATGTGAACGCCTTGGAGCTGGACGACTCGGCCCTGTATCTCTGTGCCAGCAGCTTGGGTATGGGGACAGCCGCTAACTATGGCTACACCTTCGGTTCGGGGACCAGGTTAACCGTTGTAG    | CASSLGMGTAANYGYTF+TCRBV05-04+TCRBJ01-02  | CASSLGMGTAANYGYTF  | 1300      | In         | VDJ                | 0.0012208108813691113 | 135              | 15201                     | 18               | 327                       | 51               | 30          | 46      | 51       | 58      | 61       | no data | 5           | 5             | no data      | 3            | no data       | 01          | TCRBJ01         | 02              | 01            | TCRBV05         | 04              | 01            | no data  | TCRBD01         | no data         | TCRBD01-01            | no data               | TCRBD01-01*01 | 01            | no data  | TCRBJ01       | no data    | TCRBJ01-02    | no data           | TCRBJ01-02*01 | 01            | no data  | TCRBV05       | no data    | TCRBV05-04    | no data       | TCRBV05-04*01               |            |
-+-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------+--------------------+-----------+------------+--------------------+-----------------------+------------------+---------------------------+------------------+---------------------------+------------------+-------------+---------+----------+---------+----------+---------+-------------+---------------+--------------+--------------+---------------+-------------+-----------------+-----------------+---------------+-----------------+-----------------+---------------+----------+-----------------+-----------------+-----------------------+-----------------------+---------------+---------------+----------+---------------+------------+---------------+-------------------+---------------+---------------+----------+---------------+------------+---------------+---------------+-----------------------------+------------+
-
-
-Output
-++++++
-
-+------------------+------------------------+-----------+---------+--------------------+-------------+------------+------------+------------------------------------------------------------------------------------------+
-| subject          | productive_frequency   | templates | epitope | cdr3_b_aa          | v_b_gene    | j_b_gene   | valid_cdr3 | cdr3_b_nucseq                                                                            |
-+------------------+------------------------+-----------+---------+--------------------+-------------+------------+------------+------------------------------------------------------------------------------------------+
-| Adaptive2020.tsv | 0.0012208108813691113  | 1300      | X       | CASSLGMGTAANYGYTF  | TRBV5-4*01  | TRBJ1-2*01 | True       | TTGGAGCTGGACGACTCGGCCCTGTATCTCTGTGCCAGCAGCTTGGGTATGGGGACAGCCGCTAiACTATGGCTACACCTTCGGTTCG |
-+------------------+------------------------+-----------+---------+--------------------+-------------+------------+------------+------------------------------------------------------------------------------------------+
-| Adaptive2020.tsv | 0.0015044146399640895  | 1602      | X       | CASSQPGRTLYEQYF    | TRBV14*01   | TRBJ2-7*01 | True       | CAGCCTGCAGAACTGGAGGATTCTGGAGTTTATTTCTGTGCCAGCAGCCAACCGGGACGGACCTTGTiACGAGCAGTACTTCGGGCCG |
-+------------------+------------------------+-----------+---------+--------------------+-------------+------------+------------+------------------------------------------------------------------------------------------+
 
 Loading Adaptive Biotechnology Files
 ------------------------------------

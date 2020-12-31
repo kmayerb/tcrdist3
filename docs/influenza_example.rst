@@ -1,3 +1,5 @@
+.. _d3_tree_example:
+
 Influenza Example
 =================
 
