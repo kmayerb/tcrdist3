@@ -5,13 +5,13 @@ Adaptive ImmunoSEQ Data
 
 Adaptive uses a distinct naming convention to `IMGT Nomenclature <http://www.imgt.org/IMGTScientificChart/Nomenclature/IMGTnomenclature.html>`_. This poses a formatting challenge when using ImmunoSEQ files as inputs to tcrdist3. According to Adaptive's technical team: "Adaptive's nomenclature is more expanded to both facilitate alphanumeric sorting, and also specify the precision of the identification." Adaptive's technical team further explained to us the difference between naming systems, which we paraphrase here: 
 
-Both naming systems follow a [locus and family]-[gene]*[allele] convention, where IMGT naming prioritizes brevity, opting for "a single letter or number where possible" (except for alleles). IMGT also leaves out gene-level information when there is only one gene in the family. For instance, IMGT drops the gene-level info in naming TRBV15*02. 
+Both naming systems follow a [locus and family]-[gene]*[allele] convention, where IMGT naming prioritizes brevity, opting for "a single letter or number where possible" (except for alleles). IMGT also leaves out gene-level information when there is only one gene in the family. For instance, IMGT drops the gene-level info in naming TRBV15*02. By contrast, Adaptive uses the following three possible names:
 
-* A gene with allele-level identification: TRBV15-01*01
-* Gene-level identification: TRBV15-01
-* Family-level only: TRBV15
+* A gene with allele-level identification: TCRBV15-01*02
+* Gene-level identification: TCRBV15-01
+* Family-level only: TCRBV15
 
-Adaptive's output files can contain gene-level names within the 'bioidentity' field like TRBV15-X, when there is ambiguity about the gene-level assignment. 
+Adaptive's output files can contain gene-level names within the 'bioidentity' field like TCRBV15-X, when there is ambiguity about the gene-level assignment. 
 
 tcrdist3 uses IMGT gene names throughout, so the first step to working with ImmunoSEQ files is name conversion. To avoid losing lots of CDR3 data, when the V gene may not be fully resolved we often use Adaptive 'bioidentity' gene-level calls and replace allele with *01. Depending on your project's goals, you may want to do this cleaning by hand, so let's first take a look at how to convert Adaptive's `v_gene` into its IMGT*01 equivalent:
 
