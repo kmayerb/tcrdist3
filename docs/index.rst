@@ -9,12 +9,14 @@ In addition to the docstrings found throughout the code, we provide an example i
 Quick Links
 -----------
 
+* Get started with some videos and easy examples, with :ref:`welcome`.
 * For details on how to compute distances, see :ref:`tcrdistances`.
 * For details on discovering meta-clonotypes, see :ref:`metaclonotypes`. 
 * For details on making gene-usge plots. see :ref:`visualizing`.  
 * For details on converting Adaptive ImmunoSeq data, see :ref:`adaptive`.
 * For an example of making a D3 interactive TCRdist tree, see :ref:`d3_tree_example`.
 * For finding biochemically similar nearest neighbors when the data is too large to store in memory, you can make use of a :ref:`sparsity` , or use appraoch illustrated in :ref:`bulk_data`.
+
 
 
 Installation
