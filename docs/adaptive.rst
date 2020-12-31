@@ -3,15 +3,17 @@
 Adaptive ImmunoSEQ Data
 =======================
 
-The primary challenge in using ImmunoSEQ files is the different naming convention for TRV and TRJ genes. Adatptive's technical team explained the difference clearly, which I will paraphrase here: Adaptive uses a distinct naming convention to `IMGT Nomenclature <http://www.imgt.org/IMGTScientificChart/Nomenclature/IMGTnomenclature.html>`_. Both follow a [locus and family]-[gene]*[allele] convention, where IMGT naming prioritizes brevity, opting for "a single letter or number where possible" (except for alleles). IMGT also leaves out gene-level information when there is only one gene in the family. For instance, the gene-level info is dropped in naming TRBV15*02. According to Adaptive's technical team: "Adaptive's nomenclature is more expanded to both facilitate alphanumeric sorting, and also specify the precision of the identification."
+Adaptive uses a distinct naming convention to `IMGT Nomenclature <http://www.imgt.org/IMGTScientificChart/Nomenclature/IMGTnomenclature.html>`_. This poses a formatting challenge when using ImmunoSEQ files as inputs to tcrdist3. According to Adaptive's technical team: "Adaptive's nomenclature is more expanded to both facilitate alphanumeric sorting, and also specify the precision of the identification." Adaptive's technical team further explained to us the difference between naming systems, which we paraphrase here: 
+
+Both naming systems follow a [locus and family]-[gene]*[allele] convention, where IMGT naming prioritizes brevity, opting for "a single letter or number where possible" (except for alleles). IMGT also leaves out gene-level information when there is only one gene in the family. For instance, IMGT drops the gene-level info in naming TRBV15*02. 
 
 * A gene with allele-level identification: TRBV15-01*01
 * Gene-level identification: TRBV15-01
 * Family-level only: TRBV15
 
-When Gene-level resolution is missing, we have found a that some of Adaptive's output files can contain gene-level names within the bioidentiy field like TRBV15-X, when there is ambiguity about the gene-level assignment.
+Adaptive's output files can contain gene-level names within the 'bioidentity' field like TRBV15-X, when there is ambiguity about the gene-level assignment. 
 
-tcrdist3 uses IMGT gene names throughout, so the first step to working with ImmunoSEQ files is name conversion.  To avoid losing lots of CDR3 data, when V gene may not be full resolved we often use Adaptive gene-level calls and replace allele with *01. You may want to do this cleaning by hand and include genes resolved at the allele level, so let's take a look at how to convert Adaptive's `v_gene` into it's IMGT*01 equivalent:
+tcrdist3 uses IMGT gene names throughout, so the first step to working with ImmunoSEQ files is name conversion. To avoid losing lots of CDR3 data, when the V gene may not be fully resolved we often use Adaptive 'bioidentity' gene-level calls and replace allele with *01. Depending on your project's goals, you may want to do this cleaning by hand, so let's first take a look at how to convert Adaptive's `v_gene` into its IMGT*01 equivalent:
 
 .. code-block:: python
     :emphasize-lines: 5
@@ -29,6 +31,9 @@ tcrdist3 uses IMGT gene names throughout, so the first step to working with Immu
 Cleaning Adaptive ImmunoSEQ Files
 ---------------------------------
 
+We also have a one line conversion function that works with recent ImmunoSEQ files
+containing the 'bioidentity' field, as shown here:
+
 import_adaptive_file
 ++++++++++++++++++++
 
@@ -44,8 +49,9 @@ import_adaptive_file
 .. autofunction:: import_adaptive_file
 
 
+After conversion, the data as a Pandas DataFrame can be directly imported to tcrdist3.
 
-Loading Adaptive Biotechnology Files
+Loading Adaptive ImmunoSEQ Files
 ------------------------------------
 
 .. literalinclude:: ../tcrdist/tests/test_introduction_2.py
