@@ -1,4 +1,4 @@
-.. _visualizingpgen:
+.. _visualizing:
 
 Visualizing
 ===========

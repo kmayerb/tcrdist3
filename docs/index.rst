@@ -3,7 +3,20 @@ tcrdist3
 
 `tcrdist3 <https://github.com/kmayerb/tcrdist3>`_ is an open-source python package that enables a broad array of T cell receptor sequence analyses.
 
-In addition to the docstrings found throughout the code, we provide an example in a minimal TCR analysis workflow. A gallery of runnable examples demonstrates the suite of features and more complex analyses.
+In addition to the docstrings found throughout the code, we provide an example in a minimal TCR analysis workflow. A gallery of runnable examples demonstrates the suite of features for custom analyses.
+
+
+Quick Links
+-----------
+
+* Get started with some videos and easy examples, with :ref:`welcome`.
+* For details on how to compute distances, see :ref:`tcrdistances`.
+* For details on discovering meta-clonotypes, see :ref:`metaclonotypes`. 
+* For details on making gene-usge plots. see :ref:`visualizing`.  
+* For details on converting Adaptive ImmunoSeq data, see :ref:`adaptive`.
+* For an example of making a D3 interactive TCRdist tree, see :ref:`d3_tree_example`.
+* For finding biochemically similar nearest neighbors when the data is too large to store in memory, you can make use of a :ref:`sparsity` , or use appraoch illustrated in :ref:`bulk_data`.
+
 
 
 Installation
@@ -24,7 +37,9 @@ Docker Container
 If you need more details, checkout out the page on the tcrdist3 :ref:`docker` container.
 
 
-Brief background
+
+
+Brief Background
 ----------------
 
 A human alpha/beta T cell repertoire is huge, comprised of an estimated 10^11 to 10^13 total T cells, with the process of V(D)J recombination capable of generating as many as 10^15 to 10^20 unique receptor sequences. With the wide adoption of high-throughput Adaptive Immune Receptor Repertoire sequencing (AIRR-seq) and single-cell sequencing technologies, immunologists are witnessing an explosion in the availability of TCR repertoire data.
@@ -270,12 +285,10 @@ Save your TCRrep object using `dill <https://pypi.org/project/dill/>`_.
 
 
 
-Bulk Repertoires
-----------------
-
-
 References
 ----------
+
+Mayer-Blackwell K, Schattgen S, Cohen-Lavi L, Crawford JC, Souquette A, Gaevert JA, Hertz T, Thomas PG, Bradley PH, Fiore-Gartland A. n.d. TCR meta-clonotypes for biomarker discovery with tcrdist3: quantification of public, HLA-restricted TCR biomarkers of SARS-CoV-2 infection. bioRxiv (2020) doi:10.1101/2020.12.24.424260
 
 Dash, P. et al. Quantifiable predictive features define epitope-specific T cell receptor repertoires. Nature 547, 89–93 (2017)
 
@@ -308,6 +321,7 @@ Huang, H., Wang, C., Rubelt, F., Scriba, T. J. & Davis, M. M. Analyzing the Myco
    public
    visualizing
    motif_gallery
+   metaclonotypes
    influenza_example
   
 
