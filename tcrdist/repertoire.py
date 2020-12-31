@@ -6,7 +6,7 @@ from . import repertoire_db
 from tcrdist.rep_funcs import _pws, compute_pws_sparse
 from tcrdist.sample import _default_sampler
 from tcrdist.background import get_stratified_gene_usage_frequency
-from tcrdist.background import _synthesize_human_beta_vj_background, _synthesize_human_alpha_vj_background, _synthesize_mouse_beta_vj_background
+from tcrdist.background import _synthesize_human_beta_vj_background, _synthesize_human_alpha_vj_background, _synthesize_mouse_beta_vj_background, _synthesize_mouse_alpha_vj_background
 from zipdist.zip2 import Zipdist2
 import sys
 
@@ -668,12 +668,15 @@ class TCRrep:
                 vj_background = _synthesize_mouse_beta_vj_background(ts = ts, df = self.clone_df)
         # TODO: ADD OTHER OPTIONS
         elif chain == "alpha":
+            if ts is None:
+                ts = _default_sampler(organism = self.organism, chain = "alpha")()
+                ts = get_stratified_gene_usage_frequency(ts = ts, replace = True) 
             if self.organism == "human":
-                raise ValueError("TODO: FUTURE VERSIONS NEED ALPHA(HUMAN)")
-                #vj_background = _synthesize_human_alpha_vj_background(ts = ts, df = self.clone_df)
+                #raise ValueError("TODO: FUTURE VERSIONS NEED ALPHA(HUMAN)")
+                vj_background = _synthesize_human_alpha_vj_background(ts = ts, df = self.clone_df)
             elif self.organism == "mouse":
-                raise ValueError("TODO: FUTURE VERSIONS NEED ALPHA(MOUSE)")
-                #vj_background = _synthesize_alpha_beta_vj_background(ts = ts, df = self.clone_df)
+                #raise ValueError("TODO: FUTURE VERSIONS NEED ALPHA(MOUSE)")
+                vj_background = _synthesize_mouse_alpha_vj_background(ts = ts, df = self.clone_df)
         return vj_background   
 
 
