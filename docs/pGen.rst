@@ -3,6 +3,9 @@
 Probability of Generation
 =========================
 
+Human Example 
+-------------
+
 The generation probability, Pgen, defined by Walczyk and colleagues and implemented in Python by Sethna et al. (2019) is another way of filtering TCRs and TCR neighborhoods that are more frequent than expected based on their probability of being produced through recombination in early phases of immune development. 
 
 .. literalinclude:: ../tcrdist/tests/test_pgen_1.py
@@ -22,14 +25,26 @@ if you have multiple cores.
     :language: python
 
 
-.. literalinclude:: ../tcrdist/tests/longtest_pgen_parallel.py
+Mouse Example 
+-------------
+
+This example shows similar functionality for mouse data. It also 
+illustrates how OLGA + tcrdist3 allow one to look for low 
+probability of generation TCRs that have lots of biochemically 
+similar neighbors, which can be a sign of strong convergent 
+selection cause by antigen exposure.
+
+.. literalinclude:: ../tcrdist/tests/test_pgen_mouse.py
     :linenos:
-    :lines: 6-42
+    :lines: 6-140
     :dedent: 4
     :language: python
 
 
+|pgen_img1| 
 
+.. |pgen_img1| image:: _static/nlog10_pgen_vs_neighbors_pw_ab_50.png
+   :width: 80%
 
 References 
 ----------
