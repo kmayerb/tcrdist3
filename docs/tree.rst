@@ -3,6 +3,7 @@
 Trees
 =====
 
+
 Interactive tree diagrams can be easily produced in tcrdist3. 
 To automate the processes decsribed in more detail on the :ref:`motif_gallery` page, 
 initiate a `TCRtree` class as shown below. The result is a 

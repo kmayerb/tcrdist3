@@ -3,6 +3,7 @@
 Adaptive ImmunoSEQ Data
 =======================
 
+
 Adaptive uses a distinct naming convention to `IMGT Nomenclature <http://www.imgt.org/IMGTScientificChart/Nomenclature/IMGTnomenclature.html>`_. This poses a formatting challenge when using ImmunoSEQ files as inputs to tcrdist3. According to Adaptive's technical team: "Adaptive's nomenclature is more expanded to both facilitate alphanumeric sorting, and also specify the precision of the identification." Adaptive's technical team further explained to us the difference between naming systems, which we paraphrase here: 
 
 Both naming systems follow a [locus and family]-[gene]*[allele] convention, where IMGT naming prioritizes brevity, opting for "a single letter or number where possible" (except for alleles). IMGT also leaves out gene-level information when there is only one gene in the family. For instance, IMGT drops the gene-level info in naming TRBV15*02. By contrast, Adaptive uses the following three possible names:

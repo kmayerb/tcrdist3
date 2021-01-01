@@ -3,6 +3,7 @@
 Docker
 ======
 
+
 The fastest way to try out tcrdist3 is to use our Docker image. 
 
 If you run Linux, we assume you know how to use Docker. If you 
