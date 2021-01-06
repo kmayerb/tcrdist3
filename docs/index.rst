@@ -56,7 +56,7 @@ Now in the iPython console you can copy and paste examples.
 venv 
 ++++
 
-Alternatively you can install _`Python 3.8.5 <https://www.python.org/downloads/release/python-385/>`_ and 
+Alternatively you can install `Python 3.8.5 <https://www.python.org/downloads/release/python-385/>`_ and 
 create a virtual environment. Here's a video showing how:
 
 .. raw:: html
@@ -68,7 +68,7 @@ create a virtual environment. Here's a video showing how:
 
    python3 -m venv ./tcr3
    source tcr3/bin/activate
-   pip3 install parasail>=1.1.17
+   pip3 install parasail==1.1.17
    pip3 install tcrdist3
 
 
