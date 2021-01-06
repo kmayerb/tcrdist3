@@ -24,6 +24,53 @@ Installation
 
    pip install git+https://github.com/kmayerb/tcrdist3.git@0.1.9
 
+OSX Install Tips
+++++++++++++++++
+
+If you are having trouble installing on OSX, here are some additional steps that
+users have done to install tcrdist3 on OS X from scratch:
+
+1. Install Homebrew: https://brew.sh (copy the command from the webpage into Terminal app)
+2. In Terminal intall the following (or parasail may not build): 
+
+.. code-block:: none
+
+   brew install autoconf automake libtool
+
+miniconda 
++++++++++
+
+3. Install miniconda for python3.8 for OS X from the `.pkg <https://docs.conda.io/en/latest/miniconda.html>`_ .
+4. In the terminal and type: 
+
+.. code-block:: none
+
+   conda create --name tcrdist3 python=3.8
+   conda activate tcrdist3
+   pip install tcrdist3
+   pip install notebook ipython
+   ipython
+ 
+Now in the iPython console you can copy and paste examples.
+
+venv 
+++++
+
+Alternatively you can install _`Python 3.8.5 <https://www.python.org/downloads/release/python-385/>`_ and 
+create a virtual environment. Here's a video showing how:
+
+.. raw:: html
+
+	<iframe width="672" height="378" src="https://www.youtube.com/embed/rgKaii-ARvE" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+
+.. code-block:: none
+
+   python3 -m venv ./tcr3
+   source tcr3/bin/activate
+   pip3 install parasail>=1.1.17
+   pip3 install tcrdist3
+
 
 Docker Container
 ----------------
@@ -31,6 +78,7 @@ Docker Container
 .. code-block:: none
 
    docker pull quay.io/kmayerb/tcrdist3:0.1.9
+
 
 If you need more details, checkout out the page on the tcrdist3 :ref:`docker` container.
 
