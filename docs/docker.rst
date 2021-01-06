@@ -16,7 +16,6 @@ Getting the Docker Image
 
 Pull the image:
 
-
 .. code-block:: none
     
     docker pull quay.io/kmayerb/tcrdist3:0.1.9
@@ -38,10 +37,36 @@ is to run IPython and copy and paste the code snippets on this doc page. It's ea
 a file from inside a running Docker container to your host machine, but remember once you 
 exit a container your files don't persist. 
 
+.. raw:: html
+
+	<iframe width="672" height="378" src="https://www.youtube.com/embed/JBZtF5sc8QE" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    
+
+
+Mounting Files
+--------------
+
+.. tip::
+    Mounting your docker container to a working director is easy. 
+    (For more on this see `Docker for the busy researcher <http://erick.matsen.org/2018/04/19/docker.html>`_)
+    
+.. code-block:: none
+
+    docker run -v ${HOME}/mydata/:/yourdata/ -it quay.io/kmayerb/tcrdist3:0.1.9
+    ls data 
+ 
+    
+.. raw:: html
+
+	<iframe width="672" height="378" src="https://www.youtube.com/embed/78m5WXr895w" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    
+    
 Copying Files
 -------------
 
-.. code-block::
+You can also copy a file out of running container if you forget to mount a shared folder.
+
+.. code-block:: none
     
     """
     find the container ID
@@ -52,15 +77,3 @@ Copying Files
     3a51162eb585        quay.io/kmayerb/tcrdist3:0.1.9   "/bin/bash"
     """
     docker cp 3a51162eb585:hierdiff_example_PA_v_PB1.html hierdiff_example_PA_v_PB1.html
-
-
-.. tip::
-    Mounting your docker container to a working director is easy. 
-    (For more on this see `Docker for the busy researcher <http://erick.matsen.org/2018/04/19/docker.html>`_)
-    
-    .. code-block::
-    
-        docker run -v ${HOME}/foo:/data -it quay.io/kmayerb/tcrdist3:0.1.9
-        ls data 
-    
-
