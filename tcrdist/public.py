@@ -13,7 +13,6 @@ from palmotif import compute_pal_motif, svg_logo
 from tcrdist.summarize import _occurs_N_str, member_summ, filter_is, test_for_subsets
 from progress.bar import IncrementalBar
 from tcrdist.tree import _default_sampler, _default_sampler_olga, allele_01
-from tcrdist.ecdf import _todense_row
 
 __all__ = ['_neighbors_fixed_radius',
 		   '_K_neighbors_fixed_radius',
