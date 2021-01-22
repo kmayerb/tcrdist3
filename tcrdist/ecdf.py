@@ -200,7 +200,7 @@ def _plot_manuscript_ecdfs(
     min_freq=1e-6,
     cdr3_len_min=10., 
     cdr3_len_max=16.,
-    low_pass = -5,       
+    low_pass = -5,
     cmap=mpl.cm.viridis_r):
     """
     _plot_manuscript_ecdfs, recreate the manuscript type ecdf
@@ -226,7 +226,7 @@ def _plot_manuscript_ecdfs(
 
     """
     # Define colormap range for CDR3 length
-    low_pass_num = 1**low_pass # -5 -> 10^-5
+    low_pass_num = 10**low_pass # -5 -> 10^-5
     norm = mpl.colors.Normalize(vmin=cdr3_len_min, vmax=cdr3_len_max)
     if cdr3_len is None:
         cdr3_len = 10 * np.ones(ecdf_mat.shape[0])
