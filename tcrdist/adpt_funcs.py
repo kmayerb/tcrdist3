@@ -32,7 +32,8 @@ def import_adaptive_file(   adaptive_filename,
                             epitope = None,
                             log = True, 
                             swap_imgt_dictionary = None,
-                            additional_cols = None):
+                            additional_cols = None,
+                            use_cols =  ['bio_identity', 'productive_frequency', 'templates', 'rearrangement']):
     """
     Prepare tcrdist3 input from 2020 Adaptive File containing 'bio_identity', 'productive_frequency', 'templates', and 'rearrangement'.
 
@@ -60,13 +61,16 @@ def import_adaptive_file(   adaptive_filename,
         If None, the default dictionary adaptive_to_imgt is used
     additional_cols : None or List
         list of any additional columns you want to keep
+    use_cols : list
+        ['bio_identity', 'productive_frequency', 'templates', 'rearrangement','subject'] list of columns to retain from original input file. Add 'subject' 
+        if you wish to retain the subject.
     
     Returns 
     -------
     bulk_df : pd.DataFrame
     """
     try:
-        bulk_df = pd.read_csv(adaptive_filename, sep= sep, usecols = ['bio_identity', 'productive_frequency', 'templates', 'rearrangement'])
+        bulk_df = pd.read_csv(adaptive_filename, sep= sep, usecols = use_cols )
     except ValueError as e:
         raise Exception('Bulk Adpative TCR file was missing required columns') from e
 
@@ -100,11 +104,12 @@ def import_adaptive_file(   adaptive_filename,
     # Count number of valid seqs
     valid = np.sum(bulk_df['valid_cdr3'])
     
-    # Assign subject baesd on the < subject > argument 
-    if subject is None:
-        bulk_df['subject'] = adaptive_filename
-    else: 
-        bulk_df['subject'] = subject
+    # Assign subject baesd on the < subject > argument if not already in bulk_df
+    if subject not in bulk_df.columns:
+        if subject is None:
+            bulk_df['subject'] = adaptive_filename
+        else: 
+            bulk_df['subject'] = subject
 
     # Assign a user supplied or blank epitope baesd on the < epitope > argument 
     if epitope is None:
