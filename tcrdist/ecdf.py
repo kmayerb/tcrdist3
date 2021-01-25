@@ -5,20 +5,8 @@ from matplotlib import pyplot as plt
 import matplotlib as mpl
 
 __all__ = ['distance_ecdf',
-           'make_ecdf_step']
-
-def _todense(pw, maxd):
-    """Make a pairwise distance matrix dense"""
-    pw = np.asarray(pw.todense())
-    pw[pw == 0] = maxd + 1
-    pw[np.diag_indices_from(pw)] = 0
-    return pw
-
-def _todense_row(pw, maxd):
-    """Make a pairwise distance matrix dense"""
-    pw = np.asarray(pw.todense())
-    pw[pw == 0] = maxd + 1
-    return pw
+           'make_ecdf_step',
+           'plot_ecdf']
 
 def distance_ecdf(pwrect, thresholds=None, weights=None, pseudo_count=0, skip_diag=False, absolute_weight = False):
     """Computes the empirical cumulative distribution function (ECDF) for
@@ -29,15 +17,18 @@ def distance_ecdf(pwrect, thresholds=None, weights=None, pseudo_count=0, skip_di
     target and reference set are contained in the elements of pwrect.
 
     Optionally, relative weights can be supplied for each reference TCR.
-    These can be TCR counts or other weights andthe ECDF will still
+    These can be TCR counts or other weights and the ECDF will still
     be a probability on [0, 1].
 
     Parameters
     ----------
     pwrect : np.ndarray or scipy.sparse.csr_matrix, (clone_df.shape[0], n_ref)
+        Matrix of pairwise distances among TCRs (can be rectangular). Sparse matrix may encode
+        true zeros (i.e. identical TCRs) as -1 or 0, without having effect on the ECDF.
     thresholds : np.ndarray
         Vector of thresholds at which the ECDF should be evaluated.
-        By default will use all unique values in pwrect.
+        By default will use all unique values in pwrect. For sparse arrays the thresholds
+        should not exceed the largest distance encoded.
     weights : np.ndarray or list, (clone_df.shape[0], )
         Relative weight of each TCR in the reference (column dimension of pwrect)
     pseudo_count : int
@@ -46,7 +37,8 @@ def distance_ecdf(pwrect, thresholds=None, weights=None, pseudo_count=0, skip_di
     skip_diag : bool
         Skip counting the diagonal for computing ECDF of seqs against same seqs.
     absolute_weight : bool
-        if True, denominator is number of total sequences in pwrect.shape[2] rather than sum of the weights. 
+        if True, denominator is number of total sequences in pwrect.shape[2] rather than sum of the weights.
+        
     Returns
     -------
     thresholds : vector, thresholds.shape[0]
@@ -77,10 +69,11 @@ def distance_ecdf(pwrect, thresholds=None, weights=None, pseudo_count=0, skip_di
 
     for i in range(pwrect.shape[0]):
         if sparse.issparse(pwrect):
+            """By using the row.data attribute we only sum over distances
+            that were stored: large distances that were discarded from the sparse
+            representation (which are sometimes thought of as zeros) are simply
+            not present and therefore never counted as below threshold[i]"""
             row = pwrect[i, :]
-                #row = _todense_row(row, maxd = 50)
-                #row = np.reshape(row, (pwrect.shape[1], 1))
-                #numer = np.sum((row <= thresholds[None, :]) * weights[:, None], axis=0)
             numer = np.sum((row.data[:, None] <= thresholds[None, :]) * weights[row.indices, None], axis=0)
         else:
             row = np.reshape(pwrect[i, :], (pwrect.shape[1], 1))
@@ -207,7 +200,7 @@ def _plot_manuscript_ecdfs(
     min_freq=1e-6,
     cdr3_len_min=10., 
     cdr3_len_max=16.,
-    low_pass = -5,       
+    low_pass = -5,
     cmap=mpl.cm.viridis_r):
     """
     _plot_manuscript_ecdfs, recreate the manuscript type ecdf
@@ -233,7 +226,7 @@ def _plot_manuscript_ecdfs(
 
     """
     # Define colormap range for CDR3 length
-    low_pass_num = 1**low_pass # -5 -> 10^-5
+    low_pass_num = 10**low_pass # -5 -> 10^-5
     norm = mpl.colors.Normalize(vmin=cdr3_len_min, vmax=cdr3_len_max)
     if cdr3_len is None:
         cdr3_len = 10 * np.ones(ecdf_mat.shape[0])
