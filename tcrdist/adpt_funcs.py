@@ -105,7 +105,7 @@ def import_adaptive_file(   adaptive_filename,
     valid = np.sum(bulk_df['valid_cdr3'])
     
     # Assign subject baesd on the < subject > argument if not already in bulk_df
-    if subject not in bulk_df.columns:
+    if 'subject' not in bulk_df.columns:
         if subject is None:
             bulk_df['subject'] = adaptive_filename
         else: 
