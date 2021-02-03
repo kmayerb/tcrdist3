@@ -366,6 +366,7 @@ Huang, H., Wang, C., Rubelt, F., Scriba, T. J. & Davis, M. M. Analyzing the Myco
    :maxdepth: 1
 
    adaptive
+   vdjtools
    sparsity
    bulkdata
    docker
