@@ -196,6 +196,39 @@ def find_centers_beta(
 
 
 def rank_centers(centers_filename = None, centers_df = None, rank_column = 'chi2joint', min_nsubject = 2, min_nr = 1):
+	"""
+	This function takes the output of tcrdist.neighbors.bkgd_cntl_nn2(), 
+	a set of scored metaclonotypes (centers - TCRs + radius) 
+	and ranks them by chi2 statistics, 
+	prioritizing those that include lots of target sequences 
+	while minimizing inclusion of background sequences. 
+	
+	Parameters
+	----------
+	centers_filename : str or None
+		User can only provide centers_df or centers_filename but not both
+		The filepath to a file containing metaclonotype centers information, generally produced with 
+		tcrdist.neighbors.bkgd_cntl_nn2()
+	centers_df : DataFrame or None
+		User can only provide centers_df or centers_filename but not both.
+		The Pandas DataFraem containing metaclonotype centers information, generally produced with 
+		tcrdist.neighbors.bkgd_cntl_nn2()
+	rank_column : str
+		Default : 'chi2joint' (or 'chi2joint' (radius+motif averaged) or chi2re'(using motif only), 'chi2dist' (using radius only) 
+	min_nsubject : int
+		Default 2, (minimum publicity of the meta-clonotype). 
+		That is, the minimum number of unique subjects contributing TCRs 
+		among a group of biochemically TCRs to form a meta-clonotype. 
+	min_nr : int
+		Default 1, (minimum non-redundancy). Once the metaclonotypes are ranked, 
+		the function requires that lower ranked meta-clonotypes to have a minimum number
+		<min_nr> of new sequences not already spanned by a higher ranked meta-clonotype. 
+	
+	Returns
+	-------
+	df : DataFrame
+	
+	"""
 	import pandas as pd
 	import ast
 	from tcrdist.summarize import filter_gt, filter_is, test_for_subsets, test_for_almost_subsets
