@@ -94,8 +94,14 @@ def bkgd_cntl_nn2( tr,
         Default is cdr3_b_aa', the column containing CDR3 string
     add_cols  : list
         Extra columns from clone_df to include in centers_df['v_b_gene', 'j_b_gene'],
-    ncpus = 4
-        passed to pm_processes when using parmap   
+    ncpus : int
+        e.g., 4, passed to pm_processes when using parmap   
+    include_seq_info : bool 
+        If True, returned DataFrame <centers_df> will include ['target_neighbors', 'target_seqs',
+        'background_neighbors','background_seqs','background_v', 'background_j']
+        as columns in centers_df DataFrame returned by this function. 
+        This allows for inspection of sequences found in both the antigen enriched repertoire and supplied
+        background.
     thresholds : list
         Default is [x for x in range(0,50,2)] indicating tcrdist thresholds to compute 
         a ecdf over.
@@ -110,6 +116,11 @@ def bkgd_cntl_nn2( tr,
         for joint chi2, weight for distance based portion
     forced_max_radius : int or None
         if not None, radius cannot exceed this amount
+    
+    Returns 
+    -------
+    centers_df: DataFrame
+    
     Notes
     -----
 
