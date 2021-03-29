@@ -11,8 +11,8 @@ def test_workflow_2():
     import pandas as pd
     from tcrdist.repertoire import TCRrep
     from tcrdist.adpt_funcs import get_basic_centroids
-
-    path = os.path.join('tcrdist', 'data', 'covid19')
+    from tcrdist.paths import path_to_base
+    path = os.path.join(path_to_base, 'tcrdist', 'data', 'covid19')
     file = 'mira_epitope_16_1683_QYIKWPWYI_YEQYIKWPW_YEQYIKWPWY.tcrdist3.csv'
     filename = os.path.join(path,file)
     
