@@ -15,7 +15,7 @@ Loading a TCR Dataset
 
 .. literalinclude:: ../tcrdist/tests/test_workflow_2.py
     :linenos:
-    :lines: 6-28
+    :lines: 6-30
     :dedent: 4
     :language: python
 
