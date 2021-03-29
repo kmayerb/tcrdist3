@@ -58,7 +58,7 @@ tr.pw_cdr3_b_aa
 
 ##### TCR meta-clonotypes for biomarker discovery with tcrdist3: quantification of public, HLA-restricted TCR biomarkers of SARS-CoV-2 infection
 
-Mayer-Blackwell K, Schattgen S, Cohen-Lavi L, Crawford JC, Souquette A, Gaevert JA, Hertz T, Thomas PG, Bradley PH, Fiore-Gartland A. [bioRxiv (2020)](https://www.biorxiv.org/content/10.1101/2020.12.24.424260v1).
+Mayer-Blackwell K, Schattgen S, Cohen-Lavi L, Crawford JC, Souquette A, Gaevert JA, Hertz T, Thomas PG, Bradley PH, Fiore-Gartland A. [bioRxiv (2020)](https://www.biorxiv.org/content/10.1101/2020.12.24.424260v2).
 
 
 ##### Quantifiable predictive features define epitope-specific T cell receptor repertoires
