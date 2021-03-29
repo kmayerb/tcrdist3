@@ -47,6 +47,7 @@ An Example With Simulated Data
   import pandas as pd
   import numpy as np
   import IPython
+  from tcrdist import plotting
 
   np.random.seed(110820)
   n = 50
@@ -62,7 +63,7 @@ An Example With Simulated Data
   df = df.assign(count=1)
   df.loc[:10, 'count'] = 10 # Sim expansion of the genes used in the first 10 rows
 
-  svg = td.plotting.plot_pairings(cell_df = df,
+  svg = plotting.plot_pairings(cell_df = df,
                                   cols = ['j_a_gene', 'v_a_gene',
                                           'v_b_gene', 'j_b_gene'],
                                   count_col='count')
@@ -108,6 +109,7 @@ The datafile referenced here is (`vdjDB_PMID28636592 <https://www.dropbox.com/s/
   import pandas as pd
   import numpy as np
   import IPython
+  from tcrdist import plotting
 
   pd_df = pd.read_csv("vdjDB_PMID28636592.tsv", sep = "\t")       # 1
   t_df = td.mappers.vdjdb_to_tcrdist2(pd_df = pd_df)              # 2
@@ -120,7 +122,7 @@ The datafile referenced here is (`vdjDB_PMID28636592 <https://www.dropbox.com/s/
 
   t_df_spec = t_df.loc[(ind_org)&(ind_epi),:]
 
-  svg = td.plotting.plot_pairings(cell_df = t_df_spec,
+  svg = plotting.plot_pairings(cell_df = t_df_spec,
                                   cols = ['j_a_gene', 'v_a_gene',
                                           'v_b_gene', 'j_b_gene'],
                                   count_col='count',
