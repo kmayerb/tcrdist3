@@ -67,10 +67,14 @@ def test_breadth_estimation_workflow(testing_only = True):
   
     ncpus = min(multiprocessing.cpu_count(), 6)
     # Download 2 bulk files for testing and demonstration purposes
-    files = ['1588BW_20200417_PBMC_unsorted_cc1000000_ImmunRACE_050820_008_gDNA_TCRB.tsv.tcrdist3.tsv',
+    files = [
+    '1588BW_20200417_PBMC_unsorted_cc1000000_ImmunRACE_050820_008_gDNA_TCRB.tsv.tcrdist3.tsv',
     '1349BW_unsorted_cc1000000_ImmunRACE_043020_003_gDNA_TCRB.tsv.tcrdist3.tsv']
     if not np.all([os.path.isfile(f) for f in files]):
-        download_and_extract_zip_file("ImmunoSeq_MIRA_matched_tcrdist3_ready_2_files.zip", source = "dropbox", dest = ".")
+        download_and_extract_zip_file(
+            "ImmunoSeq_MIRA_matched_tcrdist3_ready_2_files.zip", 
+            source = "dropbox", 
+            dest = ".")
         assert np.all([os.path.isfile(f) for f in files])
     # Download a Meta-Clonotypes File, All Meta-Clonotypes from Pre-Print Manuscript 
     # (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7781332/)
@@ -113,7 +117,9 @@ def test_breadth_estimation_workflow(testing_only = True):
     df_bulk = df_bulk[valid_TRBV_CDR3_TRBJ].reset_index(drop = True)
     # Convert templates to counts
     if 'templates' in df_bulk.columns:
-        df_bulk = df_bulk[['cdr3_b_aa','v_b_gene','j_b_gene','templates','productive_frequency']].rename(columns = {'templates':'count'})
+        df_bulk = df_bulk[['cdr3_b_aa','v_b_gene','j_b_gene','templates',
+        'productive_frequency']].\
+        rename(columns = {'templates':'count'})
     else:
         df_bulk = df_bulk[['cdr3_b_aa','v_b_gene','j_b_gene','count','productive_frequency']]
     tr_bulk   = TCRrep(cell_df = df_bulk,
@@ -126,7 +132,10 @@ def test_breadth_estimation_workflow(testing_only = True):
     bulk_clones   = tr_bulk.clone_df.shape[0]
     # Get and ideal chunksize that will control memory usage
     # 10**7 will keep memory > 2GB per CPU. 
-    ideal_chunk_size = get_safe_chunk(tr_search.clone_df.shape[0], tr_bulk.clone_df.shape[0], target = 10**7)
+    ideal_chunk_size = get_safe_chunk(
+        search_clones = tr_search.clone_df.shape[0], 
+        bulk_clones = tr_bulk.clone_df.shape[0],
+        target = 10**7)
     print(f"IDEAL CHUNK SIZE {ideal_chunk_size},{ncpus} CPUS")
     # ██████╗ ███████╗ ██████╗████████╗    ███████╗███████╗ █████╗ ██████╗  ██████╗██╗  ██╗
     # ██╔══██╗██╔════╝██╔════╝╚══██╔══╝    ██╔════╝██╔════╝██╔══██╗██╔══██╗██╔════╝██║  ██║
@@ -280,5 +289,7 @@ def test_breadth_estimation_workflow(testing_only = True):
         df_breadth = df_breadth.assign(file = files[0])
         # save rectangular sparse matrix, tabulation, and breadth esimates for future reference
         scipy.sparse.save_npz(os.path.join(destination, f"{file}.rw.npz"), tr_search.rw_beta)
-        df_tab.to_csv(os.path.join(destination, f"{file}.tabulation.tsv"), sep = '\t', index = True)
-        df_breadth.to_csv(os.path.join(destination, f"{file}.breadth.tsv"), sep = '\t', index = True)
+        df_tab.to_csv(os.path.join(destination, f"{file}.tabulation.tsv"), 
+            sep = '\t', index = True)
+        df_breadth.to_csv(os.path.join(destination, f"{file}.breadth.tsv"),
+            sep = '\t', index = True)
