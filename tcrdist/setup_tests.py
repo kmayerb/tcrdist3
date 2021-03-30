@@ -100,6 +100,24 @@ L = {"dash.zip":
             'url' : "https://www.dropbox.com/s/onr5lntmlm4fivi/ruggiero_human_beta_t.tsv.sampler.tsv.zip?dl=1"},
         'aws': { 
             'url' : None}
+        },
+    "ImmunoSeq_MIRA_matched_tcrdist3_ready.zip":
+        {'dropbox':{
+            'url' : "https://www.dropbox.com/s/1vma8opj0yqts9e/ImmunoSeq_MIRA_matched_tcrdist3_ready.zip?dl=1"},
+        'aws': { 
+            'url' : None}
+        },
+    "ImmunoSeq_MIRA_matched_tcrdist3_ready_2_files.zip":
+        {'dropbox':{
+            'url' : "https://www.dropbox.com/s/qrjawanmrklts70/ImmunoSeq_MIRA_matched_tcrdist3_ready_2_files.zip?dl=1"},
+        'aws': { 
+            'url' : None}
+        },
+    'bioRxiv_v2_metaclonotypes.tsv.zip':
+        {'dropbox':{
+            'url' : "https://www.dropbox.com/s/hpt1ropv7u02eqr/bioRxiv_v2_metaclonotypes.tsv.zip?dl=1"},
+        'aws': { 
+            'url' : None}
         }
     }
 
