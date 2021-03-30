@@ -1,7 +1,7 @@
 tcrdist3
 ========
 
-`tcrdist3 <https://github.com/kmayerb/tcrdist3>`_ is an open-source python package that enables a broad array of T cell receptor sequence analyses. Some of the functionality and code is adapted from the original tcr-dist package which was released with the publication of Dash et al. `Nature (2017) <https://doi.org/10.1038/nature22383>`_. This package contains a new API for computing tcrdistance measures as well as new features for biomarker development, decribed in more detail in Mayer-Blackwell et al. `bioRxiv (2020) <https://www.biorxiv.org/content/10.1101/2020.12.24.424260v1>`_. The package has been expanded to include supprot for gamma-delta TCRs; it has also been recoded to increase CPU efficiency using numba, a high-performance just-in-time compiler.
+`tcrdist3 <https://github.com/kmayerb/tcrdist3>`_ is an open-source python package that enables a broad array of T cell receptor sequence analyses. Some of the functionality and code is adapted from the original tcr-dist package which was released with the publication of Dash et al. `Nature (2017) <https://doi.org/10.1038/nature22383>`_. This package contains a new API for computing tcrdistance measures as well as new features for biomarker development, decribed in more detail in Mayer-Blackwell et al. `bioRxiv (2020) <https://www.biorxiv.org/content/10.1101/2020.12.24.424260v2>`_. The package has been expanded to include supprot for gamma-delta TCRs; it has also been recoded to increase CPU efficiency using numba, a high-performance just-in-time compiler.
 
 
 Quick Links
@@ -22,7 +22,7 @@ Installation
 
 .. code-block:: none
 
-   pip install git+https://github.com/kmayerb/tcrdist3.git@0.1.9
+   pip install git+https://github.com/kmayerb/tcrdist3.git@0.2.0
 
 OSX Install Tips
 ++++++++++++++++
@@ -77,7 +77,7 @@ Docker Container
 
 .. code-block:: none
 
-   docker pull quay.io/kmayerb/tcrdist3:0.1.9
+   docker pull quay.io/kmayerb/tcrdist3:0.2.0
 
 
 If you need more details, checkout out the page on the tcrdist3 :ref:`docker` container.
@@ -326,7 +326,7 @@ Save your TCRrep object using `dill <https://pypi.org/project/dill/>`_.
 References
 ----------
 
-Mayer-Blackwell K, Schattgen S, Cohen-Lavi L, Crawford JC, Souquette A, Gaevert JA, Hertz T, Thomas PG, Bradley PH, Fiore-Gartland A. n.d. TCR meta-clonotypes for biomarker discovery with tcrdist3: quantification of public, HLA-restricted TCR biomarkers of SARS-CoV-2 infection. bioRxiv (2020) doi:10.1101/2020.12.24.424260
+Mayer-Blackwell K, Schattgen S, Cohen-Lavi L, Crawford JC, Souquette A, Gaevert JA, Hertz T, Thomas PG, Bradley PH, Fiore-Gartland A. 2020 TCR meta-clonotypes for biomarker discovery with tcrdist3: identification of public, HLA-restricted SARS-CoV-2 associated TCR features. bioRxiv (2020) doi:10.1101/2020.12.24.424260
 
 Dash, P. et al. Quantifiable predictive features define epitope-specific T cell receptor repertoires. Nature 547, 89–93 (2017)
 
@@ -354,6 +354,7 @@ Huang, H., Wang, C., Rubelt, F., Scriba, T. J. & Davis, M. M. Analyzing the Myco
    public
    pGen
    metaclonotypes
+   breadth
    tree
    influenza_example
    visualizing
