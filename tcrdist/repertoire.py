@@ -32,7 +32,7 @@ class TCRrep:
         specifies relevant chains for single or paried TCR analysis
         ['alpha','beta'], ['alpha'], ['beta'], ['gamma','delta'],  ['gamma'] or ['delta']  
     db_file : str
-        specifies refereence file. The default is 'alphabeta_gammadelta_db.tsv' which
+        specifies reference file. The default is 'alphabeta_gammadelta_db.tsv' which
         is preinstalled  with the install python3.7/site-packages/tcrdist/db/
     archive_name : str
         Name for archive file. (only used if archive result is True)
@@ -49,7 +49,7 @@ class TCRrep:
         If True, infer index_cols used to deduplicate cell_df.
         If False, index_cols can be specified directly after initialization.
     index_cols : list
-        list of index colums used to deduplicate cell_df to clone_df
+        list of index columns used to deduplicate cell_df to clone_df
     deduplicate : bool
         If True, then clone_df will be assigned cell_df grouped_by
         index_cols.
@@ -64,9 +64,9 @@ class TCRrep:
         If True, automatically compute distances
     cpus : int, 
         Number of cpus to use. In general 1 cpu is sufficient from default Numba metric 
-        with less than 10^7  pairwise compairsons. However, more cpus will 
+        with less than 10^7  pairwise comparisons. However, more cpus will 
         result in a speedup for metrics like pw.metrics.nw_hamming_metric for more than 10^6 
-        pairwise compairsons.
+        pairwise comparisons.
     
     Example
     -------
@@ -101,7 +101,7 @@ class TCRrep:
     See examples at https://tcrdist3.readthedocs.io/ for more information
     about flexibility of TCRrep.
 
-    Computed pairwised distance matrics that can be accessed:
+    Computed pairwised distance matrices that can be accessed:
         TCRrep.pw_alpha, 
         TCRrep.pw_beta,  
         TCRrep.pw_cdr3_a_aa, 
@@ -198,8 +198,20 @@ class TCRrep:
             if compute_distances:
                 # This is a safety, measure so that a new user doesn't accidently try to compute a pairwise matrix that won't fit in memory
                 if self.clone_df.shape[0] > 10000:
-                    warnings.warn(f"<clone_df> size {self.clone_df.shape[0]} > 10,000. TCRrep.compute_distances() must be called explicitly by user with knowledge of system memory availability")
-                self.compute_distances()
+                    warnings.warn(f"\n\nWhen TCRrep.<clone_df> size {self.clone_df.shape[0]} > 10,000.\n"
+                    "\tTCRrep.compute_distances() may be called explicitly by a user\n"
+                    "\twith knowledge of system memory availability.\n"
+                    "\tHowever, it's HIGHLY unlikely that you want to compute such\n"
+                    "\ta large numpy array. INSTEAD, if you want all pairwise distance,\n"
+                    "\tyou will likely want to set an appropriate number of cpus with TCRrep.cpus = x,\n"
+                    "\tand then generate a scipy.sparse csr matrix of distances with:\n"
+                    "\tTCRrep.compute_sparse_rect_distances(radius=50, chunk_size=100), leaving df and df2 arguments blank.\n"
+                    "\tWhen you do this the results will be stored as TCRrep.rw_beta instead of TCRrep.pw_beta.\n"
+                    "\tThis function is highly useful for comparing a smaller number of sequences against a bulk set\n"
+                    "\tIn such a case, you can specify df and df2 arguments to create a non-square matrix of distances.\n"
+                    "\tSee https://tcrdist3.readthedocs.io/en/latest/sparsity.html?highlight=sparse for more info.\n")
+                else:
+                    self.compute_distances()
 
             if self.archive_result:
                 self.archive()
@@ -340,7 +352,29 @@ class TCRrep:
     def compute_rect_distances(self, df = None, df2 = None, store = None):
         self._rect_distances(pw_dist_func=_pws, df = df, df2 = df2, store = store)
     
-    def compute_sparse_rect_distances(self, df=None, df2=None, radius=50, chunk_size=500):
+    def compute_sparse_rect_distances(self, df=None, df2=None, radius=50, chunk_size=100):
+        """
+        Computes sparse rectangular distance as a scipy.sparse csr matrix, only retaining distances <= radius. 
+        This function is crucial when working with bulk data. Values > radius are zeros and not 
+        retained saving memory. True zeros are represented as -1.
+        
+        NOTE if this function is called with out explicitly supplying df or df2 arguments, 
+        it computes all pairwise distances between clones in the TCRrep.clone_df by default
+        
+        Parameters
+        ----------
+        df : DataFrame or None
+            clone_df (will specify rows of the distance matrix)
+        df2 : DataFrame or None
+            clone_df (will specify columns of the distance matrix)
+        radius : int
+            The maximum radius, where distance information is retained the scipy.sparse csr matrix.
+            All distances greater than this radius are not retained, saving memory.
+        chunk_size: int
+            How many rows to compute at a time. To manage memory computations are done on a chunk of rows at a time, 
+            and chunks are spread out over multiple cpus. See from tcrdist.breadth import get_safe_chunk if you want
+            to tune chunk size to the scale of the task.
+        """
         self._rect_distances(pw_dist_func=compute_pws_sparse, df=df, df2=df2, radius=radius, chunk_size=chunk_size)
     
     def _rect_distances(self, pw_dist_func, df = None, df2 = None, **kwargs):

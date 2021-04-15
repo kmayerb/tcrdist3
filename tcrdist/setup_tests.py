@@ -100,26 +100,45 @@ L = {"dash.zip":
             'url' : "https://www.dropbox.com/s/onr5lntmlm4fivi/ruggiero_human_beta_t.tsv.sampler.tsv.zip?dl=1"},
         'aws': { 
             'url' : None}
-        },
+    },
     "ImmunoSeq_MIRA_matched_tcrdist3_ready.zip":
         {'dropbox':{
             'url' : "https://www.dropbox.com/s/1vma8opj0yqts9e/ImmunoSeq_MIRA_matched_tcrdist3_ready.zip?dl=1"},
         'aws': { 
             'url' : None}
-        },
+    },
     "ImmunoSeq_MIRA_matched_tcrdist3_ready_2_files.zip":
         {'dropbox':{
             'url' : "https://www.dropbox.com/s/qrjawanmrklts70/ImmunoSeq_MIRA_matched_tcrdist3_ready_2_files.zip?dl=1"},
         'aws': { 
             'url' : None}
-        },
+    },
     'bioRxiv_v2_metaclonotypes.tsv.zip':
         {'dropbox':{
             'url' : "https://www.dropbox.com/s/hpt1ropv7u02eqr/bioRxiv_v2_metaclonotypes.tsv.zip?dl=1"},
         'aws': { 
             'url' : None}
-        }
+    },
+    'ImmunoSEQhsTCRBV4b_tcrdist3.zip':
+        {'dropbox':{
+            'url' : "https://www.dropbox.com/s/22iyel9uyzy7zyq/ImmunoSEQhsTCRBV4b_tcrdist3.zip?dl=1"},
+        'aws': { 
+            'url' : None}
+    },
+    '2021-04-02-Release_v2.1_metaclonotypes_concise.tsv.zip':
+        {'dropbox':{
+         'url': "https://www.dropbox.com/s/6to8fsga8k5twdr/2021-04-02-Release_v2.1_metaclonotypes_concise.tsv.zip?dl=1"},
+         'aws':{
+            'url' : None}
+    },
+    '2021-04-02-Release_v2.1_TCRs_concise_covid_only.tsv.zip':
+        {'dropbox' : {
+            'url' : "https://www.dropbox.com/s/60i0reiv7utr8hw/2021-04-02-Release_v2.1_TCRs_concise_covid_only.tsv.zip?dl=1"},
+         'aws':{
+            'url' : None}
     }
+    }
+    
 
 def list_available_zip_files():
     """
@@ -143,7 +162,7 @@ def get_url(zipfile, source = 'dropbox'):
     url = L[zipfile][source]['url']
     return url
 
-def download_and_extract_zip_file(zipfile, source = 'dropbox', dest = paths.path_to_base):
+def download_and_extract_zip_file(zipfile = None, source = 'dropbox', dest = paths.path_to_base):
     """ 
     Downloads and extracts a zip file to destination folder.
     Uses functions from **requests** and **Zipfile**, part of the Python Standard Library, to avoid the 
@@ -169,3 +188,37 @@ def download_and_extract_zip_file(zipfile, source = 'dropbox', dest = paths.path
         # Extract all the contents of zip file in different directory
         zipObj.extractall(dest)
 
+def download_and_extract_directly_from_url(zipfile, url,dest = paths.path_to_base):
+    """
+    Advanced feature allowing downloads from URLs not prespecified in list above.
+    
+    Users who want to add downloads to public URLs may find this useful; However, 
+    this is not recommended unless you want something not yet available in package test files. 
+    You can check list_available_zip_files() to see if the name and url of the file 
+    you want is already prespecified as a test or demonstration file. 
+    
+    Whereas if you use this direct option, filenames are not strictly enforced.
+    
+    Parameters
+    ----------
+    zipfile : str 
+        Name of zip file
+    url : str
+        User can directly provide the url they wish to use (advanced option)
+    dest : str
+        path where the files to be saved and unzipped
+    
+    Example
+    -------
+    from tcrdist.setup_tests import download_and_extract_directly_from_url
+    download_and_extract_directly_from_url(zipfile= "2021-04-02-Release_v2.1_TCRs_concise_covid_only.tsv.zip",
+        url = "https://www.dropbox.com/s/60i0reiv7utr8hw/2021-04-02-Release_v2.1_TCRs_concise_covid_only.tsv.zip?dl=1")
+    
+    """
+    r = requests.get(url) 
+    with open(zipfile,'wb') as f:
+        f.write(r.content)
+    with ZipFile(zipfile, 'r') as zipObj:
+        # Extract all the contents of zip file in different directory
+        zipObj.extractall(dest)
+    
