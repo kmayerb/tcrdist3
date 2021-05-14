@@ -74,6 +74,7 @@ def test_tcr_join_tcrdist():
   import pandas as pd
   from tcrdist.breadth import get_safe_chunk
   from tcrdist.repertoire import TCRrep
+  from tcrdist.join import join_by_dist
 
   tr20 = TCRrep(cell_df = v20df[['subject', 'cdr3_b_aa', 'v_b_gene', 'j_b_gene', 'bio_identity','protein_coordinate']].copy(),
       organism='human', 
