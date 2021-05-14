@@ -1,5 +1,5 @@
 import pytest
-
+import pandas as pd
 v20df = pd.read_csv('https://www.dropbox.com/s/wmc5wc752t782kq/MIRA_v21_covid_diagnosed_sars_cov2_ci_epitope_specific_tcrs.tsv?dl=1', sep = "\t").head(1000)
 v21df = pd.read_csv('https://www.dropbox.com/s/c3gfq1lu0xdefpy/MIRA_v20_covid_diagnosed_sars_cov2_ci_epitope_specific_tcrs.tsv?dl=1', sep = "\t").head(1000)
 
