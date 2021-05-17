@@ -82,7 +82,7 @@ def join_by_dist(
     if radius_list is None:
         nn = _neighbors_sparse_fixed_radius(csrmat = csrmat, radius = radius)
     else: 
-        assert len(radius_list) == left_df.shape[1]
+        assert len(radius_list) == left_df.shape[0]
         nn = _neighbors_sparse_variable_radius(csrmat = csrmat, radius_list = radius_list)
     left_index = list()
     right_index = list()
