@@ -52,6 +52,9 @@ tr.pw_alpha
 tr.pw_beta
 tr.pw_cdr3_a_aa
 tr.pw_cdr3_b_aa
+
+from tcrdist.public import _neighbors_fixed_radius
+_neighbors_fixed_radius(tr.pw_beta, 50)         
 ```
 
 ## Citing
