@@ -57,6 +57,37 @@ from tcrdist.public import _neighbors_fixed_radius
 _neighbors_fixed_radius(tr.pw_beta, 50)         
 ```
 
+### Sparse Matrix Representation 
+
+```python
+import pandas as pd
+from tcrdist.repertoire import TCRrep
+from tcrdist.breadth import get_safe_chunk
+
+df = pd.read_csv("dash.csv")
+tr = TCRrep(cell_df = df[['subject','epitope','count','v_b_gene','j_b_gene','cdr3_b_aa','cdr3_b_nucseq']], 
+            organism = 'mouse', 
+            chains = ['beta'], 
+            compute_distances = False)
+
+# Set to desired number of CPUs
+tr.cpus = 2
+
+# Identify a safe chunk size based on input data shape and target number of 
+# pairwise distance to be temporarily held in memory per node. 
+safe_chunk_size = get_safe_chunk(
+            tr.clone_df.shape[0], 
+            tr.clone_df.shape[0], 
+            target = 10**7) 
+
+tr.compute_sparse_rect_distances(
+        df = tr.clone_df, 
+        radius=50,
+        chunk_size = safe_chunk_size)
+
+print(tr.rw_beta)
+```
+
 ## Citing
 
 ##### TCR meta-clonotypes for biomarker discovery with tcrdist3: quantification of public, HLA-restricted TCR biomarkers of SARS-CoV-2 infection
