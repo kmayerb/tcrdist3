@@ -10,6 +10,7 @@ Quick Links
 * Get started with some videos and easy examples, with :ref:`welcome`.
 * For details on how to compute distances, see :ref:`tcrdistances`.
 * For details on discovering meta-clonotypes, see :ref:`metaclonotypes`.
+* For details on how to tabulate meta-clonotypes in a bulk repertoire, see :ref:`join`
 * For details on estimating liklihood of V(D)J recombination, see :ref:`pgen`.  
 * For details on making gene-usage plots, see :ref:`visualizing`.  
 * For details on converting Adaptive ImmunoSeq data, see :ref:`adaptive`.
@@ -354,7 +355,7 @@ Huang, H., Wang, C., Rubelt, F., Scriba, T. J. & Davis, M. M. Analyzing the Myco
    public
    pGen
    metaclonotypes
-   breadth
+   join
    tree
    influenza_example
    visualizing
