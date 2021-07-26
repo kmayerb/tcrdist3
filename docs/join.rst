@@ -9,7 +9,7 @@ Step-by-Step Example
 
 This page offers a step-by-step explanation of how to tabulate 
 meta-clonotype conformant clones in a bulk TCRb Repertoire using :py:func:`tcrdist.join.join_by_dist`.
-For copying and pastering, all the code discussed is contained in one block below (:ref:`full_example`).
+For copying into a new example, all the code discussed below is contained in a single block (:ref:`full_example`).
 
 .. code-block:: python
     :emphasize-lines: 8
