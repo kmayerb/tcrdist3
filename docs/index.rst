@@ -1,7 +1,7 @@
 tcrdist3
 ========
 
-`tcrdist3 <https://github.com/kmayerb/tcrdist3>`_ is an open-source python package that enables a broad array of T cell receptor sequence analyses. Some of the functionality and code is adapted from the original tcr-dist package which was released with the publication of Dash et al. `Nature (2017) <https://doi.org/10.1038/nature22383>`_. This package contains a new API for computing tcrdistance measures as well as new features for biomarker development, decribed in more detail in Mayer-Blackwell et al. `bioRxiv (2020) <https://www.biorxiv.org/content/10.1101/2020.12.24.424260v2>`_. The package has been expanded to include supprot for gamma-delta TCRs; it has also been recoded to increase CPU efficiency using numba, a high-performance just-in-time compiler.
+`tcrdist3 <https://github.com/kmayerb/tcrdist3>`_ is an open-source python package that enables a broad array of T cell receptor sequence analyses. Some of the functionality and code is adapted from the original tcr-dist package which was released with the publication of Dash et al. `Nature (2017) <https://doi.org/10.1038/nature22383>`_. This package contains a new API for computing tcrdistance measures as well as new features for biomarker development, described in more detail in Mayer-Blackwell et al. `bioRxiv (2020) <https://www.biorxiv.org/content/10.1101/2020.12.24.424260v2>`_. The package has been expanded to include support for gamma-delta TCRs; it has also been recoded to increase CPU efficiency using numba, a high-performance just-in-time compiler.
 
 
 Quick Links
@@ -10,8 +10,9 @@ Quick Links
 * Get started with some videos and easy examples, with :ref:`welcome`.
 * For details on how to compute distances, see :ref:`tcrdistances`.
 * For details on discovering meta-clonotypes, see :ref:`metaclonotypes`.
-* For details on how to tabulate meta-clonotypes in a bulk repertoire, see :ref:`join`
-* For details on estimating liklihood of V(D)J recombination, see :ref:`pgen`.  
+* For details on how to tabulate meta-clonotypes in a bulk repertoire, see :ref:`join`.
+* Left or inner join two sets of TCRs by distance, to find nearest neighbors see :py:func:`tcrdist.join.join_by_dist`.
+* For details on estimating likelihood of V(D)J recombination, see :ref:`pgen`.  
 * For details on making gene-usage plots, see :ref:`visualizing`.  
 * For details on converting Adaptive ImmunoSeq data, see :ref:`adaptive`.
 * For an example of making a D3 interactive TCRdist tree, see :ref:`d3_tree_example`.
@@ -91,7 +92,7 @@ Brief Background
 
 A human alpha/beta T cell repertoire is huge, comprised of an estimated 10^11 to 10^13 total T cells, with the process of V(D)J recombination capable of generating as many as 10^15 to 10^20 unique receptor sequences. With the wide adoption of high-throughput Adaptive Immune Receptor Repertoire sequencing (AIRR-seq) and single-cell sequencing technologies, immunologists are witnessing an explosion in the availability of TCR repertoire data.
 
-TCR functional diversity is concentrated in complementarity defining regions (CDRs) that contact antigen-presenting molecules and enable receptor docking and antigenic specificity. Although software tools exist for TCR repertoire analysis we have developed a modern Python package that improves upon a biochemically aware TCR distance metric that can effectively reduce the dimensionality of repertoire data, enable statistical analyses that efficiently handle the scale of and molecular diversity in AIRR-seq datasets. Tcrdist3 is designed as an interactive set of functional operations that can be interfaced with existing tools and used to construct flexible hypothesis-driven analysis pipelines within batch computing frameworks.
+TCR functional diversity is concentrated in complementarity defining regions (CDRs) that contact antigen-presenting molecules and enable receptor docking and antigenic specificity. Although software tools exist for TCR repertoire analysis we have developed a modern Python package that improves upon a biochemically aware TCR distance metric that can effectively reduce the dimensionality of repertoire data, enable statistical analyses that efficiently handle the scale of and molecular diversity in AIRR-seq datasets. tcrdist3 is designed as an interactive set of functional operations that can be interfaced with existing tools and used to construct flexible hypothesis-driven analysis pipelines within batch computing frameworks.
 
 Loading a TCR Dataset
 ---------------------
