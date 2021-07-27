@@ -20,6 +20,10 @@ def join_by_dist(
     are joined with TCRs in the Right-Dataframe, for up to `max_n` closest TCRs where 
     the paired distance is less that that specifed in the `radius` or `radius_list` arguments.
     
+    This is analogous to SQL type joins, except instead of matching keys, rows of the Left and Right 
+    DataFrames are merged based on TCRs that within a specified distance. Intutively, this 
+    permits fuzzy matching between similar TCRs. 
+    
     Crucially, one must provide a scipy.sparse csr matrix which can be pre-computed using. 
     :py:func:`tcrdist.rep_funcs.compute_pws_sparse` or 
     :py:func:`tcrdist.reperotire.TCRrep.compute_sparse_rect_distances`
@@ -40,13 +44,13 @@ def join_by_dist(
     right_df: pandas.DataFrame
         Clone DataFrame
     how : str
-        must be ['inner','left','outer'] 
+        Must be one of 'inner','left', or'outer', which determines the type of merge to be performed.
+
+        * 'inner' use intersection of top max_n neigbors between Left and Right DataFrames, droping rows where there is no match.
         
-        * 'inner' for intersection of matches between Left and Right DataFrames, droping rows where there is no match.
-        
-        * 'left' all (matched or unmatched) rows from left data.frame; i.e., it will produce NAs where there is no match in the Right DataFrame.
+        * 'left' use top max_n rows from Right DataFrame neighboring rows in from Left DataFrame or produce NA where a TCR in Left DataFrame has no neighbor in the Right DataFrame.
  
-        * 'outer' is a FULL OUTER JOIN combines the results of both Left and Right DataFrame. Outer join and returns all (matched or unmatched) rows.
+        * 'outer' a FULL OUTER JOIN combines top max_n neighbors of both left and right DataFrame, producing NAs where a TCR in either the Right or Left DataFrame has no neighbor in other DataFrame.
 
         * (hint: right joins are not possible, unless you switch input dataframe order and recompute the spase matrix)
         
