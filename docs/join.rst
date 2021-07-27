@@ -213,7 +213,7 @@ modeling.
         sum()[['count_bulk', 'templates_bulk']]
     
 
-.. code-block:: 
+.. code-block:: bash
 
                     count_bulk  templates_bulk  unique_clones
     protein_search
@@ -247,7 +247,7 @@ of 'protein_search'
         groupby('protein_coordinate_search').\
         sum()[['count_bulk', 'templates_bulk']]
 
-.. code-block::
+.. code-block:: bash
 
                                count_bulk  templates_bulk
     protein_coordinate_search
