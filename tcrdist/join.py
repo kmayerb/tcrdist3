@@ -16,22 +16,19 @@ def join_by_dist(
     sort_by_dist = True):
     """
     Join two sets of clonotypes, based on a distance threshold 
-    encoded in a sparse matrix. That is, all TCRs in the Left DataFrame, 
-    will be joined with all TCRs in the right dataframe <= radius sepecified.
-    Crucially you must provide a scipy.sparse csr matrix which 
-    can be pre-computed using. 
+    encoded in a sparse matrix. The TCRs in the Left-DataFrame, 
+    are joined with TCRs in the Right-Dataframe, for up to `max_n` closest TCRs where 
+    the paired distance is less that that specifed in the `radius` or `radius_list` arguments.
     
-    from tcrdist.rep_funcs import compute_pws_sparse
+    Crucially, one must provide a scipy.sparse csr matrix which can be pre-computed using. 
+    :py:func:`tcrdist.rep_funcs.compute_pws_sparse` or 
+    :py:func:tcrdist.reperotire.TCRrep.compute_sparse_rect_distances`
     
-    or 
+    It is also possible to join using a unique radius for each sequence in Left-DataFrame
+    using the `radius_list` argument instead of the fixed `radius` argument. 
+    However, if using a radius list, it must match the number of rows in the csrmat 
+    and the number of rows in Left DataFrame (i.e., len(radius_list) == left_df.shape[1] ).
     
-    from tcrdist.reperotire import TCRrep
-    TCRrep.compute_sparse_rect_distances
-    
-    You can also have a unique radius for each sequence in left DataFrame
-    using the radius_list argument, which will superseded the radius argument.
-    Recall that the radius list must equal the number of rows in the 
-    csrmat and rows in left DataFrame( i.e., len(radius_list) == left_df.shape[1] ).
     Parameters 
     ----------
     
@@ -43,10 +40,16 @@ def join_by_dist(
     right_df: pandas.DataFrame
         Clone DataFrame
     how : str
-        must be ['inner','left','outer'] (hint: if you want a right join tough luck, just switch input dataframe order)
-        'outer' is a FULL OUTER JOIN combines the results of both left and right outer joins and returns all (matched or unmatched) rows from the tables on both sides of the join clause
-        'inner' for intersection of matches between left and right data.frames
-        'left' all (matched or unmatched) rows from left data.frame; i.e., it will produce NAs for non matched rows in the left but not 
+        must be ['inner','left','outer'] 
+        
+        * 'outer' is a FULL OUTER JOIN combines the results of both Left and Right DataFrame. Outer join and returns all (matched or unmatched) rows.
+        
+        * 'inner' for intersection of matches between Left and Right DataFrames, droping rows where there is no match.
+        
+        * 'left' all (matched or unmatched) rows from left data.frame; i.e., it will produce NAs where there is no match in the Right DataFrame.
+ 
+        * (hint: right joins are not possible, unless you switch input dataframe order and recompute the spase matrix)
+        
     left_cols : list
         all columns to include in left_df
     right_cols : list
