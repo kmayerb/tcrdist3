@@ -22,7 +22,7 @@ def join_by_dist(
     
     Crucially, one must provide a scipy.sparse csr matrix which can be pre-computed using. 
     :py:func:`tcrdist.rep_funcs.compute_pws_sparse` or 
-    :py:func:tcrdist.reperotire.TCRrep.compute_sparse_rect_distances`
+    :py:func:`tcrdist.reperotire.TCRrep.compute_sparse_rect_distances`
     
     It is also possible to join using a unique radius for each sequence in Left-DataFrame
     using the `radius_list` argument instead of the fixed `radius` argument. 
@@ -42,12 +42,12 @@ def join_by_dist(
     how : str
         must be ['inner','left','outer'] 
         
-        * 'outer' is a FULL OUTER JOIN combines the results of both Left and Right DataFrame. Outer join and returns all (matched or unmatched) rows.
-        
         * 'inner' for intersection of matches between Left and Right DataFrames, droping rows where there is no match.
         
         * 'left' all (matched or unmatched) rows from left data.frame; i.e., it will produce NAs where there is no match in the Right DataFrame.
  
+        * 'outer' is a FULL OUTER JOIN combines the results of both Left and Right DataFrame. Outer join and returns all (matched or unmatched) rows.
+
         * (hint: right joins are not possible, unless you switch input dataframe order and recompute the spase matrix)
         
     left_cols : list
