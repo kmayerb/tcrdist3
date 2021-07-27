@@ -15,15 +15,18 @@ def join_by_dist(
     radius_list = None, 
     sort_by_dist = True):
     """
-    Join two sets of clonotypes, based on a distance threshold 
-    encoded in a sparse matrix. The TCRs in the Left-DataFrame, 
-    are joined with TCRs in the Right-Dataframe, for up to `max_n` closest TCRs where 
-    the paired distance is less that that specifed in the `radius` or `radius_list` arguments.
+    Join two sets of TCRs, based on a distance threshold 
+    encoded in a sparse matrix `csrmat`. 
     
-    This is analogous to SQL type joins, except instead of matching keys, rows of the Left and Right 
-    DataFrames are merged based on finding TCRs pairs between dataset that are within a 
-    specified distance of sequence divergence specified in `csrmat`. Intutively, this 
-    permits fuzzy matching between similar TCRs in any two TCR repertoire data sets.
+    The TCRs in the Left-DataFrame, are joined with TCRs in the Right-Dataframe, 
+    for up to `max_n` closest TCRs where the paired distance is less that 
+    that specifed in the `radius` or `radius_list` arguments.
+    
+    This is analogous to SQL type joins, except instead of matching common keys, the 
+    rows of the Left and Right DataFrames are merged based on finding simimlar TCRs within
+    a specified radius of sequence divergence. Intutively, this 
+    permits fuzzy matching between similar TCRs in any two 
+    TCR repertoire data sets.
     
     Crucially, one must provide a scipy.sparse csr matrix which can be pre-computed using. 
     :py:func:`tcrdist.rep_funcs.compute_pws_sparse` or 
