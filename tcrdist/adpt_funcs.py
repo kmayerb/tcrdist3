@@ -387,9 +387,9 @@ def bulk_adaptive_dataset_to_tcrdist3_clone_df( bulk_filename = None,
     bulk_filename : str 
         input adaptive file e.g., "KHBR20-00150_TCRB.tsv"
     minimum_file : str
-        minimum (CDR3,V,J,freq  only) output path e.g.,"KHBR20-00150_TCRB.tsv.tcrdist3.v_min.csv",
+        minimum (CDR3,V,J,freq, templates,  only) output path e.g.,"KHBR20-00150_TCRB.tsv.tcrdist3.v_min.csv",
     maximum_file : str
-        maximum (All CDRs, V,J, freq, subject,) output path "KHBR20-00150_TCRB.tsv.tcrdist3.v_max.csv",
+        maximum (All CDRs, V,J, freq, subject, and all field in clone_df) output path "KHBR20-00150_TCRB.tsv.tcrdist3.v_max.csv",
     organism = 'human',
     chains = ['beta'],
     epitope = None)
@@ -462,7 +462,7 @@ def bulk_adaptive_dataset_to_tcrdist3_clone_df( bulk_filename = None,
                 cpus = 1,
                 db_file = 'alphabeta_gammadelta_db.tsv')
 
-    tr.clone_df[['cdr3_b_aa','v_b_gene','j_b_gene','productive_frequency']].to_csv(minimum_file, sep = "\t", index = False)
+    tr.clone_df[['cdr3_b_aa','v_b_gene','j_b_gene','productive_frequency','templates']].to_csv(minimum_file, sep = "\t", index = False)
     tr.clone_df.to_csv(maximum_file, sep = "\t", index = False)
     
     return tr.clone_df.copy()
