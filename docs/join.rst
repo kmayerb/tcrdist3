@@ -170,7 +170,7 @@ First, we create new columns recording which sequence pairs meet certain meta-cl
 
 .. code-block:: python
 
-    df_join['RADIUS'] = df_join.apply(lambda x: x['radius_search'] <= x['dist'], axis = 1)
+    df_join['RADIUS'] = df_join.apply(lambda x: x['dist'] <= x['radius_search'], axis = 1)
     import re
     df_join['MOTIF'] = df_join.apply(lambda x: re.search(string = x['cdr3_b_aa_bulk'], pattern = x['regex_search']) is not None, axis = 1)
     df_join['RADIUSANDMOTIF'] =  df_join['RADIUS'] & df_join['MOTIF']
@@ -210,7 +210,7 @@ modeling.
         groupby(['rank_bulk']).\
         head(1).\
         groupby('protein_search').\
-        sum()[['count_bulk', 'templates_bulk']]
+        sum()[['count_bulk', 'templates_bulk','unique_clones']]
     
 
 .. code-block:: bash
@@ -218,15 +218,13 @@ modeling.
                     count_bulk  templates_bulk  unique_clones
     protein_search
     E                 0.000013               1              1
-    M                 0.000401              31             23
-    N                 0.001371             106             48
-    ORF1ab            0.002368             183            154
-    ORF3a             0.000725              56             42
-    ORF6              0.000013               1              1
-    ORF7a             0.000039               3              2
+    M                 0.000078               6              6
+    N                 0.001320             102             42
+    ORF1ab            0.000919              71             59
+    ORF3a             0.000414              32             27
+    ORF7a             0.000052               4              3
     ORF7b             0.000013               1              1
-    ORF8              0.000026               2              2
-    S                 0.001203              93             42
+    S                 0.001346             104             41
 
 
 Alternatively, now suppose we are interested tabulating the number 
@@ -251,11 +249,13 @@ of 'protein_search'
 
                                count_bulk  templates_bulk
     protein_coordinate_search
-    S 1056:1069                  0.000091               7
+    S 1056:1069                  0.000220              17
+    S 1192:1201                  0.000026               2
     S 265:278                    0.000789              61
-    S 55:69                      0.000259              20
-    S 83:98                      0.000013               1
-    S 860:875                    0.000052               4
+    S 55:69                      0.000246              19
+    S 706:723                    0.000013               1
+    S 83:98                      0.000026               2
+    S 860:875                    0.000026               2
 
 
 
@@ -331,7 +331,7 @@ Full Example
         max_n= 1000,
         radius = 36)
     
-    df_join['RADIUS'] = df_join.apply(lambda x: x['radius_search'] <= x['dist'], axis = 1)
+    df_join['RADIUS'] = df_join.apply(lambda x: x['dist'] <= x['radius_search'], axis = 1)
     import re
     df_join['MOTIF'] = df_join.apply(lambda x: re.search(string = x['cdr3_b_aa_bulk'],
         pattern = x['regex_search']) is not None, axis = 1)
@@ -346,20 +346,6 @@ Full Example
         groupby('protein_search').\
         sum()[['count_bulk', 'templates_bulk','unique_clones']]
 
-    """
-                    count_bulk  templates_bulk  unique_clones
-    protein_search
-    E                 0.000013               1              1
-    M                 0.000401              31             23
-    N                 0.001371             106             48
-    ORF1ab            0.002368             183            154
-    ORF3a             0.000725              56             42
-    ORF6              0.000013               1              1
-    ORF7a             0.000039               3              2
-    ORF7b             0.000013               1              1
-    ORF8              0.000026               2              2
-    S                 0.001203              93             42
-    """
 
 
 
