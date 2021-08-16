@@ -680,12 +680,14 @@ class TCRrep:
                 "cdr1_d_aa" : {'use_numba': True, 'distance_matrix': pw.matrices.tcr_nb_distance_matrix, 'dist_weight': 1, 'gap_penalty':4, 'ntrim':0, 'ctrim':0, 'fixed_gappos':True}}
       
 
-    def synthesize_vj_matched_background(self, ts  = None, chain = "beta"):
+    def synthesize_vj_matched_background(self, ts  = None, chain = "beta" , n = 100000):
         """
         tcrsampler : TCRsampler or None
        
         chain : str 
             'beta' (in future, TODO: add 'alpha')
+        n : int
+            number of sequences to synthesize and adjust
         TODO
         -------
         ONLY WORKS CURRENTLY FOR HUMAN BETA, VIA OLGA
@@ -697,7 +699,7 @@ class TCRrep:
                 ts = _default_sampler(organism = self.organism, chain = "beta")()
                 ts = get_stratified_gene_usage_frequency(ts = ts, replace = True) 
             if self.organism == "human":
-                vj_background = _synthesize_human_beta_vj_background(ts = ts, df = self.clone_df)
+                vj_background = _synthesize_human_beta_vj_background(ts = ts, df = self.clone_df, n = n)
             elif self.organism == "mouse":
                 vj_background = _synthesize_mouse_beta_vj_background(ts = ts, df = self.clone_df)
         # TODO: ADD OTHER OPTIONS
