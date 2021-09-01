@@ -1,4 +1,6 @@
 from scipy import sparse
+import numpy as np
+
 def add_sparse_pwd(a, b, neg1_fmt=True):
     """
     Add sparse pairwise distance matrices a and b.
