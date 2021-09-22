@@ -36,7 +36,7 @@ jobs:
         python -c "from tcrdist.setup_tests import *; download_and_extract_zip_file('dash.zip')"
         python -c "from tcrdist.setup_tests import *; download_and_extract_zip_file('sant.csv.zip')"
         pytest --cov=tcrdist/
-        coveralls --service=github
+
       
 
         
