@@ -398,7 +398,7 @@ def _synthesize_human_beta_vj_background(ts,fn = None, df = None, n = 100000):
     # Combine
     return df_vj_bkgd
 
-def _synthesize_human_alpha_vj_background(ts,fn = None, df = None):
+def _synthesize_human_alpha_vj_background(ts,fn = None, df = None, n=100000):
     """
     _build_vj_background
 
@@ -435,12 +435,12 @@ def _synthesize_human_alpha_vj_background(ts,fn = None, df = None):
     #   Note: <size> aregument should be greater than desired, because Olga can return none due to non-productive CDR3s.
     df_vj_bkgd = make_vj_matched_background(ts = ts,
         gene_usage_counter = gene_usage_counter,    
-        size = 150000, 
+        size = int(n * 1.5),
         recomb_type="VJ", 
         chain_folder = "human_T_alpha",
         cols = ['v_a_gene', 'j_a_gene', 'cdr3_a_aa'])
     # Sample to get the desired number of TCRs from teh v,j matched set
-    df_vj_bkgd = df_vj_bkgd.sample(100000, random_state = 1).reset_index(drop = True)
+    df_vj_bkgd = df_vj_bkgd.sample(n, random_state = 1).reset_index(drop = True)
     print("CALCULATE INVERSE PROBABILITY WEIGHT ADJUSTMENT.")
     # Calculate the invese weighting adjustmetn
     df_vj_bkgd['weights'] = calculate_adjustment(df = df_vj_bkgd, adjcol = "pVJ", cols = ['v_a_gene','j_a_gene'])
@@ -449,7 +449,7 @@ def _synthesize_human_alpha_vj_background(ts,fn = None, df = None):
     return df_vj_bkgd
 
 
-def _synthesize_mouse_beta_vj_background(ts, fn = None, df = None):
+def _synthesize_mouse_beta_vj_background(ts, fn = None, df = None, n=100000):
     """
     _build_vj_background
 
@@ -486,12 +486,12 @@ def _synthesize_mouse_beta_vj_background(ts, fn = None, df = None):
     #   Note: <size> aregument should be greater than desired, because Olga can return none due to non-productive CDR3s.
     df_vj_bkgd = make_vj_matched_background(ts = ts,
         gene_usage_counter = gene_usage_counter,    
-        size = 150000, 
+        size = int(n * 1.5),
         recomb_type="VDJ", 
         chain_folder = "mouse_T_beta",
         cols = ['v_b_gene', 'j_b_gene', 'cdr3_b_aa'])
     # Sample to get the desired number of TCRs from teh v,j matched set
-    df_vj_bkgd = df_vj_bkgd.sample(100000, random_state = 1).reset_index(drop = True)
+    df_vj_bkgd = df_vj_bkgd.sample(n, random_state = 1).reset_index(drop = True)
     print("CALCULATE INVERSE PROBABILITY WEIGHT ADJUSTMENT.")
     # Calculate the invese weighting adjustmetn
     df_vj_bkgd['weights'] = calculate_adjustment(df = df_vj_bkgd, adjcol = "pVJ")
@@ -499,7 +499,7 @@ def _synthesize_mouse_beta_vj_background(ts, fn = None, df = None):
     # Combine
     return df_vj_bkgd
 
-def _synthesize_mouse_alpha_vj_background(ts, fn = None, df = None):
+def _synthesize_mouse_alpha_vj_background(ts, fn = None, df = None, n=100000):
     """
     _build_vj_background
 
@@ -536,12 +536,12 @@ def _synthesize_mouse_alpha_vj_background(ts, fn = None, df = None):
     #   Note: <size> aregument should be greater than desired, because Olga can return none due to non-productive CDR3s.
     df_vj_bkgd = make_vj_matched_background(ts = ts,
         gene_usage_counter = gene_usage_counter,    
-        size = 150000, 
+        size = int(n * 1.5),
         recomb_type="VJ", 
         chain_folder = "mouse_T_alpha",
         cols = ['v_a_gene', 'j_a_gene', 'cdr3_a_aa'])
     # Sample to get the desired number of TCRs from teh v,j matched set
-    df_vj_bkgd = df_vj_bkgd.sample(100000, random_state = 1, replace = True).reset_index(drop = True)
+    df_vj_bkgd = df_vj_bkgd.sample(n, random_state = 1, replace = True).reset_index(drop = True)
     print("CALCULATE INVERSE PROBABILITY WEIGHT ADJUSTMENT.")
     print(df_vj_bkgd)
     # Calculate the invese weighting adjustmetn
