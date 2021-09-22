@@ -701,7 +701,7 @@ class TCRrep:
             if self.organism == "human":
                 vj_background = _synthesize_human_beta_vj_background(ts = ts, df = self.clone_df, n = n)
             elif self.organism == "mouse":
-                vj_background = _synthesize_mouse_beta_vj_background(ts = ts, df = self.clone_df)
+                vj_background = _synthesize_mouse_beta_vj_background(ts = ts, df = self.clone_df, n = n)
         # TODO: ADD OTHER OPTIONS
         elif chain == "alpha":
             if ts is None:
@@ -709,10 +709,10 @@ class TCRrep:
                 ts = get_stratified_gene_usage_frequency(ts = ts, replace = True) 
             if self.organism == "human":
                 #raise ValueError("TODO: FUTURE VERSIONS NEED ALPHA(HUMAN)")
-                vj_background = _synthesize_human_alpha_vj_background(ts = ts, df = self.clone_df)
+                vj_background = _synthesize_human_alpha_vj_background(ts = ts, df = self.clone_df, n = n)
             elif self.organism == "mouse":
                 #raise ValueError("TODO: FUTURE VERSIONS NEED ALPHA(MOUSE)")
-                vj_background = _synthesize_mouse_alpha_vj_background(ts = ts, df = self.clone_df)
+                vj_background = _synthesize_mouse_alpha_vj_background(ts = ts, df = self.clone_df, n = n)
         return vj_background   
 
 
