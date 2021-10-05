@@ -10,7 +10,7 @@ RUN pip3 install python-levenshtein==0.12.0
 RUN pip3 install pytest 
 RUN pip3 install jedi==0.17.2
 RUN pip3 install ipython==7.18.1 
-RUN pip3 install git+https://github.com/kmayerb/tcrdist3.git@0.1.9
+RUN pip3 install git+https://github.com/kmayerb/tcrdist3.git@0.2.2
 RUN pip3 install requests
 RUN python3 -c "from tcrdist.setup_tests import *; download_and_extract_zip_file('dash.zip', dest = '.')"
 
