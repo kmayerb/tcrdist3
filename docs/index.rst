@@ -24,7 +24,7 @@ Installation
 
 .. code-block:: none
 
-   pip install git+https://github.com/kmayerb/tcrdist3.git@0.2.0
+   pip install git+https://github.com/kmayerb/tcrdist3.git@0.2.2
 
 OSX Install Tips
 ++++++++++++++++
