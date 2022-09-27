@@ -337,11 +337,11 @@ def bkgd_cntl_nn2( tr,
         rs = centers_df['regex'].to_list()
         bkgd_cdr3 = tr_background.clone_df[cdr3_col].to_list()
         target_cdr3 = tr.clone_df[cdr3_col].to_list()
-        target_regex_hits = parmap.map(_multi_regex, rs, bkgd_cdr3 = target_cdr3 , pm_pbar = True, pm_processes = ncpus)
-        target_re_hits = [np.sum([1 if (x is not None) else 0 for x in l]) for l in target_regex_hits ]
+        target_re_hits = parmap.map(_multi_regex, rs, bkgd_cdr3 = target_cdr3 , pm_pbar = True, pm_processes = ncpus) #modified _multi_regex() returns np.sum
+        #target_re_hits = [np.sum([1 if (x is not None) else 0 for x in l]) for l in target_regex_hits ]
         centers_df['target_re_hits'] = target_re_hits
-        bkgd_regex_hits = parmap.map(_multi_regex, rs, bkgd_cdr3 = bkgd_cdr3, pm_pbar = True, pm_processes = ncpus)
-        bkgd_re_hits = [np.sum([1 if (x is not None) else 0 for x in l]) for l in bkgd_regex_hits]
+        bkgd_re_hits = parmap.map(_multi_regex, rs, bkgd_cdr3 = bkgd_cdr3, pm_pbar = True, pm_processes = ncpus) #modified _multi_regex() returns np.sum
+        #bkgd_re_hits = [np.sum([1 if (x is not None) else 0 for x in l]) for l in bkgd_regex_hits]
         centers_df['bkgd_re_hits'] = bkgd_re_hits
         bkgd_weighted_re_hits = [np.sum(np.array([1 if (x is not None) else 0 for x in l]) * (weights)) for l in bkgd_regex_hits] 
         # Compute Relative Rates
