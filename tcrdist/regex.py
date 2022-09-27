@@ -141,8 +141,8 @@ def _multi_regex(regex , bkgd_cdr3):
 	Search a regex pattern in a list of string 
 	"""
 	result = [re.search(string = s, pattern = regex ) for s in bkgd_cdr3] 
-	result = [1 if (x is not None) else None for x in result]
-	return result
+	result = [1 if (x is not None) else 0 for x in result] #produces 0 rather than None
+	return np.sum(result) #modified to return the sum, as no need to store the whole array in RAM
 
 def _index_to_seqs(ind, clone_df, col):
 	dfnode   = clone_df.iloc[ind,].copy()
