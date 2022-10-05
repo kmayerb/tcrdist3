@@ -334,19 +334,18 @@ def bkgd_cntl_nn2( tr,
         print("TESTING REGEX FOR EACH META-CLONOTYPE")
         # THIS INVOLVES TESTING REGEX AGAINST TARGET AND BACKGROUND
         # Test regex against backgound
-        rs = centers_df['regex'].to_list()
+        rs = [re.comp(r) for r in centers_df['regex'].to_list()]
         bkgd_cdr3 = tr_background.clone_df[cdr3_col].to_list()
         target_cdr3 = tr.clone_df[cdr3_col].to_list()
-        target_re_hits = parmap.map(_multi_regex, rs, bkgd_cdr3 = target_cdr3 , pm_pbar = True, pm_processes = ncpus) #modified _multi_regex() returns np.sum
-        #target_re_hits = [np.sum([1 if (x is not None) else 0 for x in l]) for l in target_regex_hits ]
-        centers_df['target_re_hits'] = target_re_hits
-        bkgd_re_hits = parmap.map(_multi_regex, rs, bkgd_cdr3 = bkgd_cdr3, pm_pbar = True, pm_processes = ncpus) #modified _multi_regex() returns np.sum
-        #bkgd_re_hits = [np.sum([1 if (x is not None) else 0 for x in l]) for l in bkgd_regex_hits]
-        centers_df['bkgd_re_hits'] = bkgd_re_hits
-        bkgd_weighted_re_hits = [np.sum(np.array([1 if (x is not None) else 0 for x in l]) * (weights)) for l in bkgd_regex_hits] 
+        target_re_hits = parmap.map(_multi_regex_precompiled, rs, bkgd_cdr3 = target_cdr3 , pm_pbar = True, pm_processes = ncpus) #modified _multi_regex() returns tuple
+        centers_df['target_re_hits'] = [h[0] for h in target_re_hits]
+        bkgd_re_hits = parmap.map(_multi_regex_precompiled, rs, bkgd_cdr3 = bkgd_cdr3, pm_pbar = True, pm_processes = ncpus) #modified _multi_regex() returns tuple
+        centers_df['bkgd_re_hits'] = [h[0] for h in bkgd_re_hits]
+        centers_df['bkgd_re_weighted_hits']  = [h[1] for h in bkgd_re_hits]
+        rm(target_re_hits)
+        rm(bkgd_re_hits)
         # Compute Relative Rates
         print("COMPUTING WEIGHTED ODDS RATIO, RELATIVE RATES FOR EACH REGEX")
-        centers_df['bkgd_re_weighted_hits'] = bkgd_weighted_re_hits 
         centers_df['TR_re'] = [compute_rate(pos=r['target_re_hits'], neg=n1-r['target_re_hits']) for i,r in centers_df.iterrows()]
         centers_df['BR_re_weighted'] = [compute_rate(pos=r['bkgd_re_weighted_hits'], 
                                      neg=n2-r['bkgd_re_weighted_hits']) for i,r in centers_df.iterrows()]
