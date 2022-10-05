@@ -10,7 +10,7 @@ import parmap
 import scipy.sparse
 import warnings
 #from tcrdist.repertoire import TCRrep
-from tcrdist.regex import _index_to_regex_str, _index_to_seqs, _multi_regex 
+from tcrdist.regex import _index_to_regex_str, _index_to_seqs, _multi_regex_precompiled 
 from scipy.stats import chi2_contingency
 
 
