@@ -136,13 +136,19 @@ def _index_to_regex_str(ind,
 	return(regex_str)
 
 
-def _multi_regex(regex , bkgd_cdr3):
+def _multi_regex_precompiled(regex , bkgd_cdr3, weights=None):
 	"""
-	Search a regex pattern in a list of string 
+	Search a pre-compiled regex pattern in a list of strings
+	Optionally applies weights
+	Returns a tuple giving the number of hits and sums of the weights of the hits
 	"""
-	result = [re.search(string = s, pattern = regex ) for s in bkgd_cdr3] 
-	result = [1 if (x is not None) else 0 for x in result] #produces 0 rather than None
-	return np.sum(result) #modified to return the sum, as no need to store the whole array in RAM
+	result = [regex.search(string = s) for s in bkgd_cdr3]
+	result = np.array([True if (x is not None) else False for x in result])
+	if type(weights) is type(None):
+		return(np.sum(result),None)
+	else:
+		return(np.sum(result),np.sum(weights[result]))
+
 
 def _index_to_seqs(ind, clone_df, col):
 	dfnode   = clone_df.iloc[ind,].copy()
