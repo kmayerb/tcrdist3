@@ -24,5 +24,5 @@ def test_example_10():
   
     tr.compute_rect_distances( df = tr.clone_df, df2 = tr2.clone_df) #(3)
 
-    assert tr.rw_alpha.shape == (10,1924) 
-    assert tr.rw_beta.shape  == (10,1924)
+    assert tr.rw_alpha.shape == (10,1920) 
+    assert tr.rw_beta.shape  == (10,1920)
