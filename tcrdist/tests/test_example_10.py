@@ -17,7 +17,7 @@ def test_example_10():
                 chains = ['alpha','beta'], 
                 compute_distances = False)
     df2 = pd.read_csv("dash.csv")
-    tr2 = TCRrep(cell_df = df,               #(2)
+    tr2 = TCRrep(cell_df = df2,               #(2)
                 organism = 'mouse', 
                 chains = ['alpha','beta'], 
                 compute_distances = False)
