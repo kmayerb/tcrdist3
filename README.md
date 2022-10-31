@@ -29,7 +29,7 @@ pip install git+https://github.com/kmayerb/tcrdist3.git@0.2.2
 ```
 docker pull quay.io/kmayerb/tcrdist3:0.2.2
 ```
-## User Contributed Colab Notebooks Examples Using tcrdist3
+## User-Contributed Colab Notebook Examples Using tcrdist3
 
 ### 1. Example K Nearest Neighbor Classification using tcrdist3 
 
