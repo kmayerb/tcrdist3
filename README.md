@@ -29,9 +29,13 @@ pip install git+https://github.com/kmayerb/tcrdist3.git@0.2.2
 ```
 docker pull quay.io/kmayerb/tcrdist3:0.2.2
 ```
+## User-Contributed Colab Notebook Examples Using tcrdist3
 
+### 1. Example K Nearest Neighbor Classification using tcrdist3 
 
-## Documentation
+[![open in colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1boqbGZjJqt_di3-3ygatHO-G4L7t4rY-?usp=sharing) (Author: Liel Cohen-Lavi). This notebook illustrates how to integrate tcrdist3 with scikit-learn's implementation of K Nearest Neighbor classification. TCRdist-based KNN classification performance on a set of labeled receptors is assessed with cross-validation or training/test splits   This simple method is proposed as a quickly implementable benchmark for the performance of more computationally intensive TCR-epitope specificity prediction approaches. 
+
+## Package Documentation
 [![Documentation Status](https://readthedocs.org/projects/tcrdist3/badge/?version=latest)](https://tcrdist3.readthedocs.io/en/latest/?badge=latest)
 
 More documentation can be found at [tcrdist3.readthedocs](https://tcrdist3.readthedocs.io/).
