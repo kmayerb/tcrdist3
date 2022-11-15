@@ -1,6 +1,5 @@
 import os
 import random
-import dill
 import re
 import parmap
 import timeit
@@ -17,7 +16,6 @@ def test_bkgd_cntl_nn2_setup():
 	random.seed(1)
 	
 	tcrdist_path        =   os.path.split(getfile(TCRrep))[0]
-	output_stem         =   'm60_test_main_version'
 	
 	fn_background       =   'm60_bkgd_test_input.csv'
 	fn_background       =   os.path.join(tcrdist_path, 'data', 'covid19', fn_background)
@@ -49,22 +47,9 @@ def test_bkgd_cntl_nn2_setup():
 	
 	assert tr.rw_beta.shape[0] == tr.clone_df.shape[0]
 	
-	with open('{}.tr.dill'.format(output_stem),'wb') as handle:
-		dill.dump(tr,handle)
-	
-	with open('{}.tr_background.dill'.format(output_stem),'wb') as handle:
-		dill.dump(tr_background,handle)
+	return(tr,tr_background)
 
-
-def test_bkgd_cntl_nn2(ncpus=2):
-	output_stem         =   'm60_test_main_version'
-	
-	with open('{}.tr.dill'.format(output_stem),'rb') as handle:
-		tr = dill.load(handle)
-	
-	with open('{}.tr_background.dill'.format(output_stem),'rb') as handle:
-		tr_background = dill.load(handle)
-	
+def test_bkgd_cntl_nn2(tr,tr_background,ncpus=2):
 	centers_df = bkgd_cntl_nn2(	tr = tr, 
 								tr_background = tr_background,
 								ctrl_bkgd = 10**-6, 
@@ -74,20 +59,9 @@ def test_bkgd_cntl_nn2(ncpus=2):
 								thresholds = [x for x in range(0,50,2)], 
 								generate_regex = True, 
 								test_regex = True)
-	
-	out_fn_center_df		     = '{}.bkgd_cntl_nn2.centers_df.csv'.format(output_stem)
-	centers_df.to_csv(out_fn_center_df, index = False)
+	return(centers_df)
 
-
-def test_bkgd_cntl_nn3(ncpus=2):	
-	output_stem         =   'm60_test_main_version'
-	
-	with open('{}.tr.dill'.format(output_stem),'rb') as handle:
-		tr = dill.load(handle)
-	
-	with open('{}.tr_background.dill'.format(output_stem),'rb') as handle:
-		tr_background = dill.load(handle)
-	
+def test_bkgd_cntl_nn3(tr,tr_background,ncpus=2):	
 	centers_df = bkgd_cntl_nn3(	tr = tr, 
 								tr_background = tr_background,
 								ctrl_bkgd = 10**-6, 
@@ -97,24 +71,14 @@ def test_bkgd_cntl_nn3(ncpus=2):
 								thresholds = [x for x in range(0,50,2)], 
 								generate_regex = True, 
 								test_regex = True)
-	
-	out_fn_center_df			= '{}.bkgd_cntl_nn3.centers_df.csv'.format(output_stem)
-	centers_df.to_csv(out_fn_center_df, index = False)
+	return(centers_df)
 
-
-def compare_bkgd_cntl_outputs():
-    output_stem     =   'm60_test_main_version'
-    centers_df_old = pd.read_csv('{}.bkgd_cntl_nn2.centers_df.csv'.format(output_stem))
-    centers_df_new  = pd.read_csv('{}.bkgd_cntl_nn3.centers_df.csv'.format(output_stem))
-    assert(centers_df_old.round(6).equals(centers_df_new.round(6))) #rounding to dodge floating point error
-
-
-test_bkgd_cntl_nn2_setup()
-test_bkgd_cntl_nn2()
-test_bkgd_cntl_nn3()
+tr,tr_background = test_bkgd_cntl_nn2_setup()
+centers_df_nn2 = test_bkgd_cntl_nn2(tr,tr_background)
+centers_df_nn3 = test_bkgd_cntl_nn3(tr,tr_background)
 
 #now compare the output - AssertionError if they don't match
-compare_bkgd_cntl_outputs()
+assert(centers_df_nn2.round(6).equals(centers_df_nn3.round(6))) #rounding to dodge floating point error
 
 
 
