@@ -199,7 +199,7 @@ def member_summ(res_df, clone_df, key_col = 'neighbors_i', count_col='count', ad
         gby = m.groupby(col)[count_col].agg(np.sum)
         gby = 100 * gby / gby.sum()
         gby = gby.sort_values(ascending=False)
-        out = ', '.join(['%s (%2.1f%%)' % (idx, v) for idx,v in gby.iteritems()][:N])
+        out = ', '.join(['%s (%2.1f%%)' % (idx, v) for idx,v in gby.items()()][:N])
         return out
     
     split = []

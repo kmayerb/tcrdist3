@@ -312,10 +312,10 @@ def plot_pairings(cell_df, cols, count_col=None, use_color_gradients=True, other
         a1pixels = {}
         yleft = yspacer + top_margin
         """Nested loops over the alleles (a0, a1) in the pair of columns, r0, r1"""
-        for a0, a0count in counts[r0].iteritems():
+        for a0, a0count in counts[r0].items()():
             y0_right = yspacer + top_margin
             a0color = r0colors[a0]
-            for a1, a1count in counts[r1].iteritems():
+            for a1, a1count in counts[r1].items()():
                 a1color = r1colors[a1]
                 vj = (a0, a1)
                 a1color = r1colors[a1]
@@ -407,7 +407,7 @@ def plot_pairings(cell_df, cols, count_col=None, use_color_gradients=True, other
 
             x = x0 + jj*(flat_band + middle_band)
             ystart = yspacer + top_margin
-            for a, acount in counts[r].iteritems():
+            for a, acount in counts[r].items()():
                 if acount*ypixel_scale < min_height_for_labels:
                     #print(acount * ypixel_scale)
                     break
