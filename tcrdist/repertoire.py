@@ -830,5 +830,5 @@ def _deduplicate(cell_df, index_cols):
     Use index_cols to group by and group identical entries. The input DataFrame
     must have a column 'count'.
     """
-    clones = cell_df.groupby(index_cols)['count'].agg(np.sum).reset_index()
+    clones = cell_df.groupby(index_cols)['count'].agg('sum').reset_index()
     return clones

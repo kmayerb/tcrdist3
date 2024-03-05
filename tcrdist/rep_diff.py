@@ -196,10 +196,10 @@ def member_summ(res_df, clone_df, key_col = 'neighbors_i', count_col='count', ad
     summ_df = member_summ(res_df, clone_df)
     res_df = res_df.join(summ_df, how='left')"""
     def _top_N_str(m, col, count_col, N):
-        gby = m.groupby(col)[count_col].agg(np.sum)
+        gby = m.groupby(col)[count_col].agg('sum')
         gby = 100 * gby / gby.sum()
         gby = gby.sort_values(ascending=False)
-        out = ', '.join(['%s (%2.1f%%)' % (idx, v) for idx,v in gby.items()()][:N])
+        out = ', '.join(['%s (%2.1f%%)' % (idx, v) for idx, v in gby.items()][:N])
         return out
     
     split = []

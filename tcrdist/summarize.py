@@ -239,7 +239,7 @@ def _top_N_str(m, col, count_col, N):
     >>> _top_N_str(df, col = 'catvar', count_col ='numvar', N=2)
     'b (88.6%), a (8.8%)'
     """
-    gby = m.groupby(col)[count_col].agg(np.sum)
+    gby = m.groupby(col)[count_col].agg('sum')
     gby = 100 * gby / gby.sum()
     gby = gby.sort_values(ascending=False)
     out = ', '.join(['%s (%2.1f%%)' % (idx, v) for idx,v in gby.items()()][:N])
@@ -315,7 +315,7 @@ def member_summ(res_df, clone_df, key_col = 'neighbors_i', count_col='count', ad
     summ_df = member_summ(res_df, clone_df)
     res_df = res_df.join(summ_df, how='left')"""
     def _top_N_str(m, col, count_col, N):
-        gby = m.groupby(col)[count_col].agg(np.sum)
+        gby = m.groupby(col)[count_col].agg('sum')
         gby = 100 * gby / gby.sum()
         gby = gby.sort_values(ascending=False)
         out = ', '.join(['%s (%2.1f%%)' % (idx, v) for idx,v in gby.items()()][:N])
