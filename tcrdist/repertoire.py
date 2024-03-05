@@ -763,8 +763,8 @@ class TCRrep:
         ------
         ValueError if invalid organism is passed to TCRrep __init__
         """
-        if self.organism not in ["human", "mouse"]:
-            raise ValueError("organism must be 'mouse' or 'human'")
+        if self.organism not in ["human", "mouse", "rhesus"]:
+            raise ValueError("organism must be 'mouse', 'human', or 'rhesus' ")
     
     def _validate_chains(self):
         """
