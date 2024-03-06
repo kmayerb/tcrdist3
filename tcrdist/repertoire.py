@@ -110,7 +110,7 @@ class TCRrep:
     def __init__(self,
                  organism          = "mouse",
                  chains            = ['alpha', 'beta'],
-                 db_file           = 'alphabeta_gammadelta_db.tsv',
+                 db_file           = 'combo_xcr_2024-03-05.tsv',
                  archive_name      = 'tcrdist3.archive',
                  blank             = False,
                  cell_df           = None,
