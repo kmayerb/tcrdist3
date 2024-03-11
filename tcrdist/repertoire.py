@@ -110,7 +110,7 @@ class TCRrep:
     def __init__(self,
                  organism          = "mouse",
                  chains            = ['alpha', 'beta'],
-                 db_file           = 'alphabeta_gammadelta_db.tsv',
+                 db_file           = 'combo_xcr_2024-03-05.tsv',
                  archive_name      = 'tcrdist3.archive',
                  blank             = False,
                  cell_df           = None,
@@ -763,8 +763,8 @@ class TCRrep:
         ------
         ValueError if invalid organism is passed to TCRrep __init__
         """
-        if self.organism not in ["human", "mouse"]:
-            raise ValueError("organism must be 'mouse' or 'human'")
+        if self.organism not in ["human", "mouse", "rhesus"]:
+            raise ValueError("organism must be 'mouse', 'human', or 'rhesus'")
     
     def _validate_chains(self):
         """
@@ -830,5 +830,5 @@ def _deduplicate(cell_df, index_cols):
     Use index_cols to group by and group identical entries. The input DataFrame
     must have a column 'count'.
     """
-    clones = cell_df.groupby(index_cols)['count'].agg(np.sum).reset_index()
+    clones = cell_df.groupby(index_cols)['count'].agg('sum').reset_index()
     return clones

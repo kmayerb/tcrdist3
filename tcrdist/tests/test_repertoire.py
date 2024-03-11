@@ -205,7 +205,7 @@ def test_validate_organism():
         tr = TCRrep(
             organism          = "hamster",
             chains            = ["alpha", "beta"])
-    assert str(info.value) == "organism must be 'mouse' or 'human'"
+    assert str(info.value) == "organism must be 'mouse', 'human', or 'rhesus'"
 
 def test_validate_chains():
     """Test that incorrect chain raise causes ValueError"""
