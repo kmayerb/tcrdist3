@@ -26,7 +26,7 @@ Column names reflect the chain under investigation.
 
 Tcrdist3 only requires 3 input columns for single chain analysis (i.e., for beta chain `cdr3_b_aa` and `v_b_gene`, `j_b_gene`) and 6 columns for paired chain analysis (i.e., `cdr3_b_aa`, `v_b_gene`, `j_b_gene`, `cdr3_a_aa`,  `v_a_gene`, and `j_a_gene`). 
 
-The columns 'cdr3_a_nucseq', 'cdr3_b_nucseq are optional, but useful to include if you wish to prevent aggregation of multiple geneically distinct clones identical at the amino acid level (see critical information below for more information).  
+The columns 'cdr3_a_nucseq', 'cdr3_b_nucseq are optional, but useful to include if you wish to prevent aggregation of multiple genetically distinct clones identical at the amino acid level (see critical information below for more information).  
 
    
 For v_x_gene, include the full IMGT gene name and allele (e.g., TRBV1*01). If you don’t know the allele, use *01. But an allele must be present to infer v_b_genes based on matching one of the id rows in this `table <https://github.com/kmayerb/tcrdist3>`_.
