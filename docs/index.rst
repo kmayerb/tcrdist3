@@ -33,7 +33,7 @@ If you are having trouble installing on OSX, here are some additional steps that
 users have done to install tcrdist3 on OS X from scratch:
 
 1. Install Homebrew: https://brew.sh (copy the command from the webpage into Terminal app)
-2. In Terminal intall the following (or parasail may not build): 
+2. In Terminal install the following (or parasail may not build): 
 
 .. code-block:: none
 
