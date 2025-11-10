@@ -50,7 +50,7 @@ df = pd.read_csv("dash.csv")
 tr = TCRrep(cell_df = df, 
             organism = 'mouse', 
             chains = ['alpha','beta'], 
-            db_file = 'alphabeta_gammadelta_db.tsv')
+            db_file = 'combo_xcr_2024-03-05.tsv')
 
 tr.pw_alpha
 tr.pw_beta
