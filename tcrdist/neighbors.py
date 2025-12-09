@@ -7,10 +7,11 @@ This module contas
 import numpy as np 
 import pandas as pd
 import parmap
+import re
 import scipy.sparse
 import warnings
 #from tcrdist.repertoire import TCRrep
-from tcrdist.regex import _index_to_regex_str, _index_to_seqs, _multi_regex 
+from tcrdist.regex import _index_to_regex_str, _index_to_seqs, _multi_regex, _multi_regex_weighted
 from scipy.stats import chi2_contingency
 
 
@@ -365,6 +366,280 @@ def bkgd_cntl_nn2( tr,
 
     return centers_df #, thresholds, ecdfs
 
+
+#this version modified to use the new _multi_regex_weighted() function, which saves memory by summing hits (and 
+#   weighted hits) with the function, so that the full lists of regex hits do not have to be stored in memory at the
+#   same time.  It also takes a precompiled regex expression (for speed).
+def bkgd_cntl_nn3( tr, 
+                   tr_background,
+                   weights = None,
+                   ctrl_bkgd = 10**-5, 
+                   col = 'cdr3_b_aa',
+                   add_cols = ['v_b_gene', 'j_b_gene'],
+                   pw_mat_str = 'pw_beta',
+                   rw_mat_str = 'rw_beta',
+                   ncpus = 4,
+                   include_seq_info= True,
+                   thresholds = [x for x in range(0,50,2)],
+                   generate_regex = True,
+                   test_regex = True,
+                   beta_re = 1,
+                   beta_dist = 1,
+                   forced_max_radius = None):   
+    
+    """
+    bkgd_cntl_nn3 stands for background controlled nearest neighbors. 
+    tr : tcrdist.repertoire.TCRrep
+        TCRrep instance with clone_df of target data
+    tr_background : tcrdist.repertoire.TCRrep
+        TCRrep instance with clone_df of bulk data
+    ctrl_bkgd : float
+        Default is 2*10**-5, the acceptable level of background neighbror 
+    col : str
+        Default is cdr3_b_aa', the column containing CDR3 string
+    add_cols  : list
+        Extra columns from clone_df to include in centers_df['v_b_gene', 'j_b_gene'],
+    ncpus : int
+        e.g., 4, passed to pm_processes when using parmap   
+    include_seq_info : bool 
+        If True, returned DataFrame <centers_df> will include ['target_neighbors', 'target_seqs',
+        'background_neighbors','background_seqs','background_v', 'background_j']
+        as columns in centers_df DataFrame returned by this function. 
+        This allows for inspection of sequences found in both the antigen enriched repertoire and supplied
+        background.
+    thresholds : list
+        Default is [x for x in range(0,50,2)] indicating tcrdist thresholds to compute 
+        a ecdf over.
+    generate_regex : bool
+        if True, generate a regex pattern capturing most if not all of 
+        sequences in the neigbhorhood
+    test_regex = True
+        if True, test regex against both CDR3 in target and background
+    beta_re : int or float
+        for joint chi2, weight for regex based portion
+    beta_dist : int of float
+        for joint chi2, weight for distance based portion
+    forced_max_radius : int or None
+        if not None, radius cannot exceed this amount
+    
+    Returns 
+    -------
+    centers_df: DataFrame
+    
+    Notes
+    -----
+    The logic behind this function is that we want to find radi that 
+    are appropriate for each TCR in a epitope-specific target set 
+    that control the frequency of finding neighbors in a background set. 
+    For instance, a TCR with common V gene usage and a high probabililty 
+    of generation CDR3, will potentially have many nieghbors in a 
+    pre-selection background set, whereas a TCR with rare gene usage 
+    and a low probability of generation CDR3 can acomodate a larger 
+    neighborhood radi. 
+    The result dataframe can be sorted to find TCRs that anchor 
+    a nieghborhood of TCRs including the most epitope specific
+    nieghbors. We hypothesis that these TCRs are more likely to serve as a useful 
+    biomarker for searching for biochemically similar TCRs in unlabeled
+    datasets. 
+    """ 
+    
+        # <cdr_col> usually 'cdr3_b_aa', we save this for later 
+    cdr3_col = str(col)
+        # <pw_mat> pairwise matrix, typically the network between antigen enriched clones
+    pw_mat = getattr(tr, pw_mat_str)# defaults to 'pw_beta',
+        # <rw_mat> rectangular matrix, typically the network betwen antigen enriched and bulk clones
+    rw_mat = getattr(tr, rw_mat_str)# defaults to 'rw_beta',
+        # remind the user if they are using sparse or dense matrices as input
+    print(f"PW MATRIX TYPE = {type(pw_mat)}")
+    print(f"RW MATRIX TYPE = {type(rw_mat)}")
+        # <max_radius> int describing the highest distances, only will be needed for sparse impementation
+        # <thresholds> array of thresholds radii to consider 
+    thresholds = np.unique(thresholds)
+    max_radius = thresholds.max() + 1
+        # <weights> inverse probability weights, if none provided assume all are one
+    if weights is None:
+        warnings.warn("No weights provided trying to use tr_background.clone_df.weights")
+        if 'weights' in tr_background.clone_df.columns:
+            warnings.warn("USING tr_background.clone_df.weights")
+            weights = tr_background.clone_df['weights']
+        else:
+            warnings.warn("SOMETHING IS PROBABLY WRONG!!!!. You don't have a 'weights' column in your tr_background clone_df, setting to 1, results could be biased if this data is V-J matched")
+            weights = np.ones(rw_mat.shape[1])
+    thresholds = np.unique(thresholds)
+        # for each TCR, we calculate a empirical cummulative 
+        # density function along a range of threshold radii
+    
+    from tcrdist.ecdf import distance_ecdf
+    thresholds, ecdfs2 = distance_ecdf(pwrect =rw_mat, 
+      thresholds = thresholds, 
+      weights= weights, 
+      pseudo_count=0, 
+      skip_diag = False, 
+      absolute_weight = True)
+    
+    ecdfs2 = [pd.Series(x, index = thresholds) for x in ecdfs2]
+    max_radi2 = [x[x<=ctrl_bkgd].last_valid_index() for x in ecdfs2]
+    # TO SOLVE NOTABLE BUG IN THE ABOVE LINE!! If a radius is None (the next line will fail, thus set Nones to 0.
+    max_radi2 = [x if (x is not None) else 0 for x in max_radi2]
+    
+    if forced_max_radius is not None:
+        max_radi2 = [min(x,forced_max_radius) for x in max_radi2]
+    
+    max_radi = max_radi2
+        # <target_hits> number of hits within the antigen enriched repertoire at the control radius 
+    if scipy.sparse.issparse(pw_mat):
+        # sparse implementation, relies on _todense_row (see above in this module)
+        target_hits    = [np.sum(_todense_row(pw_mat[i,:], max_radius )[0] <= t) for t,i in zip(max_radi, range(0,pw_mat.shape[0]))]
+    else: 
+        target_hits    = [np.sum(pw_mat[i,:] <= t) for t,i in zip(max_radi, range(0,pw_mat.shape[0]))]
+        # <bkgd_hits>  number of hits within the bulk unenriched repertoire at the control radius 
+        # <bkgd_hits_weighted> number of hits when inverse probability weights are applied
+    if scipy.sparse.issparse(rw_mat):
+        bkgd_hits          = [np.sum(_todense_row(rw_mat[i,:], max_radius)[0] <= t) for t,i in zip(max_radi, range(0,rw_mat.shape[0]))]
+        bkgd_hits_weighted = [np.sum(1*(_todense_row(rw_mat[i,:], max_radius)[0] <= t) * (weights)) for t,i in zip(max_radi, range(0,rw_mat.shape[0]))]
+    else:
+        bkgd_hits      = [np.sum(rw_mat[i,:] <= t) for t,i in zip(max_radi, range(0,rw_mat.shape[0]))]
+        bkgd_hits_weighted = [np.sum(1*(rw_mat[i,:] <= t) * (weights)) for t,i in zip(max_radi, range(0,rw_mat.shape[0]))]
+    
+        # <bkdg_total> number of rows in background
+    bkgd_total = rw_mat.shape[1]
+        # <bkgd_weighted_total > 
+    bkgd_weighted_total = rw_mat.shape[1] # In modern, implemenation demoninator is simply length not np.sum(weights)
+        # <ctrl> divide total hits by total posible hits
+    ctrl = np.array(bkgd_hits) / bkgd_total 
+        # <ctrl_weighted> divide weighted hits byt total possible hits to approximate expected frequency in a real repertoire
+    ctrl_weighted= np.array(bkgd_hits_weighted)/bkgd_weighted_total 
+        # <center_df> this is the kernal of dataframe
+    
+        # we typically want pgen in our analysis so
+    if f'pgen_{col}' in tr.clone_df.columns:
+        centers_df = pd.DataFrame({col: tr.clone_df[col].copy(),
+                  add_cols[0] : tr.clone_df[add_cols[0]].copy(), 
+                  add_cols[1] : tr.clone_df[add_cols[1]].copy(), 
+                  'pgen' : tr.clone_df[f'pgen_{col}'],
+                  'radius': max_radi,
+                  'target_hits' : target_hits, 
+                  'bkgd_hits': bkgd_hits,
+                  'bkgd_hits_weighted': bkgd_hits_weighted,
+                  'bkgd_total' :  bkgd_total,
+                  'ctrl' : ctrl,
+                  'ctrl_weighted' : ctrl_weighted})
+    else: 
+        print("YOU DID NOT PRECALCULATE OPTIONAL PGENS SEE auto_pgen(TCRrep) NEXT TIME")
+        centers_df = pd.DataFrame({col: tr.clone_df[col].copy(),
+                  add_cols[0] : tr.clone_df[add_cols[0]].copy(), 
+                  add_cols[1] : tr.clone_df[add_cols[1]].copy(), 
+                  'radius': max_radi,
+                  'target_hits' : target_hits, 
+                  'bkgd_hits': bkgd_hits,
+                  'bkgd_hits_weighted': bkgd_hits_weighted,
+                  'bkgd_total' :  bkgd_total,
+                  'ctrl' : ctrl,
+                  'ctrl_weighted' : ctrl_weighted})
+    
+    # Total bakground counts
+    n1 = tr.clone_df.shape[0]   
+    n2 = bkgd_weighted_total 
+    print(f"ANTIGEN-ENRICHED CLONES : {n1}")
+    print(f"BULK  BACKGROUND CLONES : {n2}")  
+    print("COMPUTING WEIGHTED ODDS RATIO, RELATIVE RATE")
+    centers_df['target_misses'] = centers_df['target_hits'].apply(lambda x : n1-x)
+    centers_df['TR'] = [compute_rate(pos=r['target_hits'], neg=(n1-r['target_hits'])) for i,r in centers_df.iterrows()]
+    centers_df['TR2'] = [compute_rate(pos=r['target_hits'], neg=r['target_misses']) for i,r in centers_df.iterrows()]
+    centers_df['BR_weighted'] = [compute_rate(pos=r['bkgd_hits_weighted'], 
+                                    neg=n2-r['bkgd_hits_weighted']) for i,r in centers_df.iterrows()]
+    centers_df['RR_weighted'] = centers_df['TR']/centers_df['BR_weighted']
+    centers_df['OR_weighted'] =[compute_odds_ratio(pos=r['target_hits'], 
+                                       neg=n1-r['target_hits'], 
+                                       bpos=r['bkgd_hits_weighted'], 
+                                       bneg= n2-r['bkgd_hits_weighted'], ps = 1) for i,r in centers_df.iterrows()]
+    print("COMPUTING CHI-SQUARE STATISTIC BASED ON WEIGHTED DISTANCE HITS <chi2dist>")
+    centers_df['chi2dist'] = [chi2_contingency(np.array(
+            [[1+r['target_hits'], 1+n1-r['target_hits']],[1+r['bkgd_hits_weighted'], 1+n2-r['bkgd_hits_weighted']]]))[0] for _,r in centers_df.iterrows() ]
+    
+    if include_seq_info:
+        print("INCLUDING SEQ INFO")
+        if scipy.sparse.issparse(pw_mat):
+            target_neighbors = [list((_todense_row(pw_mat[i,:], max_radius)[0] <= t).nonzero()[0]) for t,i in zip(max_radi, range(0,pw_mat.shape[0]))]
+        else:
+            target_neighbors = [list((pw_mat[i,:] <= t).nonzero()[0]) for t,i in zip(max_radi, range(0,pw_mat.shape[0]))]
+        
+        centers_df['target_neighbors'] = target_neighbors 
+        centers_df['target_seqs'] = [tr.clone_df.loc[ar,col].to_list() for ar in target_neighbors]
+        if scipy.sparse.issparse(rw_mat):
+            background_neighbors = [list((_todense_row(rw_mat[i,:], max_radius)[0] <= t).nonzero()[0]) for t,i in zip(max_radi, range(0,pw_mat.shape[0]))]
+        else:
+            background_neighbors = [list((rw_mat[i,:] <= t).nonzero()[0]) for t,i in zip(max_radi, range(0,pw_mat.shape[0]))]
+        
+        
+        centers_df['background_neighbors'] = background_neighbors
+        #col = "cdr3_b_aa"
+        centers_df['background_seqs'] = [tr_background.clone_df.loc[ar,col].to_list() for ar in background_neighbors]
+        vcol = add_cols[0] #v_b_gene 
+        centers_df['background_v'] = [tr_background.clone_df.loc[ar,vcol].to_list() for ar in background_neighbors]
+        jcol = add_cols[1] #j_b_gene
+        centers_df['background_j'] = [tr_background.clone_df.loc[ar,jcol].to_list() for ar in background_neighbors]
+        adjcol  = 'adj_freq_pVJ'
+        if adjcol in tr_background.clone_df.columns:
+            centers_df['adj_freq'] = [tr_background.clone_df.loc[ar,adjcol].to_list() for ar in background_neighbors]
+    
+    if generate_regex:
+        print("GENERATING REGEX FOR EACH META-CLONOTYPE")
+        #cdr3_col = "cdr3_b_aa"
+        centers_df['regex'] = [_index_to_regex_str(ind = r['target_neighbors'], 
+                clone_df = tr.clone_df, 
+                pwmat = None, 
+                col = cdr3_col, 
+                centroid = tr.clone_df[cdr3_col][i],
+                ntrim = 3,
+                ctrim = 2,
+                max_ambiguity = 5) for i,r in centers_df.iterrows()]
+    
+    if test_regex:
+        print("TESTING REGEX FOR EACH META-CLONOTYPE")
+        # THIS INVOLVES TESTING REGEX AGAINST TARGET AND BACKGROUND
+        # Test regex against backgound
+        rs = [re.compile(a) for a in centers_df['regex']] #precompile regex (for speed)
+        bkgd_cdr3 = tr_background.clone_df[cdr3_col].to_list()
+        target_cdr3 = tr.clone_df[cdr3_col].to_list()
+        target_re_hits = parmap.map(
+                                    _multi_regex_weighted,
+                                    rs,
+                                    bkgd_cdr3 = target_cdr3,
+                                    pm_processes = ncpus,
+                                    pm_pbar=True
+                                    )
+        target_re_hits = [x[0] for x in target_re_hits] #new; no background weighting, so want the first element of each tuple
+        centers_df['target_re_hits'] = target_re_hits
+        bkgd_combined_hits = parmap.map( #new
+                                _multi_regex_weighted, 
+                                rs, 
+                                bkgd_cdr3 = bkgd_cdr3, 
+                                weights = weights, 
+                                pm_processes = ncpus,
+                                pm_pbar=True
+                                ) 
+        bkgd_re_hits = [x[0] for x in bkgd_combined_hits] #new
+        bkgd_weighted_re_hits = [x[1] for x in bkgd_combined_hits] #new
+        centers_df['bkgd_re_hits'] = bkgd_re_hits
+        # Compute Relative Rates
+        print("COMPUTING WEIGHTED ODDS RATIO, RELATIVE RATES FOR EACH REGEX")
+        centers_df['bkgd_re_weighted_hits'] = bkgd_weighted_re_hits 
+        centers_df['TR_re'] = [compute_rate(pos=r['target_re_hits'], neg=n1-r['target_re_hits']) for i,r in centers_df.iterrows()]
+        centers_df['BR_re_weighted'] = [compute_rate(pos=r['bkgd_re_weighted_hits'], 
+                                     neg=n2-r['bkgd_re_weighted_hits']) for i,r in centers_df.iterrows()]
+        centers_df['RR_re_weighted'] = centers_df['TR']/centers_df['BR_re_weighted']
+        centers_df['OR_re_weighted'] =[compute_odds_ratio(pos=r['target_re_hits'], 
+                                       neg=n1-r['target_re_hits'], 
+                                       bpos=r['bkgd_re_weighted_hits'], 
+                                       bneg= n2-r['bkgd_re_weighted_hits'], ps = 1) for i,r in centers_df.iterrows()]
+        print("COMPUTING CHI-SQUARE STATISTIC BASED ON WEIGHTED REGEX HITS <chi2re>")
+        centers_df['chi2re'] = [chi2_contingency(np.array(
+            [[1+r['target_re_hits'], 1+n1-r['target_re_hits']],[1+r['bkgd_re_weighted_hits'], 1+n2-r['bkgd_re_weighted_hits']]]))[0] for _,r in centers_df.iterrows() ]
+        print(f"COMPUTING JOINT CHI-SQUARE STATISTIC <chi2joint>BASED ON WEIGHTED REGEX HITS {beta_re} * <chi2re> + {beta_dist} * <chi2dist")
+        centers_df['chi2joint'] = [beta_re  * r['chi2re'] + beta_dist* r['chi2dist'] for _,r in centers_df.iterrows() ]
+    
+    return centers_df #, thresholds, ecdfs
 
 
 
