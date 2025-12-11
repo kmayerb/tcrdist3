@@ -754,8 +754,8 @@ class TCRrep:
         """
         Issues warning if invalid organism is passed to TCRrep __init__
         """
-        if self.db_file not in ['combo_xcr_2024-03-05', 'alphabeta_gammadelta_db.tsv','alphabeta_db.tsv','gammadelta_db.tsv']:
-            warnings.warn("db_file must be 'combo_xcr_2024-03-05' or 'alphabeta_gammadelta_db.tsv' or 'alphabeta_db.tsv' or 'gammadelta_db.tsv' unless you have built tcrdist3 from scratch", stacklevel=2)
+        if self.db_file not in ['combo_xcr_2024-03-05.tsv', 'alphabeta_gammadelta_db.tsv','alphabeta_db.tsv','gammadelta_db.tsv']:
+            warnings.warn("db_file must be 'combo_xcr_2024-03-05.tsv' or 'alphabeta_gammadelta_db.tsv' or 'alphabeta_db.tsv' or 'gammadelta_db.tsv' unless you have built tcrdist3 from scratch", stacklevel=2)
     
     def _validate_organism(self):
         """
