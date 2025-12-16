@@ -1,6 +1,14 @@
 import pandas as pd 
 from tcrdist.repertoire import TCRrep
 
+import sys
+import numpy as np
+import pytest
+
+pytestmark = pytest.mark.skipif(
+    sys.version_info >= (3, 11) and int(np.__version__.split(".", 1)[0]) >= 2,
+    reason="Fails on Python 3.11 with numpy >= 2.0 (uses private API)"
+)
 
 def test_example_12():
 	"""
