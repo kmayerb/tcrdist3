@@ -148,3 +148,15 @@ def _index_to_seqs(ind, clone_df, col):
 	dfnode   = clone_df.iloc[ind,].copy()
 	seqs = dfnode[col].to_list()
 	return seqs 
+
+
+def _multi_regex_weighted(regex , bkgd_cdr3, weights=None):
+    """
+    Search a regex pattern in a list of strings
+    Takes a complied regex and returns a tuple (number of hits, weighted number of hits)
+    """
+    result = np.array([True if regex.search(s) else False for s in bkgd_cdr3])
+    if type(weights) is type(None):
+        return(np.sum(result),None)
+    else:
+        return(np.sum(result),np.sum(weights[result]))
